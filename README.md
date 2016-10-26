@@ -15,15 +15,13 @@ https://github.com/github/gitignore
 
 euch die entsprechende Konfiguration laden.
 
-GIT-branches:
+GIT-policy:
 --------------
 
-Wir erwarten, dass im `master`-branch stets eine funktionsfähige Version liegt.
+**master**: always a clean working version
+**dev**: latest working version that becomes 'master' at some point
+**feature-branches**: used for developing specific features; will be merged into dev upon completion
 
-GIT-Commit-Messages:
---------------
-
-Wir erwarten, dass im `master`-branch stets eine funktionsfähige Version liegt.
 
 Issues und Project - Tabs
 -------------------------
