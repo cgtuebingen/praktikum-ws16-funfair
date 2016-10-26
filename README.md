@@ -35,4 +35,3 @@ Mit dem "Project" - Tab habt ihr die Möglichkeit eine Kanban-Tafel anzulegen. S
 
 Nun solltet ihr im nächsten Schritt diese README.md überschreiben und an euer Projekt (Titel und kurze Beschreibung) anpassen.
  
-
