@@ -1,5 +1,14 @@
+funfair project readme
+====================
+
+project description:
+-----------------
+
+project description
+
+
 Erste Schritte:
-=================
+-----------------
 
 Wir empfehlen euch in aller Ruhe GIT anzueignen. Das ganze dauert etwa 15 Minuten:
 https://try.github.io/levels/1/challenges/1
@@ -19,7 +28,9 @@ GIT-policy:
 --------------
 
 **master**: always a clean working version
+
 **dev**: latest working version that becomes 'master' at some point
+
 **feature-branches**: used for developing specific features; will be merged into dev upon completion
 
 
