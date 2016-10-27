@@ -31,7 +31,7 @@ GIT-policy:
 
 **dev**: latest working version that becomes 'master' at some point
 
-**feature-branches**: used for developing specific features; will be merged into dev upon completion
+**feature-branches**: used for developing specific features; will be merged into 'dev' upon completion
 
 
 Issues und Project - Tabs
