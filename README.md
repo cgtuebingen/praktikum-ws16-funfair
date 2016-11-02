@@ -29,7 +29,7 @@ GIT-policy:
 
 **master**: always a clean working version
 
-**dev**: latest working version that becomes 'master' at some point
+**develop**: latest working version that becomes 'master' at some point
 
 **feature-branches**: used for developing specific features; will be merged into 'dev' upon completion
 
