@@ -1,0 +1,3 @@
+[submodule "web/deepart-api"]
+	path = web/deepart-api
+	url = https://github.com/deepart-io/deepart-api.git
