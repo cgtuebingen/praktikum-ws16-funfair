@@ -2,38 +2,45 @@
 
 import requests
 
-def main2():
-
-    print("---START---")
-
-    r = requests.get("https://deepart.io/hire/", verify=False)     
-
-    # r = requests.get("https://www.google.de/")
-    # r = requests.get("https://www.google.de/", params={"#q": "value"})
-
-    print()
-    print(r.url)
-    print(r.text)
-
-    print("---END---")
-
 
 def main():
 
+
+    url = 'https://deepart.io/login/'
+
      # Fill in your details here to be posted to the login form.
     payload = {
-        'inUserName': 'rgeirhos@web.de',
-        'inUserPass': 'tiferkunschd'
+        'email': 'rgeirhos@web.de',
+        'password': 'tiferkunschd'
     }
 
-    url = 'https://www.deepart.io/login/'
-
+    
     # Use 'with' to ensure the session context is closed after use.
-    with requests.Session() as s:
-        p = s.post(url, data=payload, verify=False)
+    with requests.Session() as c:
+
+        # p = c.post(url, data=payload, verify=False)
+
+        c.get(url, verify = False)
+        
+        # grab cookie
+        csrftoken = c.cookies["csrftoken"]
+        
+        login_data = dict(csrfmiddlewaretoken = csrftoken,
+                          email = 'rgeirhos@web.de',
+                          password = 'tiferkunschd')
+
+        c.post(url,
+               data = login_data,
+               headers = {"Referer": "https://www.deepart.io/"},
+               verify = False)
+
+        page = c.get("https://deepart.io/image/submissions/",
+                     verify = False)
+        print(page.content)
+
+
         # print the html returned or something more intelligent to see if it's a successful login page.
-        print(p.text)
-        print(p.status_code)
+        #print(p.text)
         
 
         # An authorised request.
