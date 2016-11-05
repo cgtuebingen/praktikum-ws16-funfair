@@ -4,30 +4,46 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
+var col_pillar = "rgb(165, 30, 55)";
+var col_stand = "rgb(180, 160, 105)";
+var col_puck = "rgb(50, 65, 75)";
 
-ctx.translate(250.5, 250.5);
+var height = 500;
+var width  = 500;
 
-ctx.fillStyle = "#FE791A";
-ctx.fillRect(-17,  - 125, 34, 250);
-ctx.fillStyle = "#1a0000";
+ctx.translate(width/2+0.5, height/2+0.5);
+
+// main pillar
+ctx.fillStyle = col_pillar;
+ctx.fillRect(-width/15, -200, width/15, 200);
+
+/*
+ctx.fillStyle = col_puck;
 ctx.fillRect(-2, -125, 4, 250);
+*/
 
-
-ctx.fillStyle = "#c00";
+// top item
+/*
+ctx.fillStyle = col_pillar;
 ctx.beginPath();
 ctx.moveTo(-6, -125);
 ctx.lineTo(-6, -155);
 ctx.arc(0, -155, 6, Math.PI, 0, false);
 ctx.lineTo(6, -125);
 ctx.fill();
+*/
 
+// puck
+/*
 ctx.beginPath();
-ctx.fillStyle = "#FFD71C";
+ctx.fillStyle = col_puck;
 ctx.arc(0, -125, 22, 0, Math.PI*2, false);
 ctx.fill();
+*/
 
-
-ctx.fillStyle ="#E23A13";
+// stand
+/*
+ctx.fillStyle = col_stand;
 ctx.beginPath();
 ctx.moveTo(-68, 125);
 ctx.lineTo(68, 125);
@@ -43,11 +59,6 @@ ctx.lineTo(78, 180);
 ctx.lineTo(64, 140);
 ctx.closePath();
 ctx.fill();
-
-
-
-
-
-
+*/
 
 </script>
