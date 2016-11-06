@@ -1,0 +1,50 @@
+<html>
+
+    <head>
+        <title>Example</title>
+    </head>
+
+    <body>
+
+        <canvas id="canvas" width="400" height="400"></canvas>
+
+        <script src="js/common.js"></script>
+        <script>
+
+            var canvas = document.getElementById("canvas");
+            var ctx = canvas.getContext("2d");
+
+            var i = 0;
+
+            // Endless animation
+            animate('test', function () {
+
+              var x = Math.cos(i / 100) * 100 + 200;
+              var y = Math.sin(i / 100) * 100 + 200;
+
+              ctx.clearRect(0, 0, 400, 400);
+              ctx.beginPath();
+              ctx.arc(x, y, 5, 0, Math.PI * 2, false);
+              ctx.fill();
+              
+              i++;
+            });
+            // stopAnimate('test'); // to stop it again
+
+            canvas.onclick = function () {
+
+              animate('click', function (pos) {
+
+                var y = Math.sin(pos * Math.PI * 4) * 100 + 200;
+
+                ctx.beginPath();
+                ctx.arc(200, y, 5, 0, Math.PI * 2, false);
+                ctx.fill();
+
+              }, 4000); // Run for 2sec
+            };
+
+        </script>
+
+    </body>
+</html>
