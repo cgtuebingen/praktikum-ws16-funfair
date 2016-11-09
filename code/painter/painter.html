@@ -1,0 +1,81 @@
+<html>
+
+    <head>
+        <title>Example</title>
+    </head>
+
+    <body>
+
+        <canvas id="canvas" width="800" height="600"></canvas>
+
+        <script src="../js/common.js"></script>
+        <script>
+
+            var canvas = document.getElementById("canvas");
+            var ctx = canvas.getContext("2d");
+
+            var cursorX = 200;
+            var cursorY = 200;
+            
+            marginX = 25;
+            marginY = 25;
+            imgSizeX = 512;
+            imgSizeY = 512;
+
+            img = new Image;
+            img.src = "deep-art-api/inputs/lena.jpg";
+            ctx.drawImage(img, marginX, marginY);
+
+            var imageData = ctx.getImageData(marginX, marginY, imgSizeX, imgSizeY);
+   
+            // window.alert(imageData.data[3]);
+
+            for (var i = 0; i < imageData.data.length; i += 4) {
+                imageData.data[i + 3] = 255 / 4;
+            }
+
+            sum = 0;
+            revealImage = function(x, y, xnum, ynum) {
+
+                row = 0;
+                col = 0;
+                for (var i = 0; i < imageData.data.length; i += 4) {
+
+                    if (col % imgSizeY == 0) row += 1;
+                    col = col % imgSizeY;
+
+                    //TODO: this works ok, but could be improved by a proper grid.
+                    if (Math.abs(x * imgSizeX - col) <= imgSizeY / (2*xnum)) {
+                        if (Math.abs(y * imgSizeY - row) <= imgSizeX / (2*ynum)) {
+                            imageData.data[i + 3] = 255; //alpha channel
+                        }
+                    }
+                    col += 1;
+                }
+                ctx.putImageData(imageData, marginX, marginY);
+            }
+            ctx.putImageData(imageData, marginX, marginY);
+
+            document.onclick = function(e){
+                cursorX = e.pageX;
+                cursorY = e.pageY;
+            }
+
+            canvas.onclick = function () {
+
+                animate('click', function (pos) {
+
+                   xPosOnImg = Math.min(imgSizeX, cursorX-marginX) / imgSizeX;
+                   yPosOnImg = Math.min(imgSizeY, cursorY-marginY) / imgSizeY;
+
+                   revealImage(Math.min(1, xPosOnImg),
+                             Math.min(1, yPosOnImg),
+                             3, 3);
+
+              }, 4000); // Run for 2sec
+            };
+
+        </script>
+
+    </body>
+</html>
