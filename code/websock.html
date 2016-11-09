@@ -1,0 +1,20 @@
+<script>
+
+var ws = new WebSocket('ws://localhost:8080/ws');
+
+ws.onopen = function() {
+  console.log("Connected!");
+}
+
+ws.onclose = function(ev){
+  console.log("Closed!");
+}
+
+ws.onerror = function(ev){
+  console.log("Error!", ev)
+}
+
+ws.onmessage = function(ev){
+  console.log(ev.data)
+}
+</script>
