@@ -1,7 +1,7 @@
 <html>
 
     <head>
-        <title>Example</title>
+        <title>Painter</title>
     </head>
 
     <body>
@@ -11,16 +11,41 @@
         <script src="../js/common.js"></script>
         <script>
 
-            var canvas = document.getElementById("canvas");
+            var canvas = $("#canvas");
             var ctx = canvas.getContext("2d");
 
-            var cursorX = 200;
-            var cursorY = 200;
+            var cursorX = 42;
+            var cursorY = 42;
+
+            var marginX = 180;
+            var marginY = 180;
+            var imgSizeX = 512;
+            var imgSizeY = 512;
+            var defaultAlphaValue = 255 / 4;
+            var innerRadius = 45;
+            var outerRadius = 100;
+
+            var off = canvas.offset(); // get the offset of the canvas once
+
+            document.onmousemove = function(ev) {
+                cursorX = ev.pageX - off.left;
+                cursorY = ev.pageY - off.top;
+            }
+
+            $.animate('mousemove', function (pos) {
+
+                   xPosOnImg = Math.min(imgSizeX, cursorX-marginX) / imgSizeX;
+                   yPosOnImg = Math.min(imgSizeY, cursorY-marginY) / imgSizeY;
+
+                   revealImage(Math.min(1, xPosOnImg),
+                             Math.min(1, yPosOnImg),
+                             3, 3,
+                             innerRadius, outerRadius,
+                             transitionFunction = linearFunction);
+
+            });
             
-            marginX = 180;
-            marginY = 180;
-            imgSizeX = 512;
-            imgSizeY = 512;
+            
 
 
             // example picture frame taken from:
@@ -36,11 +61,19 @@
             var imageData = ctx.getImageData(marginX, marginY, imgSizeX, imgSizeY);
    
             for (var i = 0; i < imageData.data.length; i += 4) {
-                imageData.data[i + 3] = 255 / 4;
+                imageData.data[i + 3] = defaultAlphaValue;
             }
 
-            sum = 0;
-            revealImage = function(x, y, xnum, ynum) {
+            linearFunction = function(x) {
+                return(x);
+            }
+
+            revealImage = function(xPos, yPos, xnum, ynum,
+                                   innerRadius=20, outerRadius=60,
+                                   transitionFunction) {
+                // position: (x, y)
+                // xnum, ynum: size of the squares.
+                // transitionFunction: [0, 1] -> [0, 1]
 
                 row = 0;
                 col = 0;
@@ -49,11 +82,27 @@
                     if (col % imgSizeY == 0) row += 1;
                     col = col % imgSizeY;
 
+                    x_dist = Math.abs(xPos * imgSizeX - col);
+                    y_dist = Math.abs(yPos * imgSizeY - row);
+                    distance = Math.sqrt(Math.pow(x_dist, 2) + Math.pow(y_dist, 2));
+                    if (distance < outerRadius) {
+                        if (distance < innerRadius) {
+                            imageData.data[i + 3] = 255; //alpha channel
+                        } else {
+                            imageData.data[i + 3] = Math.max(255*
+                               transitionFunction((outerRadius-distance)/(outerRadius-innerRadius)),
+                                                             imageData.data[i + 3]);
+                        }
+                    }
+
+                    if(false) { //old version
+
                     //TODO: this works ok, but could be improved by a proper grid.
-                    if (Math.abs(x * imgSizeX - col) <= imgSizeY / (2*xnum)) {
-                        if (Math.abs(y * imgSizeY - row) <= imgSizeX / (2*ynum)) {
+                    if (Math.abs(xPos * imgSizeX - col) <= imgSizeY / (2*xnum)) {
+                        if (Math.abs(yPos * imgSizeY - row) <= imgSizeX / (2*ynum)) {
                             imageData.data[i + 3] = 255; //alpha channel
                         }
+                    }
                     }
                     col += 1;
                 }
@@ -61,24 +110,7 @@
             }
             ctx.putImageData(imageData, marginX, marginY);
 
-            document.onclick = function(e){
-                cursorX = e.pageX;
-                cursorY = e.pageY;
-            }
 
-            canvas.onclick = function () {
-
-                animate('click', function (pos) {
-
-                   xPosOnImg = Math.min(imgSizeX, cursorX-marginX) / imgSizeX;
-                   yPosOnImg = Math.min(imgSizeY, cursorY-marginY) / imgSizeY;
-
-                   revealImage(Math.min(1, xPosOnImg),
-                             Math.min(1, yPosOnImg),
-                             3, 3);
-
-              }, 4000); // Run for 2sec
-            };
 
         </script>
 
