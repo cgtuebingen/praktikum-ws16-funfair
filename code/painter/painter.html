@@ -14,16 +14,16 @@
             var canvas = $("#canvas");
             var ctx = canvas.getContext("2d");
 
-            var cursorX = 42;
-            var cursorY = 42;
+            var cursorX = 42; //default position
+            var cursorY = 42; //default position
 
-            var marginX = 180;
-            var marginY = 180;
+            var marginX = 180; //image frame margin
+            var marginY = 180; //image frame margin
             var imgSizeX = 512;
             var imgSizeY = 512;
-            var defaultAlphaValue = 255 / 4;
-            var innerRadius = 45;
-            var outerRadius = 100;
+            var defaultAlphaValue = 255 / 10;
+            var innerRadius = (imgSizeX+imgSizeY)/20;
+            var outerRadius = (imgSizeX+imgSizeY)/10;
 
             var off = canvas.offset(); // get the offset of the canvas once
 
@@ -39,23 +39,20 @@
 
                    revealImage(Math.min(1, xPosOnImg),
                              Math.min(1, yPosOnImg),
-                             3, 3,
                              innerRadius, outerRadius,
                              transitionFunction = linearFunction);
 
             });
             
-            
 
-
-            // example picture frame taken from:
+            // example frame taken from:
             // http://designdeko.blogspot.de/2015/04/bilderrahmen.html
             img = new Image;
             img.src = "deep-art-api/inputs/frame.jpeg";
             ctx.drawImage(img, 0, 0, width=imgSizeX+2*marginX, height=imgSizeY+2*marginY);
 
             img = new Image;
-            img.src = "deep-art-api/inputs/lena.jpg";
+            img.src = "deep-art-api/inputs/lena_1.jpg";
             ctx.drawImage(img, marginX, marginY);
  
             var imageData = ctx.getImageData(marginX, marginY, imgSizeX, imgSizeY);
@@ -68,11 +65,10 @@
                 return(x);
             }
 
-            revealImage = function(xPos, yPos, xnum, ynum,
-                                   innerRadius=20, outerRadius=60,
+            revealImage = function(xPos, yPos,
+                                   innerRadius, outerRadius,
                                    transitionFunction) {
                 // position: (x, y)
-                // xnum, ynum: size of the squares.
                 // transitionFunction: [0, 1] -> [0, 1]
 
                 row = 0;
@@ -95,21 +91,11 @@
                         }
                     }
 
-                    if(false) { //old version
-
-                    //TODO: this works ok, but could be improved by a proper grid.
-                    if (Math.abs(xPos * imgSizeX - col) <= imgSizeY / (2*xnum)) {
-                        if (Math.abs(yPos * imgSizeY - row) <= imgSizeX / (2*ynum)) {
-                            imageData.data[i + 3] = 255; //alpha channel
-                        }
-                    }
-                    }
                     col += 1;
                 }
                 ctx.putImageData(imageData, marginX, marginY);
             }
             ctx.putImageData(imageData, marginX, marginY);
-
 
 
         </script>

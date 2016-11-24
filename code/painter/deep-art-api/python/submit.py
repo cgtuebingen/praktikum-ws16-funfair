@@ -11,4 +11,4 @@ img=r.text
 link=("http://turbo.deepart.io/media/output/%s.jpg" % img)
 print link
 time.sleep(1)
-urllib.urlretrieve (link, "res.jpg")
+urllib.urlretrieve (link, "result.jpg")
