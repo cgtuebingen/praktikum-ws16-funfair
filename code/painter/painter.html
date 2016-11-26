@@ -26,23 +26,41 @@
             var outerRadius = (imgSizeX+imgSizeY)/10;
 
             var off = canvas.offset(); // get the offset of the canvas once
+            var isImgCompletelyPainted = false;
+            var congratsMessageShown = false;
 
             document.onmousemove = function(ev) {
                 cursorX = ev.pageX - off.left;
                 cursorY = ev.pageY - off.top;
             }
 
-            $.animate('mousemove', function (pos) {
+            $.animate('mousemove', function() {
 
-                   xPosOnImg = Math.min(imgSizeX, cursorX-marginX) / imgSizeX;
-                   yPosOnImg = Math.min(imgSizeY, cursorY-marginY) / imgSizeY;
+                   if(isImgCompletelyPainted & !congratsMessageShown) {
+                       alert("Congratulations - your painting is complete!");
+                       congratsMessageShown = true;
+                   }
 
-                   revealImage(Math.min(1, xPosOnImg),
-                             Math.min(1, yPosOnImg),
-                             innerRadius, outerRadius,
-                             transitionFunction = linearFunction);
+                   if(isOnImage(cursorX, cursorY)) {
+
+                       xPosOnImg = (cursorX-marginX) / imgSizeX;
+                       yPosOnImg = (cursorY-marginY) / imgSizeY;
+
+                       revealImage(xPosOnImg,
+                                   yPosOnImg,
+                                   innerRadius, outerRadius,
+                                   transitionFunction = linearFunction);
+                   }
 
             });
+
+            isOnImage = function(xPos, yPos) {
+             
+                isOnX = marginX <= xPos & xPos <= marginX+imgSizeX;
+                isOnY = marginY <= yPos & yPos <= marginY+imgSizeY;
+
+                return(isOnX & isOnY);
+            }
             
 
             // example frame taken from:
@@ -73,10 +91,16 @@
 
                 row = 0;
                 col = 0;
+                completelyPaintedThreshold = 150; // 255 would be perfect, allow some margin
+                completelyPainted = true;
                 for (var i = 0; i < imageData.data.length; i += 4) {
 
                     if (col % imgSizeY == 0) row += 1;
                     col = col % imgSizeY;
+
+                    if(imageData.data[i + 3] < completelyPaintedThreshold) {
+                        completelyPainted = false;
+                    }
 
                     x_dist = Math.abs(xPos * imgSizeX - col);
                     y_dist = Math.abs(yPos * imgSizeY - row);
@@ -93,6 +117,7 @@
 
                     col += 1;
                 }
+                isImgCompletelyPainted = completelyPainted;
                 ctx.putImageData(imageData, marginX, marginY);
             }
             ctx.putImageData(imageData, marginX, marginY);
