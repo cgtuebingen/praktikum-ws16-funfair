@@ -18,8 +18,14 @@ def paint_image(style=STYLE, image_path=IMAGE_PATH,
     link=("http://turbo.deepart.io/media/output/%s.jpg" % img)
     print link
     time.sleep(1)
-    urllib.urlretrieve (link, output_path)
+    urllib.urlretrieve(link, output_path)
 
 if __name__ == "__main__":
 
-    paint_image()
+    nonexistent = [2, 3, 4, 5, 7, 9, 11, 13, 14, 18, 20, 29, 44, 46]
+    for i in range(1, 47):
+        if i not in nonexistent:
+            paint_image(str(i),
+                        IMAGE_PATH,
+                        "styles/lena_"+str(i)+".jpg")
+
