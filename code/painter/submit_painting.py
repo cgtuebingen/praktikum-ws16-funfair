@@ -8,7 +8,7 @@ from resizeimage import resizeimage
 import scipy.misc
 
 
-STYLE = "1"
+STYLE = "38"
 IMAGE_PATH = "lena.jpg"
 OUTPUT_PATH = "res.jpg"
 SNAPSHOT_PATH = "./paintings/snapshot.jpg"
@@ -16,17 +16,32 @@ SNAPSHOT_PATH_RESIZED = "./paintings/snapshot_resized.jpg"
 
 def paint_image(style=STYLE, image_path=IMAGE_PATH,
                       output_path=OUTPUT_PATH):
-    r = requests.post('http://turbo.deepart.io/api/post/',
-                       data={'style': style,
-                             'return_url': 'http://my.return/' },
-                       files={ 'input_image': ( 'file.jpg', open(image_path, 'rb'),
-                               'image/jpeg' ) } )
-    img=r.text
-    link=("http://turbo.deepart.io/media/output/%s.jpg" % img)
-    print link
-    time.sleep(1)
-    urllib.urlretrieve(link, output_path)
 
+    max_num_trys = 15
+
+    for i in range(max_num_trys):
+        
+        r = requests.post('http://turbo.deepart.io/api/post/',
+                           data={'style': style,
+                                 'return_url': 'http://my.return/' },
+                           files={ 'input_image': ( 'file.jpg', open(image_path, 'rb'),
+                                   'image/jpeg' ) } )
+        img=r.text
+        link=("http://turbo.deepart.io/media/output/%s.jpg" % img)
+        print link
+        seconds = 1+i
+        time.sleep(seconds) # allow more time every iteration
+        urllib.urlretrieve(link, output_path)
+
+        # make sure it actually worked
+        try:
+            img = Image.open(output_path)
+            img.close()
+            break        
+
+        except:
+            print "No. "+str(i+1)+" failed! Trying again allowing the following time: "+str(seconds+1)+"s."
+        
 
 def take_image():
 
@@ -73,6 +88,6 @@ if __name__ == "__main__":
 
     take_image()
     resize_image()
-    paint_image("1", SNAPSHOT_PATH_RESIZED, "./paintings/painted_snapshot.jpg")
+    paint_image(STYLE, SNAPSHOT_PATH_RESIZED, "./paintings/painted_snapshot.jpg")
     #paint_image()
 
