@@ -71,12 +71,16 @@
             var imageData;
             var img = new Image();
 
-            img_frame.src = "deep-art-api/inputs/frame_b2.png";
+            img_frame.src = "inputs/frame_b2.png";
             // use nested loading to make sure both imgs have been loaded.
             img_frame.onload = function() {
 
-                img.src = "deep-art-api/inputs/lena_1.jpg";
+                img_name = "inputs/lena_1.jpg";
+                img_name = "paintings/painted_snapshot.jpg";
+                img.src = img_name;
+                
                 img.onload = function() {
+
                     ctx.drawImage(img_frame, 0, 0, width=imgSizeX+2*marginX,
                                                    height=imgSizeY+2*marginY);
                     ctx.drawImage(img, marginX, marginY);
