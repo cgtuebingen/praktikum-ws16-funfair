@@ -1,0 +1,139 @@
+<html>
+
+    <head>
+        <title>Painter</title>
+    </head>
+
+    <body>
+
+        <canvas id="canvas" width="900" height="900"></canvas>
+
+        <script src="../js/common.js"></script>
+        <script>
+
+            var canvas = $("#canvas");
+            var ctx = canvas.getContext("2d");
+
+            var cursorX = 42; //default position
+            var cursorY = 42; //default position
+
+            var marginX = 180; //image frame margin
+            var marginY = 180; //image frame margin
+            var imgSizeX = 512;
+            var imgSizeY = 512;
+            var defaultAlphaValue = 255 / 10;
+            var innerRadius = (imgSizeX+imgSizeY)/20;
+            var outerRadius = (imgSizeX+imgSizeY)/10;
+
+            var off = canvas.offset(); // get the offset of the canvas once
+            var isImgCompletelyPainted = false;
+            var congratsMessageShown = false;
+  
+            document.body.style.background = "white";
+
+            document.onmousemove = function(ev) {
+                cursorX = ev.pageX - off.left;
+                cursorY = ev.pageY - off.top;
+            }
+
+            $.animate('mousemove', function() {
+
+                   if(isImgCompletelyPainted & !congratsMessageShown) {
+                       // alert("Congratulations - your painting is complete!");
+                       congratsMessageShown = true;
+                   }
+
+                   if(isOnImage(cursorX, cursorY)) {
+
+                       xPosOnImg = (cursorX-marginX) / imgSizeX;
+                       yPosOnImg = (cursorY-marginY) / imgSizeY;
+
+                       revealImage(xPosOnImg,
+                                   yPosOnImg,
+                                   innerRadius, outerRadius,
+                                   transitionFunction = linearFunction);
+                   }
+
+            });
+
+            isOnImage = function(xPos, yPos) {
+             
+                isOnX = marginX <= xPos & xPos <= marginX+imgSizeX;
+                isOnY = marginY <= yPos & yPos <= marginY+imgSizeY;
+
+                return(isOnX & isOnY);
+            }
+            
+
+            // example frame taken from:
+            // http://designdeko.blogspot.de/2015/04/bilderrahmen.html
+            var img_frame = new Image();
+            var imageData;
+            var img = new Image();
+
+            img_frame.src = "deep-art-api/inputs/frame_b2.png";
+            // use nested loading to make sure both imgs have been loaded.
+            img_frame.onload = function() {
+
+                img.src = "deep-art-api/inputs/lena_1.jpg";
+                img.onload = function() {
+                    ctx.drawImage(img_frame, 0, 0, width=imgSizeX+2*marginX,
+                                                   height=imgSizeY+2*marginY);
+                    ctx.drawImage(img, marginX, marginY);
+                    imageData = ctx.getImageData(marginX, marginY, imgSizeX, imgSizeY);
+                    for (var i = 0; i < imageData.data.length; i += 4) {
+                        imageData.data[i + 3] = defaultAlphaValue;
+                    }
+                    ctx.putImageData(imageData, marginX, marginY);
+                }
+            }
+ 
+ 
+   
+            linearFunction = function(x) {
+                return(x);
+            }
+
+            revealImage = function(xPos, yPos,
+                                   innerRadius, outerRadius,
+                                   transitionFunction) {
+                // position: (x, y)
+                // transitionFunction: [0, 1] -> [0, 1]
+
+                row = 0;
+                col = 0;
+                completelyPaintedThreshold = 150; // 255 would be perfect, allow some margin
+                completelyPainted = true;
+                for (var i = 0; i < imageData.data.length; i += 4) {
+
+                    if (col % imgSizeY == 0) row += 1;
+                    col = col % imgSizeY;
+
+                    if(imageData.data[i + 3] < completelyPaintedThreshold) {
+                        completelyPainted = false;
+                    }
+
+                    x_dist = Math.abs(xPos * imgSizeX - col);
+                    y_dist = Math.abs(yPos * imgSizeY - row);
+                    distance = Math.sqrt(Math.pow(x_dist, 2) + Math.pow(y_dist, 2));
+                    if (distance < outerRadius) {
+                        if (distance < innerRadius) {
+                            imageData.data[i + 3] = 255; //alpha channel
+                        } else {
+                            imageData.data[i + 3] = Math.max(255*
+                               transitionFunction((outerRadius-distance)/(outerRadius-innerRadius)),
+                                                             imageData.data[i + 3]);
+                        }
+                    }
+
+                    col += 1;
+                }
+                isImgCompletelyPainted = completelyPainted;
+                ctx.putImageData(imageData, marginX, marginY);
+            }
+
+
+        </script>
+
+    </body>
+</html>

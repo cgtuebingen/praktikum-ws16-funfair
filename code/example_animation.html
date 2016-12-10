@@ -11,13 +11,13 @@
         <script src="js/common.js"></script>
         <script>
 
-            var canvas = document.getElementById("canvas");
+            var canvas = $("#canvas");
             var ctx = canvas.getContext("2d");
 
             var i = 0;
 
             // Endless animation
-            animate('test', function () {
+            $.animate('test', function () {
 
               var x = Math.cos(i / 100) * 100 + 200;
               var y = Math.sin(i / 100) * 100 + 200;
@@ -26,14 +26,14 @@
               ctx.beginPath();
               ctx.arc(x, y, 5, 0, Math.PI * 2, false);
               ctx.fill();
-              
+
               i++;
             });
             // stopAnimate('test'); // to stop it again
 
-            canvas.onclick = function () {
+            canvas.on('click', function () {
 
-              animate('click', function (pos) {
+              $.animate('click', function (pos) {
 
                 var y = Math.sin(pos * Math.PI * 4) * 100 + 200;
 
@@ -42,7 +42,12 @@
                 ctx.fill();
 
               }, 4000); // Run for 2sec
-            };
+            });
+            
+            var off = canvas.offset(); // get the offset of the canvas once
+            canvas.on('mousemove', function(ev) {
+                console.log(ev.pageX - off.left, ev.pageY - off.top);
+            });
 
         </script>
 
