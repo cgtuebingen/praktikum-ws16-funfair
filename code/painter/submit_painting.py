@@ -48,7 +48,7 @@ def take_image():
     import pygame.camera
     pygame.camera.init()
     pygame.camera.list_cameras()
-    cam = pygame.camera.Camera("/dev/video1", (640, 480))
+    cam = pygame.camera.Camera("/dev/video0", (640, 480))
     cam.start()
     time.sleep(0.1)  # You might need something higher in the beginning
     img = cam.get_image()
