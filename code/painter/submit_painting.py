@@ -6,6 +6,7 @@ import pygame
 from PIL import Image
 from resizeimage import resizeimage
 import scipy.misc
+import os
 
 
 STYLE = "38"
@@ -13,6 +14,7 @@ IMAGE_PATH = "lena.jpg"
 OUTPUT_PATH = "res.jpg"
 SNAPSHOT_PATH = "./paintings/snapshot.jpg"
 SNAPSHOT_PATH_RESIZED = "./paintings/snapshot_resized.jpg"
+
 
 def paint_image(style=STYLE, image_path=IMAGE_PATH,
                       output_path=OUTPUT_PATH):
@@ -48,7 +50,17 @@ def take_image():
     import pygame.camera
     pygame.camera.init()
     pygame.camera.list_cameras()
-    cam = pygame.camera.Camera("/dev/video1", (640, 480))
+
+    dirs = os.listdir("/dev/") 
+    camera_name = ""
+    for d in dirs:
+        if d.startswith("video"):
+            camera_name = d
+            break
+
+    assert(d != ""), "no camera found"
+
+    cam = pygame.camera.Camera("/dev/"+camera_name, (640, 480))
     cam.start()
     time.sleep(0.1)  # You might need something higher in the beginning
     img = cam.get_image()
