@@ -12,7 +12,7 @@ Painter-game:
 This is a demonstration of the "painter"-game: Look into the camera of your device, take a 
 snapshot and then use your hands to "paint" a modified version of the image!
 
-<p align="center"
+<p align="center">
 ![painter-demo-video](documentation/videos/painter.gif)
 </p>
 
@@ -20,14 +20,14 @@ In order to be able to use your hands for painting, you need to have a Leap Moti
  (see Dependencies). If you don't happen to have such a gadget, you can also
 simply use your mouse to draw.
 
-GIT-policy:
---------------
 
-**master**: always a clean working version
+## GIT-policy:
+* **master:** always a clean working version
 
-**develop**: latest working version that becomes 'master' at some point
+* **develop:** latest working version that becomes 'master' at some point
 
-**feature-branches**: used for developing specific features; will be merged into 'dev' upon completion
+* **feature-branches:** used for developing specific features and games;
+                        will be merged into 'dev' upon completion
 
 
 ## Setup
