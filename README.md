@@ -9,12 +9,16 @@ This is a collection of several games, all centered around the setting of a - ve
 
 Painter-game:
 -------------
-This is a demonstration of the "painter"-game: You look into the camera of your device, take a 
-picture and then use your hands to "paint" a modified version of it!
+This is a demonstration of the "painter"-game: Look into the camera of your device, take a 
+snapshot and then use your hands to "paint" a modified version of the image!
 
-![DEMO](documentation/videos/painter.gif)
+<p align="center"
+![painter-demo-video](documentation/videos/painter.gif)
+</p>
 
-In order to be able to use your hands for painting, you need to have a Leap Motion device (see Dependencies). If you don't happen to have such a gadget, you can also use your mouse to draw.
+In order to be able to use your hands for painting, you need to have a Leap Motion device
+ (see Dependencies). If you don't happen to have such a gadget, you can also
+simply use your mouse to draw.
 
 GIT-policy:
 --------------
@@ -54,7 +58,7 @@ You should then see a picture frame containg the famous 'Lena' image. Use your m
 
 The process of creating new paintings from a photograph according to a certain style is based on:
 * [Image Style Transfer Using Convolutional Neural Networks](http://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/Gatys_Image_Style_Transfer_CVPR_2016_paper.pdf)
-by Leon A. Gatys, Alexander S. Ecker, and Matthias Bethge
+by Leon A. Gatys, Alexander S. Ecker, Matthias Bethge
 * The [Deepart API](https://github.com/deepart-io/deepart-api)
 * The [Turbo-Deepart website](http://turbo.deepart.io/)
 
