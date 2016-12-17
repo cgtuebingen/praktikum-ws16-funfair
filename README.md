@@ -12,9 +12,7 @@ Painter-game:
 This is a demonstration of the "painter"-game: Look into the camera of your device, take a 
 snapshot and then use your hands to "paint" a modified version of the image!
 
-<p align="center">
 ![painter-demo-video](documentation/videos/painter.gif)
-</p>
 
 In order to be able to use your hands for painting, you need to have a Leap Motion device
  (see Dependencies). If you don't happen to have such a gadget, you can also
