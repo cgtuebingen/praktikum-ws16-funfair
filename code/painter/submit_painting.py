@@ -9,30 +9,33 @@ import scipy.misc
 import os
 
 
-STYLE = "38"
-IMAGE_PATH = "lena.jpg"
+DEFAULT_STYLE = "38"
+DEFAULT_IMG_PATH = "lena.jpg"
 OUTPUT_PATH = "res.jpg"
-SNAPSHOT_PATH = "./paintings/snapshot.jpg"
-SNAPSHOT_PATH_RESIZED = "./paintings/snapshot_resized.jpg"
+RESULT_PATH = "result_imgs"
+SNAPSHOT_PATH = os.path.join(RESULT_PATH, "snapshot.jpg")
+SNAPSHOT_PATH_RESIZED = os.path.join(RESULT_PATH, "snapshot_resized.jpg")
+SNAPSHOT_PATH_PAINTED = os.path.join(RESULT_PATH, "painted_snapshot.jpg")
 
 
-def paint_image(style=STYLE, image_path=IMAGE_PATH,
+def paint_image(style=DEFAULT_STYLE, image_path=DEFAULT_IMG_PATH,
                       output_path=OUTPUT_PATH):
 
-    max_num_trys = 15
+    r = requests.post('http://turbo.deepart.io/api/post/',
+                       data={'style': style,
+                             'return_url': 'http://my.return/' },
+                       files={ 'input_image': ( 'file.jpg', open(image_path, 'rb'),
+                               'image/jpeg' ) } )
+    img=r.text
+    link=("http://turbo.deepart.io/media/output/%s.jpg" % img)
+    print link
 
-    for i in range(max_num_trys):
-        
-        r = requests.post('http://turbo.deepart.io/api/post/',
-                           data={'style': style,
-                                 'return_url': 'http://my.return/' },
-                           files={ 'input_image': ( 'file.jpg', open(image_path, 'rb'),
-                                   'image/jpeg' ) } )
-        img=r.text
-        link=("http://turbo.deepart.io/media/output/%s.jpg" % img)
-        print link
+    max_num_seconds = 15
+
+    for i in range(max_num_seconds):
+
         seconds = 1+i
-        time.sleep(seconds) # allow more time every iteration
+        time.sleep(1)
         urllib.urlretrieve(link, output_path)
 
         # make sure it actually worked
@@ -100,6 +103,5 @@ if __name__ == "__main__":
 
     take_image()
     resize_image()
-    paint_image(STYLE, SNAPSHOT_PATH_RESIZED, "./paintings/painted_snapshot.jpg")
-    #paint_image()
+    paint_image(DEFAULT_STYLE, SNAPSHOT_PATH_RESIZED, SNAPSHOT_PATH_PAINTED)
 
