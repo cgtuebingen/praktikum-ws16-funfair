@@ -11,11 +11,7 @@ video:
 --------
 This shows a video.
 
-<p align="center">
-<img scr="documentation/videos/painter.gif">
-</p>
-
-
+![DEMO](documentation/videos/painter.gif)
 
 GIT-policy:
 --------------
