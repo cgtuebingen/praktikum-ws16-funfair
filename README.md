@@ -7,6 +7,15 @@ project description:
 Funfair: as he name suggests, funfair aims at having fun! The project consists of several games, all centered around the setting of a - very special - funfair. 
 
 
+video:
+--------
+This shows a video.
+
+<p align="center">
+<img scr="documentation/videos/painter.ogv">
+</p>
+
+
 
 GIT-policy:
 --------------
