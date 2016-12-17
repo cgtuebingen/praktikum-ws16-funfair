@@ -1,14 +1,10 @@
-funfair project readme
-====================
+# funfair
 
-Description:
------------------
-
+## Description:
 This is a collection of several games, all centered around the setting of a - very special - funfair.
+Currently, you can try out the painter-game. More games will follow until February 2017.
 
-
-Painter-game:
--------------
+### Painter-game:
 This is a demonstration of the "painter"-game: Look into the camera of your device, take a 
 snapshot and then use your hands to "paint" a modified version of the image!
 
