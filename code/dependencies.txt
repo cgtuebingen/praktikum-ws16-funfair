@@ -1,3 +1,7 @@
 tornado
 numpy
 scipy
+requests
+urllib
+time
+sys

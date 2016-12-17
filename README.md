@@ -1,6 +1,4 @@
 # funfair
-
-## Description:
 This is a collection of several games, all centered around the setting of a - very special - funfair.
 Currently, you can try out the painter-game. More games will follow until February 2017.
 
