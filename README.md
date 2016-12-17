@@ -12,7 +12,7 @@ video:
 This shows a video.
 
 <p align="center">
-<img scr="documentation/videos/painter.ogv">
+<img scr="documentation/videos/painter.gif">
 </p>
 
 
