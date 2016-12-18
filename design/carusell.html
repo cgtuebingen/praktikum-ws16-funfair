@@ -1,0 +1,233 @@
+
+<body style="background:#bb8773">
+    <script src="svg.js"></script>
+    <div id="canvas"></div>
+
+    <script>
+
+        var svg = SVG('canvas');
+
+        var width = 600;
+        var height = 600;
+
+
+        var frmColor = "#58301f";
+        var rSmall = 250;
+        var rBig = 400;
+
+        var gondolas = [];
+
+        for (var i = 0; i < 12; i++) {
+          gondolas.push(svg.path("m 1.332,-1.4750272 0,1.08788995 -23.898,41.39263025 -2.789,0 c -2.604,-0.06 -3.243,2.6941 -3,4.7617 l 0,4.7715 c -3.177,2.2816 -6.142,5.5782 -6.645,9.5918 0.38,3.4456 4.081,4.9846 6.854,6.2343 9.784,3.6975 20.399,4.4537 30.771,4.5332 10.055,-0.1468 20.331,-0.939 29.811,-4.5332 2.772,-1.2497 6.474,-2.7886 6.853,-6.2343 -0.502,-4.0136 -3.468,-7.3102 -6.644,-9.5918 -0.04,-2.3791 0.07,-4.7647 -0.06,-7.1387 -0.405,-2.3586 -2.95,-2.5242 -4.861,-2.3945 -0.35,0 -0.7,-0.001 -1.049,0 L 2.958,-0.07268725 l 0,-1.40233995 -1.625,0 z m 0,4.33984 0,46.4687802 c -2.902,-0.034 -5.804,-0.2324 -8.687,-0.5938 -0.09,-1.9656 0.223,-3.9844 -0.235,-5.9043 -1.035,-2.4387 -3.877,-1.7188 -5.969,-1.83 l -7.13,0 L 1.332,2.8648128 Z m 1.625,0.31446 21.838,37.8242202 c -3.587,-0.01 -7.175,-0.046 -10.756,0.064 -2.359,0.4049 -2.524,2.9505 -2.394,4.8614 -0.257,0.8993 0.588,2.7871 -0.573,2.873 -2.694,0.3342 -5.404,0.5038 -8.115,0.5313 l 0,-46.1543202 z").attr({fill: '#394746', stroke: 'none'}));
+        }
+
+
+        // Draw small circle
+        svg.circle(rSmall).attr({
+          stroke: frmColor,
+          fill: "none",
+          'stroke-width': 5,
+          cx: width / 2,
+          cy: height / 2
+        });
+
+        // Draw big circle
+        svg.circle(rBig).attr({
+          stroke: frmColor,
+          fill: "none",
+          'stroke-width': 5,
+          cx: width / 2,
+          cy: height / 2
+        });
+
+
+        // Geraffel am großen Rad
+        var points = "";
+        for (var i = 0; i <= 12; i++) {
+
+          if (i === 0)
+            points += "M";
+          else
+            points += "L";
+
+          points += [
+            Math.cos(i / 12 * Math.PI * 2) * rBig / 2 + width / 2,
+            Math.sin(i / 12 * Math.PI * 2) * rBig / 2 + height / 2
+          ].join(" ");
+        }
+
+        function circle(cx, cy, r) {
+          return "M" + cx + " " + cy + " " +
+                  "m" + (-r) + ",0 " +
+                  "a" + r + "," + r + " 0 1,0 " + (r * 2) + ",0 " +
+                  "a" + r + "," + r + " 0 1,0 " + (-r * 2) + ",0 ";
+        }
+
+
+
+        // Geraffel am kleinen Rad
+        for (var i = 0; i <= 6; i++) {
+
+          if (i === 0)
+            points += "M";
+          else
+            points += "L";
+
+          points += [
+            Math.cos(i / 6 * Math.PI * 2) * rSmall / 2 + width / 2,
+            Math.sin(i / 6 * Math.PI * 2) * rSmall / 2 + height / 2
+          ].join(" ");
+        }
+        for (var i = 0; i <= 6; i++) {
+
+          if (i === 0)
+            points += "M";
+          else
+            points += "L";
+
+          points += [
+            Math.cos(i / 6 * Math.PI * 2 + Math.PI / 6) * rSmall / 2 + width / 2,
+            Math.sin(i / 6 * Math.PI * 2 + Math.PI / 6) * rSmall / 2 + height / 2
+          ].join(" ");
+        }
+
+        var lights = "";
+        for (var i = 0; i <= 12; i++) {
+          var x0 = width / 2;
+          var y0 = height / 2;
+          var x1 = Math.cos(i / 12 * Math.PI * 2) * rBig / 2 + width / 2;
+          var y1 = Math.sin(i / 12 * Math.PI * 2) * rBig / 2 + height / 2;
+
+          points += "M " + [x0, y0].join(" ");
+          points += "L " + [x1, y1].join(" ");
+
+
+          var n = 24;
+          for (var j = 4; j <= n; j++) {
+            var p = j / n;
+
+            lights += circle(p * (x1 - x0) + x0, p * (y1 - y0) + y0, 1);
+
+
+
+          }
+
+
+
+        }
+
+
+
+        for (var i = 0; i < 120; i++) {
+          var a = i / 120 * Math.PI * 2;
+          lights += circle(Math.cos(a) * rBig / 2 + width / 2, Math.sin(a) * rBig / 2 + height / 2, 1.3);
+        }
+
+        for (var i = 0; i < 120; i++) {
+          var a = i / 120 * Math.PI * 2;
+          lights += circle(Math.cos(a) * rSmall / 2 + width / 2, Math.sin(a) * rSmall / 2 + height / 2, 1.3);
+        }
+
+
+
+        var pt = svg.path(points).attr({
+          fill: "none",
+          stroke: frmColor,
+          "stroke-width": 2
+        });
+
+        var group = svg.group();
+        group.add(pt);
+
+
+
+
+        // Drehachsen der Gondeln
+        for (var i = 0; i < 12; i++) {
+
+          var x = width / 2 + Math.cos(i / 12 * Math.PI * 2) * rBig / 2;
+          var y = height / 2 + Math.sin(i / 12 * Math.PI * 2) * rBig / 2;
+
+          group.add(svg.circle(10).attr({
+            stroke: "none",
+            fill: frmColor,
+            "stroke-width": 2,
+            cx: x,
+            cy: y
+          }));
+
+
+        }
+
+        group.add(svg.path(lights).attr({fill: "#9E927F", stroke: "none"}));
+
+
+        var deg = 0;
+
+        function loop() {
+
+          deg++;
+
+
+          var Deg = deg / 10;
+
+
+          for (var i = 0; i < gondolas.length; i++) {
+
+            var a = i / gondolas.length * Math.PI * 2 + Deg / 180 * Math.PI;
+
+            gondolas[i].attr({style: "transform: translate(" + (Math.cos(a) * rBig / 2 + width / 2) + "px," + (Math.sin(a) * rBig / 2 + height / 2)+"px)"});
+          }
+
+
+
+
+          group.attr({style: "transform-origin: " + width / 2 + "px " + height / 2 + 'px; transform:rotate(' + Deg + 'deg)'});
+          window.requestAnimationFrame(loop);
+
+        }
+        window.requestAnimationFrame(loop);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // Gestell
+        svg.polyline([[width / 2 - 100, height / 2 + 300], [width / 2, height / 2], [width / 2 + 100, height / 2 + 300]]).attr({
+          stroke: frmColor,
+          fill: "none",
+          "stroke-width": 16
+        });
+
+
+        // Mittelkreis
+        svg.circle(50).attr({
+          stroke: "none",
+          fill: frmColor,
+          "stroke-width": 2,
+          cx: width / 2,
+          cy: height / 2
+        });
+
+
+
+
+
+
+
+    </script>
+
+</body>
+
+
