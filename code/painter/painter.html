@@ -30,9 +30,13 @@
             var innerRadius = (imgSizeX+imgSizeY)/20;
             var outerRadius = (imgSizeX+imgSizeY)/10;
 
+            var paintedImgLocation = "result_imgs/painted_snapshot.jpg";
+            var defaultImgLocation = "input/lena_default.jpg";
+
             var off = canvas.offset(); // get the offset of the canvas once
             var isImgCompletelyPainted = false;
             var congratsMessageShown = false;
+ 
   
             document.body.style.background = "white";
 
@@ -79,12 +83,37 @@
             var imageData;
             var img = new Image();
 
-            img_frame.src = "inputs/frame_b2.png";
+
+            function getImageNameForPainting() {
+                // tries to open painted img; returns img path
+
+                var rawFile = new XMLHttpRequest();
+                imgName = defaultImgLocation;
+
+                try {
+                    rawFile.open("GET", paintedImgLocation, false);
+                    rawFile.onreadystatechange = function() {
+                        if(rawFile.readyState === 4) {
+                            if(rawFile.status === 200 || rawFile.status == 0) {
+                                imgName = paintedImgLocation;
+                            } else {
+                                imgName = defaultImgLocation;
+                            }
+                        } else {
+                            imgName = defaultImgLocation;
+                        }
+                    }
+                    rawFile.send(null);
+                } catch(err) {
+                }
+                return(imgName);
+            }
+
+            img_frame.src = "input/frame_b2.png";
             // use nested loading to make sure both imgs have been loaded.
             img_frame.onload = function() {
 
-                img_name = "inputs/lena_1.jpg";
-                img_name = "result_imgs/painted_snapshot.jpg";
+                img_name = getImageNameForPainting();
                 img.src = img_name;
                 
                 img.onload = function() {
@@ -99,7 +128,8 @@
                     ctx.putImageData(imageData, marginX, marginY);
                 }
             }
- 
+
+
             var riggedHandPlugin;
             Leap.loop({
                 hand: function(hand){

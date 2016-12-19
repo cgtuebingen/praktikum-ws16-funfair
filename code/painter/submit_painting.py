@@ -67,6 +67,10 @@ def take_image():
     cam.start()
     time.sleep(0.1)  # You might need something higher in the beginning
     img = cam.get_image()
+
+    if not os.path.exists(RESULT_PATH):
+        os.makedirs(RESULT_PATH)
+
     pygame.image.save(img, SNAPSHOT_PATH)
     cam.stop()
 
