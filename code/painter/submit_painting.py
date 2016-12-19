@@ -9,7 +9,7 @@ import scipy.misc
 import os
 
 
-DEFAULT_STYLE = "38"
+DEFAULT_STYLE = "45"
 DEFAULT_IMG_PATH = "lena.jpg"
 OUTPUT_PATH = "res.jpg"
 RESULT_PATH = "result_imgs"
