@@ -24,8 +24,7 @@ simply use your mouse to draw.
 
 ## Setup
 #### Dependencies:
-* myFirstDependency
-
+* Python 2.7.12
 
 #### Optional dependencies:
 * Leap Motion device
@@ -40,11 +39,29 @@ Funfair consists of several submodules, each implementing exactly one game.
 
 #### Painter-game
 Currently, "painter" is a game that is already playable (even though it's far from being perfect).
- In order to play this game, go to code/painter/ and open painter.html, e.g. via
+In order to play this game, follow these simple steps:
+
+```
+bash cd code/painter
+```
+
+If you possess a leap motion device (not necessary to play this game! But still fun...), plug it in and activate it via:
+
+```
+sudo leapd
+```
+
+Then, you can take a snapshot of yourself by executing the following command. This again is optional, if you choose not to take a snapshot the famous 'Lena' image will be painted.
+
+```
+python2 submit_painting.py
+```
+
+Finally, open painter.html, e.g. via
 ```
 bash firefox painter.html
 ```
-You should then see a picture frame containg the famous 'Lena' image. Use your mouse to draw.
+You should then see a picture frame containg the 'Lena' image or a snapshot of yourself. Use your mouse to draw, or your hands that move in the air above the leap motion device.
 
 ## Acknowledgement
 
