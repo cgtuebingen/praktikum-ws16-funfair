@@ -1,0 +1,170 @@
+<html>
+  
+    <head>
+        <title>Example</title>
+    </head>
+
+    <body style="background:#ebe3d9;margin:0">
+
+        <canvas id="canvas" width="800" height="600"></canvas>
+
+        <div style="position:absolute;bottom: 0px;left:0px;height:55px;background:#e84d58;width:100%;font-family: 'Bevan', cursive;font-size:40pt;text-align:center;color:#EEE1DA">FUNFAIR</div>
+
+        <img src="../../design/baloon2.svg" style="position:absolute;left:80px;top:60px;width:15%" alt="">
+
+        <script src="../js/common.js"></script>
+        <script>
+
+            var canvas = $("#canvas");
+            var ctx = canvas.getContext("2d");
+
+            var col_pillar   = "rgb(165, 30, 55)";
+            var col_stand    = "rgb(180, 160, 105)";
+            var col_puck     = "rgb(50, 65, 75)";
+            var col_bar      = "rgb(0, 105, 170)";
+            var col_platform = "rgb(50, 65, 75)";
+            var col_plat_top = "rgb(210, 150, 0)";
+
+            var height = 600;
+            var width  = 800;
+
+            var bsize = 4 // border size
+
+            var left_x = width/17
+            var top_y  = 2*height/6
+
+            var middle_x = width/2+0.5;
+            var middle_y = height/2+0.5;
+  
+            var minBarHeight = 20;
+
+            ctx.translate(middle_x, middle_y);
+
+
+            function drawCylinder(ctx, x, y,
+                                  height, radiusX, radiusY,
+                                  col1, col2) {
+
+                ctx.beginPath();
+                ctx.fillStyle = col2;
+                ctx.ellipse(x=x, y=y+height, 
+                            radiusX = radiusX,
+                            radiusY = radiusY,
+                            rotation = 0,
+                            startAngle = 0, 
+                            endAngle = 2 * Math.PI);
+                ctx.stroke();
+                ctx.fill();
+                ctx.closePath();
+ 
+                ctx.fillStyle = col2;
+                ctx.fillRect(x-radiusX, y-height,
+                             x+2*radiusX, height);
+
+                ctx.beginPath();
+                ctx.fillStyle = col1;
+                ctx.ellipse(x=x, y=y-height, 
+                            radiusX = radiusX,
+                            radiusY = radiusY,
+                            rotation = 0,
+                            startAngle = 0, 
+                            endAngle = 2 * Math.PI);
+                ctx.stroke();
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            // bottom
+            drawCylinder(ctx=ctx, x=0, y=top_y,
+                         height=20, radiusX=130, radiusY=65,
+                         col_plat_top, col_platform);
+
+            // hit button
+            drawCylinder(ctx=ctx, x=0, y=top_y+30,
+                         height=5, radiusX=135/5, radiusY=65/5,
+                         col_bar, col_platform);
+
+
+            // surrounding lines
+            ctx.fillStyle = col_puck;
+            ctx.fillRect(-left_x - bsize, -top_y - bsize,
+                         2*left_x + 2*bsize, 2*top_y + 2*bsize);
+
+            // main pillar (filled)
+            ctx.fillStyle = col_pillar;
+            ctx.fillRect(-left_x, -top_y, 2*left_x, 2*top_y);
+
+            // left surrounding
+            var offset_x = width / 80;
+            var offset_y = height / 20;
+            ctx.beginPath();
+            ctx.fillStyle = col_stand;
+            ctx.moveTo(-left_x - bsize, -top_y-bsize);
+            ctx.lineTo(-left_x - bsize - offset_x, -top_y - bsize + offset_y);
+            ctx.lineTo(-left_x - bsize - offset_x,  top_y + bsize - offset_y);
+            ctx.lineTo(-left_x - bsize, top_y + bsize);
+            ctx.closePath();
+            ctx.fill();
+
+            // right surrounding
+            ctx.beginPath();
+            ctx.fillStyle = col_stand;
+            ctx.moveTo(left_x + bsize, -top_y-bsize);
+            ctx.lineTo(left_x + bsize + offset_x, -top_y - bsize + offset_y);
+            ctx.lineTo(left_x + bsize + offset_x, top_y + bsize - offset_y);
+            ctx.lineTo(left_x + bsize, top_y + bsize);
+            ctx.closePath();
+            ctx.fill();
+
+
+            function drawMiddleBar(height) {
+
+                offset_x = 40;
+                offset_y = (400 - height); //result: 20 to 400
+ 
+                // make sure background is again background-colored
+                ctx.fillStyle = col_pillar;
+                ctx.fillRect(-left_x+offset_x, -top_y,
+                             2*left_x-2*offset_x, 2*top_y);
+
+ 
+
+                // middle bar
+                ctx.fillStyle = col_bar;
+                ctx.fillRect(-left_x+offset_x, -top_y+offset_y,
+                             2*left_x-2*offset_x, 2*top_y-offset_y);
+
+                // middle lines
+                ctx.fillStyle = col_puck;
+                for(var i=1; i<6; i++) {
+                    ctx.fillRect(-left_x, -top_y+65*i, 2*left_x, bsize);
+                }
+
+            }
+
+            drawMiddleBar(minBarHeight);
+
+            var i = 0;
+
+            // Endless animation
+            $.animate('test', function () {
+              
+              i++;
+            });
+            // stopAnimate('test'); // to stop it again
+
+
+            canvas.on('click', function () {
+
+              $.animate('click', function (pos) {
+
+                drawMiddleBar(210 + Math.sin(pos * Math.PI * 2) * 190);
+
+              }, 4000); // Run for 2sec
+            });
+
+        </script>
+
+    </body>
+</html>
+

@@ -6,31 +6,36 @@ import pygame
 from PIL import Image
 from resizeimage import resizeimage
 import scipy.misc
+import os
 
 
-STYLE = "38"
-IMAGE_PATH = "lena.jpg"
+DEFAULT_STYLE = "45"
+DEFAULT_IMG_PATH = "lena.jpg"
 OUTPUT_PATH = "res.jpg"
-SNAPSHOT_PATH = "./paintings/snapshot.jpg"
-SNAPSHOT_PATH_RESIZED = "./paintings/snapshot_resized.jpg"
+RESULT_PATH = "result_imgs"
+SNAPSHOT_PATH = os.path.join(RESULT_PATH, "snapshot.jpg")
+SNAPSHOT_PATH_RESIZED = os.path.join(RESULT_PATH, "snapshot_resized.jpg")
+SNAPSHOT_PATH_PAINTED = os.path.join(RESULT_PATH, "painted_snapshot.jpg")
 
-def paint_image(style=STYLE, image_path=IMAGE_PATH,
+
+def paint_image(style=DEFAULT_STYLE, image_path=DEFAULT_IMG_PATH,
                       output_path=OUTPUT_PATH):
 
-    max_num_trys = 15
+    r = requests.post('http://turbo.deepart.io/api/post/',
+                       data={'style': style,
+                             'return_url': 'http://my.return/' },
+                       files={ 'input_image': ( 'file.jpg', open(image_path, 'rb'),
+                               'image/jpeg' ) } )
+    img=r.text
+    link=("http://turbo.deepart.io/media/output/%s.jpg" % img)
+    print link
 
-    for i in range(max_num_trys):
-        
-        r = requests.post('http://turbo.deepart.io/api/post/',
-                           data={'style': style,
-                                 'return_url': 'http://my.return/' },
-                           files={ 'input_image': ( 'file.jpg', open(image_path, 'rb'),
-                                   'image/jpeg' ) } )
-        img=r.text
-        link=("http://turbo.deepart.io/media/output/%s.jpg" % img)
-        print link
+    max_num_seconds = 15
+
+    for i in range(max_num_seconds):
+
         seconds = 1+i
-        time.sleep(seconds) # allow more time every iteration
+        time.sleep(1)
         urllib.urlretrieve(link, output_path)
 
         # make sure it actually worked
@@ -48,10 +53,24 @@ def take_image():
     import pygame.camera
     pygame.camera.init()
     pygame.camera.list_cameras()
-    cam = pygame.camera.Camera("/dev/video0", (640, 480))
+
+    dirs = os.listdir("/dev/") 
+    camera_name = ""
+    for d in dirs:
+        if d.startswith("video"):
+            camera_name = d
+            break
+
+    assert(d != ""), "no camera found"
+
+    cam = pygame.camera.Camera("/dev/"+camera_name, (640, 480))
     cam.start()
     time.sleep(0.1)  # You might need something higher in the beginning
     img = cam.get_image()
+
+    if not os.path.exists(RESULT_PATH):
+        os.makedirs(RESULT_PATH)
+
     pygame.image.save(img, SNAPSHOT_PATH)
     cam.stop()
 
@@ -88,6 +107,5 @@ if __name__ == "__main__":
 
     take_image()
     resize_image()
-    paint_image(STYLE, SNAPSHOT_PATH_RESIZED, "./paintings/painted_snapshot.jpg")
-    #paint_image()
+    paint_image(DEFAULT_STYLE, SNAPSHOT_PATH_RESIZED, SNAPSHOT_PATH_PAINTED)
 
