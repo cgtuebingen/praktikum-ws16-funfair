@@ -16,7 +16,7 @@
    viewBox="0 0 744.09448819 1052.3622047"
    height="297mm"
    width="210mm"
-   sodipodi:docname="bude.svg">
+   sodipodi:docname="bude_fg.svg">
   <sodipodi:namedview
      inkscape:window-maximized="1"
      inkscape:window-y="1"
@@ -25,10 +25,10 @@
      inkscape:window-width="1436"
      showguides="false"
      showgrid="false"
-     inkscape:current-layer="layer6"
+     inkscape:current-layer="layer4"
      inkscape:document-units="px"
-     inkscape:cy="393.84091"
-     inkscape:cx="315.21364"
+     inkscape:cy="846.38925"
+     inkscape:cx="313.79943"
      inkscape:zoom="0.70710678"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
@@ -561,13 +561,6 @@
          style="opacity:1;fill:#bc2132;fill-opacity:1;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          inkscape:connector-curvature="0" />
     </g>
-    <ellipse
-       style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="path4259"
-       cx="173.94827"
-       cy="213.02646"
-       rx="19.79899"
-       ry="13.435029" />
     <circle
        style="opacity:1;fill:#2a2a2a;fill-opacity:1;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path4261"
