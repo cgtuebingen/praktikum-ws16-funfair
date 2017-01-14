@@ -6,7 +6,13 @@
 
     <body>
 
-        <div style="text-align: center"> <canvas id="canvas" width="900" height="900"></canvas></div>
+        <div style="position: relative"> 
+        <img src="../../design/bude_bg.svg" style="position: absolute; z-index:1" width="900">
+
+        <div style="text-align: center; z-index:2"> <canvas id="canvas" width="900" height="900"></canvas></div>
+
+        <img src="../../design/bude_fg.svg" style="position: absolute;z-index:3" width="900">
+        </div>
 
         <script src="../js/common.js"></script>
         <script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r66/three.js"></script>
