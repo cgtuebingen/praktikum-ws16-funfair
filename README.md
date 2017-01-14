@@ -33,6 +33,19 @@ simply use your mouse to draw.
 * **OS:** Linux Ubuntu 16.04.1 LTS 64-bit
 
 
+
+##JavaScript Framework
+Animations can be created by including `js/common.js`. The `example_animation.html` file gives a little overview of the functionality. In detail:
+
+```
+animate(name, callback[, time]);
+stopAnimate(name);
+```
+
+Every animation needs a unique name, which identifies it can be used to cancel it untimely. If `time` is set, it must be a positive number, the milliseconds to be run. The callback then has one argument, which holds a normalized position within the animation time in `[0, 1]`. 
+
+The example file draws every circle within each callback. The screen is cleared every iteration, so it must always be redrawn. If the click-animation should be visible, then simply change the coordinates of an object, which is drawn within the main loop.
+
 ## Usage
 ### Basic Usage
 Funfair consists of several submodules, each implementing exactly one game. 
@@ -62,6 +75,17 @@ Finally, open painter.html, e.g. via
 bash firefox painter.html
 ```
 You should then see a picture frame containg the 'Lena' image or a snapshot of yourself. Use your mouse to draw, or your hands that move in the air above the leap motion device.
+
+### Main Project
+The project can be started with python:
+python app.py
+After that, the browser can be opened: http://localhost:8080
+A websocket example can be found on http://localhost:8080/websock.html
+
+Installation
+Before python works, all dependencies must be installed:
+pip install -r dependencies.txt
+
 
 ## Acknowledgement
 
