@@ -12,9 +12,9 @@
    inkscape:version="0.91 r13725"
    version="1.1"
    id="svg2"
-   viewBox="0 0 744.09448819 1052.3622047"
-   height="297mm"
-   width="210mm"
+   viewBox="0 0 738.00006 480.00005"
+   height="480"
+   width="738"
    sodipodi:docname="bude_bg.svg">
   <sodipodi:namedview
      inkscape:window-maximized="1"
@@ -26,34 +26,20 @@
      showgrid="false"
      inkscape:current-layer="layer2"
      inkscape:document-units="px"
-     inkscape:cy="506.978"
-     inkscape:cx="484.91927"
+     inkscape:cy="294.84596"
+     inkscape:cx="426.93652"
      inkscape:zoom="0.70710678"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      borderopacity="1.0"
      bordercolor="#666666"
      pagecolor="#ffffff"
-     id="base" />
+     id="base"
+     units="px"
+     showborder="true"
+     width="280mm" />
   <defs
-     id="defs4">
-    <inkscape:path-effect
-       vertical="false"
-       scale_y_rel="false"
-       prop_scale="1"
-       bendpath="m 119,274.3622 76,0"
-       is_visible="true"
-       id="path-effect4271"
-       effect="bend_path" />
-    <inkscape:path-effect
-       vertical="false"
-       scale_y_rel="false"
-       prop_scale="1"
-       bendpath="m 119,274.3622 76,0"
-       is_visible="true"
-       id="path-effect4268"
-       effect="bend_path" />
-  </defs>
+     id="defs4" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -62,7 +48,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -70,9 +56,10 @@
      style="display:inline"
      inkscape:label="blue background"
      id="layer2"
-     inkscape:groupmode="layer">
+     inkscape:groupmode="layer"
+     transform="translate(0,-572.36247)">
     <rect
-       y="416.37015"
+       y="696.37018"
        x="116.80198"
        height="305.06607"
        width="507.09659"
@@ -80,8 +67,8 @@
        style="opacity:1;fill:#1c4f6f;fill-opacity:1" />
     <rect
        transform="matrix(0.99801016,-0.06305333,0.04343187,0.99905639,0,0)"
-       y="424.44931"
-       x="65.156319"
+       y="703.94604"
+       x="52.99305"
        height="304.31171"
        width="64.689888"
        id="rect4176"
@@ -91,17 +78,17 @@
        id="rect4178"
        width="64.689888"
        height="304.31171"
-       x="-674.98816"
-       y="377.73654"
+       x="-687.15186"
+       y="657.23328"
        transform="matrix(-0.99801016,-0.06305333,-0.04343187,0.99905639,0,0)" />
     <path
        id="path4190"
-       d="m 370.35112,531.84976 a 179.24698,118.59831 0 0 0 -179.24804,118.5957 179.24698,118.59831 0 0 0 46.27344,79.33008 l 265.9375,0 a 179.24698,118.59831 0 0 0 46.2832,-79.33008 179.24698,118.59831 0 0 0 -179.2461,-118.5957 z"
+       d="m 370.35112,811.84976 a 179.24698,118.59831 0 0 0 -179.24804,118.5957 179.24698,118.59831 0 0 0 46.27344,79.33004 l 265.9375,0 a 179.24698,118.59831 0 0 0 46.2832,-79.33004 179.24698,118.59831 0 0 0 -179.2461,-118.5957 z"
        style="opacity:0.5;fill:#3d6886;fill-opacity:1"
        inkscape:connector-curvature="0" />
     <path
        style="opacity:0.5;fill:#3d6886;fill-opacity:1"
-       d="M 370.35027,491.84902 A 179.24698,118.59831 0 0 0 191.10338,610.44513 179.24698,118.59831 0 0 0 370.35027,729.04385 179.24698,118.59831 0 0 0 549.59715,610.44513 179.24698,118.59831 0 0 0 370.35027,491.84902 Z"
+       d="M 370.35027,771.84902 A 179.24698,118.59831 0 0 0 191.10338,890.44513 179.24698,118.59831 0 0 0 370.35027,1009.0439 179.24698,118.59831 0 0 0 549.59715,890.44513 179.24698,118.59831 0 0 0 370.35027,771.84902 Z"
        id="path4194"
        inkscape:connector-curvature="0" />
   </g>
