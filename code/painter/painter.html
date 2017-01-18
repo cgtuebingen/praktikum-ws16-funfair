@@ -6,12 +6,12 @@
 
     <body>
 
-        <div style="position: relative"> 
-            <img src="../../design/bude_bg.svg" style="position: absolute; z-index:1; height=100%">
+        <div style="position: relative; width:80%; margin:auto"> 
+            <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
 
-            <div style="position:absolute; z-index:2; width:738px; height:480px"> <canvas style="text-align:center" id="canvas" width="200" height="200"></canvas></div>
+            <div style="position: absolute; z-index: 2; width: 100%; text-align: center; border: 1px solid"> <canvas id="canvas"></canvas></div>
 
-            <img src="../../design/bude_fg.svg" style="position: absolute; z-index:3; heigth=100%">
+            <img src="../../design/bude_fg_painter.svg" style="position: absolute; z-index: 3; width: 100%">
         </div>
 
         <script src="../js/common.js"></script>
@@ -23,10 +23,21 @@
 
 
             var canvas = $("#canvas");
+            canvas[0].width=window.innerWidth * 0.8;
+            canvas[0].height=window.innerHeight * 0.8;
+
+            window.onresize = function() {
+                console.log(window.innerWidth, window.innerHeight);
+                canvas[0].width = window.innerWidth * 0.9;
+                canvas[0].height= window.innerHeight * 0.9;
+                // new painting 
+            }
+
             var ctx = canvas.getContext("2d");
 
             var cursorX = 42; //default position
             var cursorY = 42; //default position
+
 
             var marginX = 180; //image frame margin
             var marginY = 180; //image frame margin
