@@ -9,9 +9,9 @@
         <div style="position: relative; width:80%; margin:auto"> 
             <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
 
-            <div style="position: absolute; z-index: 2; width: 100%; text-align: center; border: 1px solid"> <canvas id="canvas"></canvas></div>
-
             <img src="../../design/bude_fg_painter.svg" style="position: absolute; z-index: 3; width: 100%">
+            <div style="position: relative; z-index: 2; border: 1px solid"> <canvas id="canvas"></canvas></div>
+
         </div>
 
         <script src="../js/common.js"></script>
@@ -23,13 +23,14 @@
 
 
             var canvas = $("#canvas");
-            canvas[0].width=window.innerWidth * 0.8;
-            canvas[0].height=window.innerHeight * 0.8;
+            canvas[0].width = window.innerWidth;
+            canvas[0].height = window.innerHeight;
+
 
             window.onresize = function() {
                 console.log(window.innerWidth, window.innerHeight);
-                canvas[0].width = window.innerWidth * 0.9;
-                canvas[0].height= window.innerHeight * 0.9;
+                canvas[0].width = window.innerWidth;
+                canvas[0].height= window.innerHeight;
                 // new painting 
             }
 
@@ -38,14 +39,18 @@
             var cursorX = 42; //default position
             var cursorY = 42; //default position
 
+            var imgSizeX = 0.27 * window.innerWidth;
+            var imgSizeY = imgSizeX;
+            var marginX = imgSizeX * 0.2;
+            var marginY = marginX
 
-            var marginX = 180; //image frame margin
-            var marginY = 180; //image frame margin
-            var imgSizeX = 512;
-            var imgSizeY = 512;
+
+            var offsetX = 0.5*window.innerWidth - imgSizeX+0.5*marginX;
+            var offsetY = 0.46*window.innerWidth- imgSizeY;
+
             var defaultAlphaValue = 255 / 10;
-            var innerRadius = (imgSizeX+imgSizeY)/20;
-            var outerRadius = (imgSizeX+imgSizeY)/10;
+            var innerRadius = (imgSizeX+imgSizeY)/25;
+            var outerRadius = (imgSizeX+imgSizeY)/15;
 
             var paintedImgLocation = "result_imgs/painted_snapshot.jpg";
             var defaultImgLocation = "input/lena_default.jpg";
@@ -75,8 +80,8 @@
 
                 if(isOnImage(cursorX, cursorY)) {
 
-                    xPosOnImg = (cursorX-marginX) / imgSizeX;
-                    yPosOnImg = (cursorY-marginY) / imgSizeY;
+                    xPosOnImg = (cursorX-marginX-offsetX) / imgSizeX;
+                    yPosOnImg = (cursorY-marginY-offsetY) / imgSizeY;
 
                     revealImage(xPosOnImg,
                                 yPosOnImg,
@@ -87,8 +92,8 @@
 
             isOnImage = function(xPos, yPos) {
              
-                isOnX = marginX <= xPos & xPos <= marginX+imgSizeX;
-                isOnY = marginY <= yPos & yPos <= marginY+imgSizeY;
+                isOnX = (offsetX+marginX <= xPos) & (xPos <= offsetX+marginX+imgSizeX);
+                isOnY = (offsetY+marginY <= yPos) & (yPos <= offsetY+marginY+imgSizeY);
 
                 return(isOnX & isOnY);
             }
@@ -135,14 +140,19 @@
                 
                 img.onload = function() {
 
-                    ctx.drawImage(img_frame, 0, 0, width=imgSizeX+2*marginX,
-                                                   height=imgSizeY+2*marginY);
-                    ctx.drawImage(img, marginX, marginY);
-                    imageData = ctx.getImageData(marginX, marginY, imgSizeX, imgSizeY);
+                    ctx.drawImage(img_frame, offsetX, offsetY, width=imgSizeX,
+                                                   height=imgSizeY);
+
+                    var img_width = imgSizeX * 0.6;
+                    ctx.drawImage(img, offsetX+marginX, offsetY+marginY,
+                                       width = img_width,
+                                       height = img_width);
+                    imageData = ctx.getImageData(offsetX+marginX, offsetY+marginY,
+                                                 img_width, img_width);
                     for (var i = 0; i < imageData.data.length; i += 4) {
                         imageData.data[i + 3] = defaultAlphaValue;
                     }
-                    ctx.putImageData(imageData, marginX, marginY);
+                    ctx.putImageData(imageData, offsetX+marginX, offsetY+marginY);
                 }
             }
 
@@ -205,15 +215,15 @@
                 completelyPainted = true;
                 for (var i = 0; i < imageData.data.length; i += 4) {
 
-                    if (col % imgSizeY == 0) row += 1;
-                    col = col % imgSizeY;
+                    if (col % 512 == 0) row += 1;
+                    col = col % 512;
 
                     if(imageData.data[i + 3] < completelyPaintedThreshold) {
                         completelyPainted = false;
                     }
 
-                    x_dist = Math.abs(xPos * imgSizeX - col);
-                    y_dist = Math.abs(yPos * imgSizeY - row);
+                    x_dist = Math.abs(xPos * 512 - col);
+                    y_dist = Math.abs(yPos * 512 - row);
                     distance = Math.sqrt(Math.pow(x_dist, 2) + Math.pow(y_dist, 2));
                     if (distance < outerRadius) {
                         if (distance < innerRadius) {
@@ -228,7 +238,7 @@
                     col += 1;
                 }
                 isImgCompletelyPainted = completelyPainted;
-                ctx.putImageData(imageData, marginX, marginY);
+                ctx.putImageData(imageData, marginX+offsetX, marginY+offsetY);
             }
 
 
