@@ -42,15 +42,18 @@
             var imgSizeX = 0.27 * window.innerWidth;
             var imgSizeY = imgSizeX;
             var marginX = imgSizeX * 0.2;
-            var marginY = marginX
-
+            var marginY = marginX;
+            var paintingWidth = imgSizeX * 0.6;
 
             var offsetX = 0.5*window.innerWidth - imgSizeX+0.5*marginX;
+            //var offsetX = 0.5*window.innerWidth - 0.5*imgSizeX;
             var offsetY = 0.46*window.innerWidth- imgSizeY;
 
             var defaultAlphaValue = 255 / 10;
-            var innerRadius = (imgSizeX+imgSizeY)/25;
-            var outerRadius = (imgSizeX+imgSizeY)/15;
+            //var innerRadius = (imgSizeX+imgSizeY)/25;
+            //var outerRadius = (imgSizeX+imgSizeY)/15;
+            var innerRadius = 0.05;
+            var outerRadius = 0.1;
 
             var paintedImgLocation = "result_imgs/painted_snapshot.jpg";
             var defaultImgLocation = "input/lena_default.jpg";
@@ -78,10 +81,12 @@
                     congratsMessageShown = true;
                 }
 
-                if(isOnImage(cursorX, cursorY)) {
 
-                    xPosOnImg = (cursorX-marginX-offsetX) / imgSizeX;
-                    yPosOnImg = (cursorY-marginY-offsetY) / imgSizeY;
+                if(isOnImage(cursorX, cursorY)) {
+                    //TODO: change back to imgSizeX?
+
+                    xPosOnImg = (cursorX-marginX-offsetX) / paintingWidth;
+                    yPosOnImg = (cursorY-marginY-offsetY) / paintingWidth;
 
                     revealImage(xPosOnImg,
                                 yPosOnImg,
@@ -92,8 +97,8 @@
 
             isOnImage = function(xPos, yPos) {
              
-                isOnX = (offsetX+marginX <= xPos) & (xPos <= offsetX+marginX+imgSizeX);
-                isOnY = (offsetY+marginY <= yPos) & (yPos <= offsetY+marginY+imgSizeY);
+                isOnX = (offsetX+marginX <= xPos) & (xPos <= offsetX+marginX+paintingWidth);
+                isOnY = (offsetY+marginY <= yPos) & (yPos <= offsetY+marginY+paintingWidth);
 
                 return(isOnX & isOnY);
             }
@@ -140,15 +145,15 @@
                 
                 img.onload = function() {
 
-                    ctx.drawImage(img_frame, offsetX, offsetY, width=imgSizeX,
+                    ctx.drawImage(img_frame, offsetX, offsetY,
+                                                   width=imgSizeX,
                                                    height=imgSizeY);
 
-                    var img_width = imgSizeX * 0.6;
                     ctx.drawImage(img, offsetX+marginX, offsetY+marginY,
-                                       width = img_width,
-                                       height = img_width);
+                                       width = paintingWidth,
+                                       height = paintingWidth);
                     imageData = ctx.getImageData(offsetX+marginX, offsetY+marginY,
-                                                 img_width, img_width);
+                                                 paintingWidth, paintingWidth);
                     for (var i = 0; i < imageData.data.length; i += 4) {
                         imageData.data[i + 3] = defaultAlphaValue;
                     }
@@ -206,32 +211,52 @@
             revealImage = function(xPos, yPos,
                                    innerRadius, outerRadius,
                                    transitionFunction) {
-                // position: (x, y)
+                // position: (x, y); both in [0, 1]
                 // transitionFunction: [0, 1] -> [0, 1]
+
+                if(xPos < 0.0 || xPos > 1.0) {
+                    alert("Problem with xPos!");
+                }
+                if(yPos < 0.0 || yPos > 1.0) {
+                    alert("Problem with yPos!");
+                }
 
                 row = 0;
                 col = 0;
                 completelyPaintedThreshold = 150; // 255 would be perfect, allow some margin
                 completelyPainted = true;
+               
+                nc = Math.sqrt(imageData.data.length);
+                //alert(nc);
+
+
+                for (var i = nc*4*20; i<nc*4*40; i+=4) {
+                    imageData.data[i+3] = 255;
+                }
+
                 for (var i = 0; i < imageData.data.length; i += 4) {
 
-                    if (col % 512 == 0) row += 1;
-                    col = col % 512;
+                    if (col % nc == 0) {
+                        row += 1;
+                    }
+                    col = col % nc;
 
                     if(imageData.data[i + 3] < completelyPaintedThreshold) {
                         completelyPainted = false;
                     }
 
-                    x_dist = Math.abs(xPos * 512 - col);
-                    y_dist = Math.abs(yPos * 512 - row);
+                    x_dist = Math.abs(xPos - (col/nc));
+                    y_dist = Math.abs(yPos - (row/nc));
+                    //alert(x_dist, y_dist);
                     distance = Math.sqrt(Math.pow(x_dist, 2) + Math.pow(y_dist, 2));
                     if (distance < outerRadius) {
                         if (distance < innerRadius) {
                             imageData.data[i + 3] = 255; //alpha channel
                         } else {
-                            imageData.data[i + 3] = Math.max(255*
-                               transitionFunction((outerRadius-distance)/(outerRadius-innerRadius)),
-                                                             imageData.data[i + 3]);
+                            //imageData.data[i + 3] = 
+                               //Math.max(255*
+                               //transitionFunction((outerRadius-distance)/(outerRadius-innerRadius)),
+                               //                              imageData.data[i + 3]);
                         }
                     }
 
