@@ -217,6 +217,7 @@
                                    height = paintingWidth);
                 imageData = ctx.getImageData(offsetX+marginX, offsetY+marginY,
                                              paintingWidth, paintingWidth);
+
                 for (var i = 0; i < imageData.data.length; i += 4) {
                     imageData.data[i + 3] = defaultAlphaValue;
                 }
@@ -255,6 +256,7 @@
                 completelyPainted = true;
                
                 nc = Math.sqrt(imageData.data.length/4);
+                var alpha = 0.0;
 
                 for (var i = 0; i < imageData.data.length; i += 4) {
 
@@ -274,7 +276,7 @@
                         if (distance < innerRadius) {
                             imageData.data[i + 3] = 255; //alpha channel
                         } else {
-                            imageData.data[i + 3] = Math.max(255*
+                            imageData.data[i+3] = Math.max(255.0*
                                 transitionFunction((outerRadius-distance)/
                                                    (outerRadius-innerRadius)),
                                                              imageData.data[i + 3]);
