@@ -24,12 +24,10 @@
             var ctx = canvas.getContext("2d");
             var off = canvas.offset(); // get the offset of the canvas once
 
-            var col_pillar   = "rgb(165, 30, 55)";
-            var col_stand    = "rgb(180, 160, 105)";
-            var col_puck     = "rgb(50, 65, 75)";
+            var col_red   = "rgb(165, 30, 55)";
             var col_bar      = "rgb(0, 105, 170)";
-            var col_platform = "rgb(50, 65, 75)";
-            var col_plat_top = "rgb(210, 150, 0)";
+            var col_surrounding = "rgb(50, 65, 75)";
+            var col_yellow = "rgb(210, 150, 0)";
   
             var levels = ["Burnout candidate", 
                           "Amateur Yogi", 
@@ -71,17 +69,17 @@
                 barHeightProportion = Math.min(1.0, barHeightProportion); 
 
                 // big middle rectangle
-                ctx.fillStyle = col_pillar;
+                ctx.fillStyle = col_red;
                 ctx.fillRect(offsetX, offsetY, width, height);
 
                 // surrounding
-                ctx.strokeStyle = col_platform;
+                ctx.strokeStyle = col_surrounding;
                 ctx.lineWidth=surroundingWidth;
                 ctx.strokeRect(offsetX, offsetY, width, height);
 
 
                 // bar background
-                ctx.fillStyle = col_plat_top;
+                ctx.fillStyle = col_yellow;
                 var barBackgroundWidth  = (1/3) * (width-2*surroundingWidth);
                 ctx.fillRect(offsetX + 0.5*width - 0.5*barBackgroundWidth,
                              offsetY,
@@ -96,7 +94,7 @@
                              barWidth,
                              barHeight);
                 // middle lines
-                ctx.strokeStyle = col_platform;
+                ctx.strokeStyle = col_surrounding;
                 for(var i=0; i<=numLevels; i++) {
                     ctx.beginPath();
                     ctx.moveTo(offsetX, offsetY+i*(height / numLevels));
@@ -133,12 +131,12 @@
                         // elliptic level indicator
                         drawEllipse(ctx, ellipseCenterX, ellipseCenterY,
                                     ellipseWidth, ellipseHeight,
-                                    col_pillar, col_platform);
+                                    col_red, col_surrounding);
                                      
                         // level text: "Master of Yoga" etc
-                        ctx.fillStyle = col_plat_top;
+                        ctx.fillStyle = col_yellow;
                         ctx.fillText(levels[numLevels-i-1], 
-                                     offsetX-370,
+                                     offsetX-window.innerWidth/5,
                                      y);
                     }
                 }
