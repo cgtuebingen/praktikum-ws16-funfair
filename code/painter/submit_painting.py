@@ -4,22 +4,22 @@ import time
 import sys
 import pygame
 from PIL import Image
-from resizeimage import resizeimage
+#from resizeimage import resizeimage
 import scipy.misc
 import os
 
 
+
+DEFAULT_DIR = "result_imgs"
 DEFAULT_STYLE = "45"
-DEFAULT_IMG_PATH = "lena.jpg"
-OUTPUT_PATH = "res.jpg"
-RESULT_PATH = "result_imgs"
-SNAPSHOT_PATH = os.path.join(RESULT_PATH, "snapshot.jpg")
-SNAPSHOT_PATH_RESIZED = os.path.join(RESULT_PATH, "snapshot_resized.jpg")
-SNAPSHOT_PATH_PAINTED = os.path.join(RESULT_PATH, "painted_snapshot.jpg")
+SNAPSHOT_ORIG_NAME = "snapshot_orig.jpg"
+SNAPSHOT_RESIZED_NAME = "snapshot_resized.jpg"
+SNAPSHOT_PAINTED_NAME = "snapshot_painted.jpg"
 
 
-def paint_image(style=DEFAULT_STYLE, image_path=DEFAULT_IMG_PATH,
-                      output_path=OUTPUT_PATH):
+def paint_image(image_path,
+                output_path,
+                style=DEFAULT_STYLE):
     """Use DEEPART API to paint an image in a certain style."""
 
     r = requests.post('http://turbo.deepart.io/api/post/',
@@ -43,13 +43,14 @@ def paint_image(style=DEFAULT_STYLE, image_path=DEFAULT_IMG_PATH,
         try:
             img = Image.open(output_path)
             img.close()
+            print "Image painted successfully."
             break        
 
         except:
-            print "No. "+str(i+1)+" failed! Trying again allowing the following time: "+str(seconds+1)+"s."
+            print "Image retrieval no. "+str(i+1)+" failed! Trying again allowing the following time: "+str(seconds+1)+"s."
         
 
-def take_image():
+def take_image(img_path, img_name):
     """Take a snapshot using a computer's in-built camera."""
 
     import pygame.camera
@@ -63,24 +64,24 @@ def take_image():
             camera_name = d
             break
 
-    assert(d != ""), "no camera found"
+    assert(d != ""), "no camera found. This function only works for linux."
 
     cam = pygame.camera.Camera("/dev/"+camera_name, (640, 480))
     cam.start()
     time.sleep(0.1)  # You might need something higher in the beginning
     img = cam.get_image()
 
-    if not os.path.exists(RESULT_PATH):
-        os.makedirs(RESULT_PATH)
+    if not os.path.exists(img_path):
+        os.makedirs(img_path)
 
-    pygame.image.save(img, SNAPSHOT_PATH)
+    pygame.image.save(img, os.path.join(img_path, img_name))
     cam.stop()
 
 
-def resize_image():
+def resize_image(img_path, res_path):
     """Resize image to correct format (512, 512)."""
 
-    img = Image.open(SNAPSHOT_PATH)
+    img = Image.open(img_path)
 
     width, height = img.size
 
@@ -94,31 +95,24 @@ def resize_image():
     img = img.crop((left, top, right, bottom))
 
     img = scipy.misc.imresize(img, (512, 512))
-    scipy.misc.imsave(SNAPSHOT_PATH_RESIZED, img)
+    scipy.misc.imsave(res_path, img)
 
 
-def paint_them_all():
-    """Paint an image in all possible styles."""
-
-    nonexistent = [2, 3, 4, 5, 7, 9, 11, 13, 14, 18, 20, 29, 44, 46]
-    for i in range(1, 47):
-        if i not in nonexistent:
-            paint_image(str(i),
-                        IMAGE_PATH,
-                        "styles/lena_"+str(i)+".jpg")
-
-
-def take_snapshot_and_paint(style=DEFAULT_STYLE,
-                            resized_path=SNAPSHOT_PATH_RESIZED,
-                            painted_path=SNAPSHOT_PATH_PAINTED):
+def take_snapshot_and_paint(path=DEFAULT_DIR,
+                            style=DEFAULT_STYLE):
     """Take a snapshot, resize to correct format and paint it."""
 
-    take_image()
-    resize_image()
-    paint_image(style, resized_path, painted_path)
+    orig_path = os.path.join(path, SNAPSHOT_ORIG_NAME)
+    resized_path = os.path.join(path, SNAPSHOT_RESIZED_NAME)
+    painted_path = os.path.join(path, SNAPSHOT_PAINTED_NAME)
+
+    take_image(path, SNAPSHOT_ORIG_NAME)
+    resize_image(orig_path, resized_path)
+    paint_image(resized_path, painted_path, style)
 
 
 if __name__ == "__main__":
 
     take_snapshot_and_paint()
+
 
