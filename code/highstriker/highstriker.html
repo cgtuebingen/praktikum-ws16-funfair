@@ -17,6 +17,19 @@
         <script src="../js/common.js"></script>
         <script>
 
+
+            /*#########################################################
+                     ACTION HANDLING
+            ########################################################*/
+
+            window.onresize = function() {
+                canvas[0].width = window.innerWidth;
+                canvas[0].height = window.innerHeight;
+                
+                initialize();
+            }
+
+
             var ws = new WebSocket('ws://localhost:8080/ws');
 
             ws.onopen = function () {
@@ -45,6 +58,9 @@
             }
 
 
+            /*#########################################################
+                     INITIALIZATION
+            ########################################################*/
 
             var canvas = $("#canvas");
             canvas[0].width = window.innerWidth;
@@ -59,7 +75,7 @@
   
             var levels = ["Burnout candidate", 
                           "Amateur Yogi", 
-                          "Medidation junkie",
+                          "Meditation junkie",
                           "Yoga expert", 
                           "Master of Yoga"];
             var numLevels = levels.length;
@@ -88,13 +104,16 @@
 
             }
 
+
+            /*#########################################################
+                     DRAWING THE HIGHSTRIKER
+            ########################################################*/
+
             drawHighstriker = function(barHeightProportion) {
             /* barHeightProportion: \in [0, 1], denoting height of bar.
                The higher this is, the better for the striker.*/
 
-
-                barHeightProportion = Math.max(barStartValue, barHeightProportion);
-                barHeightProportion = Math.min(1.0, barHeightProportion); 
+                barHeightProportion = Math.min(1, Math.max(0, barHeightProportion));
 
                 // big middle rectangle
                 ctx.fillStyle = col_red;
@@ -133,11 +152,12 @@
 
                 // YOGA levels
                 ctx.font=String(textPx)+"px Georgia";
-
+                ctx.clearRect(0, 0, window.innerWidth/2.5, window.innerWidth/2);
                 var ellipseCenterX = offsetX-window.innerWidth/7.2;
                 var ellipseWidth = window.innerWidth / 11;
                 var ellipseHeight = window.innerWidth / 74;
 
+               
                 // strings for the level indicators
                 ctx.beginPath();
                 ctx.moveTo(ellipseCenterX-0.45*ellipseWidth, offsetY / 2);
@@ -168,23 +188,11 @@
                                      y);
                     }
                 }
+                
+
             }
 
             initialize();
-
-            /*#########################################################
-                     ACTION HANDLING
-            ########################################################*/
-            window.onresize = function() {
-                canvas[0].width = window.innerWidth;
-                canvas[0].height = window.innerHeight;
-                
-                initialize();
-            }
-
-
-
-
 
             /*#########################################################
                      DRAWING FUNCTIONS
