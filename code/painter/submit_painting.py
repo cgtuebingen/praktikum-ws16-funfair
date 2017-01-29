@@ -4,7 +4,7 @@ import time
 import sys
 import pygame
 from PIL import Image
-from resizeimage import resizeimage
+#from resizeimage import resizeimage
 import scipy.misc
 import os
 

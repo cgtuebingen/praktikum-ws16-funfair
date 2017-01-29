@@ -48,7 +48,7 @@ class SocketHandler(websocket.WebSocketHandler):
                     if key == 27: # exit on ESC
                         if not os.path.exists(img_path):
                             os.makedirs(img_path)
-                        cv2.imwrite(os.path.join(img_path, "snapshot.jpg"), frame)
+                        cv2.imwrite(os.path.join(img_path, "snapshot_orig.jpg"), frame)
                         break
                 vc.release()
                 cv2.destroyAllWindows()
