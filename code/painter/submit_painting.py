@@ -1,12 +1,10 @@
 import requests
 import urllib
 import time
-import sys
 from sys import platform
 if platform != "darwin":
     import pygame
 from PIL import Image
-#from resizeimage import resizeimage
 import scipy.misc
 import os
 
