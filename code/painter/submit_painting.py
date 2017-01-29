@@ -20,6 +20,7 @@ SNAPSHOT_PATH_PAINTED = os.path.join(RESULT_PATH, "painted_snapshot.jpg")
 
 def paint_image(style=DEFAULT_STYLE, image_path=DEFAULT_IMG_PATH,
                       output_path=OUTPUT_PATH):
+    """Use DEEPART API to paint an image in a certain style."""
 
     r = requests.post('http://turbo.deepart.io/api/post/',
                        data={'style': style,
@@ -49,6 +50,7 @@ def paint_image(style=DEFAULT_STYLE, image_path=DEFAULT_IMG_PATH,
         
 
 def take_image():
+    """Take a snapshot using a computer's in-built camera."""
 
     import pygame.camera
     pygame.camera.init()
@@ -76,6 +78,7 @@ def take_image():
 
 
 def resize_image():
+    """Resize image to correct format (512, 512)."""
 
     img = Image.open(SNAPSHOT_PATH)
 
@@ -95,6 +98,7 @@ def resize_image():
 
 
 def paint_them_all():
+    """Paint an image in all possible styles."""
 
     nonexistent = [2, 3, 4, 5, 7, 9, 11, 13, 14, 18, 20, 29, 44, 46]
     for i in range(1, 47):
@@ -103,9 +107,18 @@ def paint_them_all():
                         IMAGE_PATH,
                         "styles/lena_"+str(i)+".jpg")
 
-if __name__ == "__main__":
+
+def take_snapshot_and_paint(style=DEFAULT_STYLE,
+                            resized_path=SNAPSHOT_PATH_RESIZED,
+                            painted_path=SNAPSHOT_PATH_PAINTED):
+    """Take a snapshot, resize to correct format and paint it."""
 
     take_image()
     resize_image()
-    paint_image(DEFAULT_STYLE, SNAPSHOT_PATH_RESIZED, SNAPSHOT_PATH_PAINTED)
+    paint_image(style, resized_path, painted_path)
+
+
+if __name__ == "__main__":
+
+    take_snapshot_and_paint()
 
