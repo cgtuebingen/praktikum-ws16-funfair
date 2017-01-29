@@ -81,6 +81,7 @@
 
                 initialize();
                 drawImage();
+                drawPaintButton();
             }
 
 
@@ -150,7 +151,45 @@
 
             riggedHandPlugin = Leap.loopController.plugins.riggedHand;
 
-           
+
+
+             /*##########################################################
+                "PAINT ME" BUTTON
+              ##########################################################
+            */
+
+
+            // photo icon taken from: 
+            // http://www.clker.com/clipart-camera-icon-8.html
+
+            drawPaintButton = function() {
+                var radius = imgSizeX / 10;
+                var centerX = offsetX+imgSizeX+marginX;
+                var centerY = offsetY + 0.5*imgSizeY;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY,
+                        radius, 0, 2*Math.PI, false);
+                ctx.fillStyle = "green";
+                ctx.fillStyle = "#9c2364";
+                ctx.fill();
+            
+                ctx.lineWidth = imgSizeX / 75;
+                ctx.strokeStyle="#003300";
+                ctx.stroke();   
+
+                var photo = new Image();
+                photo.src = "camera/photo_icon.png";
+                var iconWidth = imgSizeX/9;
+                var iconHeight = iconWidth/600*430;
+                photo.onload = function() {
+                    ctx.drawImage(photo, centerX-radius/1.8, centerY-radius/2.4,
+                                         width=iconWidth,
+                                         height=iconHeight);
+
+                }
+            }
+
+            drawPaintButton(); 
 
             /*##########################################################
                 LOADING FRAME AND PAINTING
@@ -217,6 +256,7 @@
                                    height = paintingWidth);
                 imageData = ctx.getImageData(offsetX+marginX, offsetY+marginY,
                                              paintingWidth, paintingWidth);
+
                 for (var i = 0; i < imageData.data.length; i += 4) {
                     imageData.data[i + 3] = defaultAlphaValue;
                 }
@@ -255,6 +295,7 @@
                 completelyPainted = true;
                
                 nc = Math.sqrt(imageData.data.length/4);
+                var alpha = 0.0;
 
                 for (var i = 0; i < imageData.data.length; i += 4) {
 
@@ -274,7 +315,7 @@
                         if (distance < innerRadius) {
                             imageData.data[i + 3] = 255; //alpha channel
                         } else {
-                            imageData.data[i + 3] = Math.max(255*
+                            imageData.data[i+3] = Math.max(255.0*
                                 transitionFunction((outerRadius-distance)/
                                                    (outerRadius-innerRadius)),
                                                              imageData.data[i + 3]);
