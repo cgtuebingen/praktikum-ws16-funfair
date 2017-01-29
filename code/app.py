@@ -58,8 +58,24 @@ class EmoWorker:
             return 0.0
 
     def get_brain_imagestyle(self):
-        # TODO
-        return 42
+
+        std = np.std(self.last_values_list, ddof=1) # sample standard deviation
+ 
+        # idea: the lower std, the more relaxed the painting,
+        # the higher std, the more excited it should be.
+
+        if std < 40:
+            return 6
+
+        elif std < 110:
+            return 10
+
+        elif std < 180:
+            return 26
+
+        else:
+            return 21
+
 
     def do_start(self):
 
