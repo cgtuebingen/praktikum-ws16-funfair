@@ -31,7 +31,13 @@
             var col_bar      = "rgb(0, 105, 170)";
             var col_platform = "rgb(50, 65, 75)";
             var col_plat_top = "rgb(210, 150, 0)";
-            var numLevels = 5;
+  
+            var levels = ["Burnout candidate", 
+                          "Amateur Yogi", 
+                          "Medidation junkie",
+                          "Yoga expert", 
+                          "Master of Yoga"];
+            var numLevels = levels.length;
 
             var width;
             var height;
@@ -40,23 +46,30 @@
             var surroundingWidth;
             var textPx;
 
+            var barStartValue = 0.05;
+            var bar = barStartValue;
+        
+
             initialize = function() {
 
-                width = window.innerWidth/13;
+                width = window.innerWidth / 13;
                 height = window.innerWidth / 5;
-                offsetX = window.innerWidth/2.7;
+                offsetX = window.innerWidth / 2.3;
                 offsetY = window.innerWidth / 4;
                 surroundingWidth = window.innerWidth / 185;
-                textPx = window.innerWidth /71;
+                textPx = Math.trunc(window.innerWidth / 71);
                 
-                drawHighstriker(0.5);
+                drawHighstriker(bar);
 
             }
 
             drawHighstriker = function(barHeightProportion) {
+            /* barHeightProportion: \in [0, 1], denoting height of bar.
+               The higher this is, the better for the striker.*/
 
-                // barHeightProportion: \in [0, 1], denoting height of bar.
-                // The higher this is, the better for the striker.
+
+                barHeightProportion = Math.max(barStartValue, barHeightProportion);
+                barHeightProportion = Math.min(1.0, barHeightProportion); 
 
                 // big middle rectangle
                 ctx.fillStyle = col_pillar;
@@ -83,7 +96,6 @@
                              offsetY+height-barHeight,
                              barWidth,
                              barHeight);
-
                 // middle lines
                 ctx.strokeStyle = col_platform;
                 for(var i=0; i<=numLevels; i++) {
@@ -95,19 +107,42 @@
                 }
 
                 // YOGA levels
-                 
                 ctx.font=String(textPx)+"px Georgia";
- 
+
+                var ellipseCenterX = offsetX-window.innerWidth/7.2;
+                var ellipseWidth = window.innerWidth / 11;
+                var ellipseHeight = window.innerWidth / 74;
+
+                // strings for the level indicators
+                ctx.beginPath();
+                ctx.moveTo(ellipseCenterX-0.45*ellipseWidth, offsetY / 2);
+                ctx.lineWidth = surroundingWidth*2;
+                ctx.lineTo(ellipseCenterX-0.45*ellipseWidth, offsetY * 1.7);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(ellipseCenterX+0.45*ellipseWidth, offsetY / 2);
+                ctx.lineWidth = surroundingWidth*2;
+                ctx.lineTo(ellipseCenterX+0.45*ellipseWidth, offsetY * 1.7);
+                ctx.stroke();
+
                 for(var i=0; i<numLevels; i++) {
 
-                    ctx.fillStyle = col_platform;
-                    ctx.fillText("Master of Yoga", 
-                                 offsetX-250,
-                                 offsetY+i*(height / numLevels)+();
-
+                    if(barHeightProportion*numLevels >= (numLevels-i-1)) {
+                        var y = offsetY+i*(height / numLevels) +0.5*(height/numLevels);
+                        var ellipseCenterY = y - window.innerWidth / 185;
+                        // elliptic level indicator
+                        drawEllipse(ctx, ellipseCenterX, ellipseCenterY,
+                                    ellipseWidth, ellipseHeight,
+                                    col_pillar, col_platform);
+                                     
+                        // level text: "Master of Yoga" etc
+                        ctx.fillStyle = col_plat_top;
+                        ctx.fillText(levels[numLevels-i-1], 
+                                     offsetX-370,
+                                     y);
+                    }
                 }
-
-
             }
 
             initialize();
@@ -127,44 +162,46 @@
             }
 
 
+            // TODO delete this: for demonstration purpose only
+            document.onmousemove = function(ev) {
+                bar += 0.003;
+                initialize();
+            }
+
+
             /*#########################################################
                      DRAWING FUNCTIONS
             #########################################################*/
 
             function drawCylinder(ctx, x, y,
                                   height, radiusX, radiusY,
-                                  col1, col2) {
+                                  col1, col2, colStroke) {
+
+                drawEllipse(ctx, x, y+height,
+                            radiusX, radiusY, col1, colStroke);
+
+                drawEllipse(ctx, x, y-height,
+                            radiusX, radiusY,
+                            col2, colStroke);
+            }
+
+            function drawEllipse(ctx, x, y,
+                                 radiusX, radiusY,
+                                 col, colStroke) {
 
                 ctx.beginPath();
-                ctx.fillStyle = col2;
-                ctx.ellipse(x=x, y=y+height, 
+                ctx.fillStyle = col;
+                ctx.ellipse(x, y, 
                             radiusX = radiusX,
                             radiusY = radiusY,
                             rotation = 0,
                             startAngle = 0, 
                             endAngle = 2 * Math.PI);
-                ctx.stroke();
-                ctx.fill();
-                ctx.closePath();
- 
-                ctx.fillStyle = col2;
-                ctx.fillRect(x-radiusX, y-height,
-                             x+2*radiusX, height);
-
-                ctx.beginPath();
-                ctx.fillStyle = col1;
-                ctx.ellipse(x=x, y=y-height, 
-                            radiusX = radiusX,
-                            radiusY = radiusY,
-                            rotation = 0,
-                            startAngle = 0, 
-                            endAngle = 2 * Math.PI);
+                ctx.strokeStyle = colStroke;
                 ctx.stroke();
                 ctx.fill();
                 ctx.closePath();
             }
-
-
 
         </script>
 
