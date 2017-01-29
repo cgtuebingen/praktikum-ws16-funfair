@@ -65,6 +65,8 @@ class SocketHandler(websocket.WebSocketHandler):
                 sp.resize_image(orig_path, resized_path)
                 sp.paint_image(resized_path, painted_path)
 
+                self.write_message("painter:finished")
+
         else:
             print 'message received: \"%s\"' % message
 
@@ -80,6 +82,7 @@ if __name__ == "__main__":
     app = tornado.web.Application([
         (r'/()', web.StaticFileHandler, {'path': './index.html'}),
         (r'/ws', SocketHandler),
+        (r"/design/(.+)", web.StaticFileHandler, {'path': '../design/'}),
         (r"/(.+)", web.StaticFileHandler, {'path': './'})
     ], debug=True)
     app.listen(8080)

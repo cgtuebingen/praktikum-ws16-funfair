@@ -1,335 +1,384 @@
 <html>
 
-    <head>
-        <title>Painter</title>
-    </head>
+<head>
+    <title>Painter</title>
+</head>
 
-    <body>
+<body>
 
-        <div style="position: relative; width:80%; margin:auto"> 
-            <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
+<div style="position: relative; width:80%; margin:auto">
+    <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
 
-            <img src="../../design/bude_fg_painter.svg" style="position: absolute; z-index: 3; width: 100%">
-            <div style="position: relative; z-index: 2"> <canvas id="canvas"></canvas></div>
+    <img src="../../design/bude_fg_painter.svg" style="position: absolute; z-index: 3; width: 100%">
+    <div style="position: relative; z-index: 2">
+        <canvas id="canvas"></canvas>
+    </div>
 
-        </div>
+</div>
 
-        <script src="../js/common.js"></script>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r66/three.js"></script>
-        <script src="http://js.leapmotion.com/leap-0.6.4.min.js"></script>
-        <script src="http://js.leapmotion.com/leap-plugins-0.1.6.1.js"></script>
-        <script src="http://js.leapmotion.com/leap.rigged-hand-0.1.3.min.js"></script>
-        <script>
-
-
-            /*##########################################################
-                VARIABLE INITIALIZATION
-              ##########################################################
-            */
-
-            // initializing variables (all independent from canvas size)
-            var canvas = $("#canvas");
-            canvas[0].width = window.innerWidth;
-            canvas[0].height = window.innerHeight;
-            var ctx = canvas.getContext("2d");
-            var cursorX = 42; //default position
-            var cursorY = 42; //default position
-            var defaultAlphaValue = 255 / 10;
-            var innerRadius = 0.13;
-            var outerRadius = 0.20;
-            var paintedImgLocation = "result_imgs/snapshot_painted.jpg";
-            var defaultImgLocation = "input/lena_default.jpg";
-            document.body.style.background = "white";
+<script src="../js/common.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r66/three.js"></script>
+<script src="http://js.leapmotion.com/leap-0.6.4.min.js"></script>
+<script src="http://js.leapmotion.com/leap-plugins-0.1.6.1.js"></script>
+<script src="http://js.leapmotion.com/leap.rigged-hand-0.1.3.min.js"></script>
+<script>
 
 
-            // initializing flexible variables (depending on canvas size)
-            var imgSizeX;
-            var imgSizeY;
-            var marginX;
-            var marginY;
-            var paintingWidth;
-            var offsetX;
-            var offsetY;
-            var off;
-            var isCompletelyPainted;
+    var ws = new WebSocket('ws://localhost:8080/ws');
 
-            initialize = function() {
-                imgSizeX = 0.27 * window.innerWidth;
-                imgSizeY = imgSizeX;
-                marginX = imgSizeX * 0.2;
-                marginY = marginX;
-                paintingWidth = imgSizeX * 0.6;
+    ws.onopen = function () {
+        console.log("Connected!");
+    }
 
-                offsetX = 0.5*window.innerWidth - imgSizeX+0.5*marginX;
-                offsetY = 0.46*window.innerWidth- imgSizeY;
-                off = canvas.offset(); // get the offset of the canvas once
-               
-                isCompletelyPainted = false;
+    ws.onclose = function (ev) {
+        console.log("Closed!");
+    }
+
+    ws.onerror = function (ev) {
+        console.log("Error!", ev)
+    }
+
+    ws.onmessage = function (ev) {
+
+        if (ev.data == "painter:finished") {
+            // Draw image =)
+            window.setTimeout(function() {
+                img_frame.onload(); // it's a bit dirty to directly call the callback but...yea =)
+            }, 1000);
+        }
+        console.log("LOL!", ev.data)
+    }
+
+
+    /*##########################################################
+     VARIABLE INITIALIZATION
+     ##########################################################
+     */
+
+    // initializing variables (all independent from canvas size)
+    var canvas = $("#canvas");
+    canvas[0].width = window.innerWidth;
+    canvas[0].height = window.innerHeight;
+    var ctx = canvas.getContext("2d");
+    var cursorX = 42; //default position
+    var cursorY = 42; //default position
+    var defaultAlphaValue = 255 / 10;
+    var innerRadius = 0.13;
+    var outerRadius = 0.20;
+    var paintedImgLocation = "result_imgs/snapshot_painted.jpg";
+    var defaultImgLocation = "input/lena_default.jpg";
+    document.body.style.background = "white";
+
+
+    // initializing flexible variables (depending on canvas size)
+    var imgSizeX;
+    var imgSizeY;
+    var marginX;
+    var marginY;
+    var paintingWidth;
+    var offsetX;
+    var offsetY;
+    var off;
+    var isCompletelyPainted;
+
+    initialize = function () {
+        imgSizeX = 0.27 * window.innerWidth;
+        imgSizeY = imgSizeX;
+        marginX = imgSizeX * 0.2;
+        marginY = marginX;
+        paintingWidth = imgSizeX * 0.6;
+
+        offsetX = 0.5 * window.innerWidth - imgSizeX + 0.5 * marginX;
+        offsetY = 0.46 * window.innerWidth - imgSizeY;
+        off = canvas.offset(); // get the offset of the canvas once
+
+        isCompletelyPainted = false;
+    }
+
+    initialize();
+
+    /*##########################################################
+     ACTION HANDLING (EXCEPT FOR REVEALING THE PAINTING)
+     ##########################################################
+     */
+
+    window.onresize = function () {
+        console.log(window.innerWidth, window.innerHeight);
+        canvas[0].width = window.innerWidth;
+        canvas[0].height = window.innerHeight;
+
+        initialize();
+        drawImage();
+        drawPaintButton();
+    }
+
+
+    document.onmousemove = function (ev) {
+        cursorX = ev.pageX - off.left;
+        cursorY = ev.pageY - off.top;
+    }
+
+    $.animate('mousemove', function () {
+        handleMove();
+    });
+
+    handleMove = function () {
+
+
+        if (isOnImage(cursorX, cursorY)) {
+
+            xPosOnImg = (cursorX - marginX - offsetX) / paintingWidth;
+            yPosOnImg = (cursorY - marginY - offsetY) / paintingWidth;
+
+            revealImage(xPosOnImg,
+                yPosOnImg,
+                innerRadius, outerRadius,
+                transitionFunction = linearFunction);
+        }
+    }
+
+
+    var riggedHandPlugin;
+    Leap.loop({
+        hand: function (hand) {
+            var label = hand.data('label');
+
+            var handMesh = hand.data('riggedHand.mesh');
+
+            var screenPosition = handMesh.screenPosition(
+                hand.palmPosition,
+                riggedHandPlugin.camera
+            );
+        }
+    })
+        .use('riggedHand')
+        .use('handEntry')
+        .on('handLost', function (hand) {
+            var label = hand.data('label');
+            if (label) {
+                document.body.removeChild(label);
+                hand.data({label: undefined});
             }
- 
-            initialize();
-
-            /*##########################################################
-                ACTION HANDLING (EXCEPT FOR REVEALING THE PAINTING)
-              ##########################################################
-            */
-
-            window.onresize = function() {
-                console.log(window.innerWidth, window.innerHeight);
-                canvas[0].width = window.innerWidth;
-                canvas[0].height= window.innerHeight;
-
-                initialize();
-                drawImage();
-                drawPaintButton();
-            }
+        });
 
 
-            document.onmousemove = function(ev) {
-                cursorX = ev.pageX - off.left;
-                cursorY = ev.pageY - off.top;
-            }
+    Leap.loop(function (frame) {
+        if (frame.pointables.length > 0) {
+            var position = frame.pointables[0].stabilizedTipPosition;
+            var normalized = frame.interactionBox.normalizePoint(position);
 
-            $.animate('mousemove', function() {
-                handleMove();
-            });
+            var x = window.innerWidth * normalized[0];
+            var y = window.innerHeight * (1 - normalized[1]);
+            //TODO: what to do with x and y -> obsolete?
+            revealImage(normalized[0],
+                (1 - normalized[1]),
+                innerRadius, outerRadius,
+                transitionFunction = linearFunction);
+        }
+    });
 
-            handleMove = function() {
-
-
-                if(isOnImage(cursorX, cursorY)) {
-
-                    xPosOnImg = (cursorX-marginX-offsetX) / paintingWidth;
-                    yPosOnImg = (cursorY-marginY-offsetY) / paintingWidth;
-
-                    revealImage(xPosOnImg,
-                                yPosOnImg,
-                                innerRadius, outerRadius,
-                                transitionFunction = linearFunction);
-                }
-            }
+    riggedHandPlugin = Leap.loopController.plugins.riggedHand;
 
 
-            var riggedHandPlugin;
-            Leap.loop({
-                hand: function(hand){
-                    var label = hand.data('label');
- 
-                    var handMesh = hand.data('riggedHand.mesh');
-
-                    var screenPosition = handMesh.screenPosition(
-                        hand.palmPosition,
-                        riggedHandPlugin.camera
-                    );
-                }
-            })
-            .use('riggedHand')
-            .use('handEntry')
-            .on('handLost', function(hand){
-                var label = hand.data('label');
-                if (label){
-                    document.body.removeChild(label);
-                    hand.data({label: undefined});
-                }
-            });
+    /*##########################################################
+     "PAINT ME" BUTTON
+     ##########################################################
+     */
 
 
-            Leap.loop(function(frame) {
-                if (frame.pointables.length > 0) {
-                    var position = frame.pointables[0].stabilizedTipPosition;
-                    var normalized = frame.interactionBox.normalizePoint(position);
-    
-                    var x = window.innerWidth * normalized[0];
-                    var y = window.innerHeight * (1 - normalized[1]);
-                    //TODO: what to do with x and y -> obsolete?
-                    revealImage(normalized[0],
-                                (1-normalized[1]),
-                                innerRadius, outerRadius,
-                                transitionFunction = linearFunction);
-                }
-            });
+    // photo icon taken from:
+    // http://www.clker.com/clipart-camera-icon-8.html
 
-            riggedHandPlugin = Leap.loopController.plugins.riggedHand;
+    var buttonPos = {
+        x: 0,
+        y: 0,
+        r: 0
+    };
 
+    document.onclick = function (ev) {
 
+        var x = ev.pageX - off.left;
+        var y = ev.pageY - off.top;
 
-             /*##########################################################
-                "PAINT ME" BUTTON
-              ##########################################################
-            */
+        // Check if button was clicked
+        if(Math.hypot(x - buttonPos.x, y - buttonPos.y) <= buttonPos.r) {
+            // Send signal to backend
+            ws.send('painter:take');
+        }
+    };
 
+    drawPaintButton = function () {
+        var radius = imgSizeX / 10;
+        var centerX = offsetX + imgSizeX + marginX;
+        var centerY = offsetY + 0.5 * imgSizeY;
+        buttonPos.x = centerX;
+        buttonPos.y = centerY;
 
-            // photo icon taken from: 
-            // http://www.clker.com/clipart-camera-icon-8.html
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+        ctx.fillStyle = "green";
+        ctx.fillStyle = "#9c2364";
+        ctx.fill();
 
-            drawPaintButton = function() {
-                var radius = imgSizeX / 10;
-                var centerX = offsetX+imgSizeX+marginX;
-                var centerY = offsetY + 0.5*imgSizeY;
-                ctx.beginPath();
-                ctx.arc(centerX, centerY,
-                        radius, 0, 2*Math.PI, false);
-                ctx.fillStyle = "green";
-                ctx.fillStyle = "#9c2364";
-                ctx.fill();
-            
-                ctx.lineWidth = imgSizeX / 75;
-                ctx.strokeStyle="#003300";
-                ctx.stroke();   
+        ctx.lineWidth = imgSizeX / 75;
+        ctx.strokeStyle = "#003300";
+        ctx.stroke();
 
-                var photo = new Image();
-                photo.src = "camera/photo_icon.png";
-                var iconWidth = imgSizeX/9;
-                var iconHeight = iconWidth/600*430;
-                photo.onload = function() {
-                    ctx.drawImage(photo, centerX-radius/1.8, centerY-radius/2.4,
-                                         width=iconWidth,
-                                         height=iconHeight);
+        var photo = new Image();
+        photo.src = "camera/photo_icon.png";
+        var iconWidth = imgSizeX / 9;
+        buttonPos.r = 32; // is this the correct radius?
 
-                }
-            }
+        var iconHeight = iconWidth / 600 * 430;
+        photo.onload = function () {
+            ctx.drawImage(photo, centerX - radius / 1.8, centerY - radius / 2.4,
+                width = iconWidth,
+                height = iconHeight);
 
-            drawPaintButton(); 
+        }
+    }
 
-            /*##########################################################
-                LOADING FRAME AND PAINTING
-              ##########################################################
-            */
+    drawPaintButton();
 
-            // example frame taken from:
-            // http://designdeko.blogspot.de/2015/04/bilderrahmen.html
-            var img_frame = new Image();
-            var imageData;
-            var img = new Image();
+    /*##########################################################
+     LOADING FRAME AND PAINTING
+     ##########################################################
+     */
 
-            function getImageNameForPainting() {
-                // tries to open painted img; returns img path
+    // example frame taken from:
+    // http://designdeko.blogspot.de/2015/04/bilderrahmen.html
+    var img_frame = new Image();
+    var imageData;
+    var img = new Image();
 
-                var rawFile = new XMLHttpRequest();
-                imgName = defaultImgLocation;
+    function getImageNameForPainting() {
+        // tries to open painted img; returns img path
 
-                try {
-                    rawFile.open("GET", paintedImgLocation, false);
-                    rawFile.onreadystatechange = function() {
-                        if(rawFile.readyState === 4) {
-                            if(rawFile.status === 200 || rawFile.status == 0) {
-                                imgName = paintedImgLocation;
-                            } else {
-                                imgName = defaultImgLocation;
-                            }
-                        } else {
-                            imgName = defaultImgLocation;
-                        }
+        var rawFile = new XMLHttpRequest();
+        imgName = defaultImgLocation;
+
+        try {
+            rawFile.open("GET", paintedImgLocation, false);
+            rawFile.onreadystatechange = function () {
+                if (rawFile.readyState === 4) {
+                    if (rawFile.status === 200 || rawFile.status == 0) {
+                        imgName = paintedImgLocation;
+                    } else {
+                        imgName = defaultImgLocation;
                     }
-                    rawFile.send(null);
-                } catch(err) {
-                }
-                return(imgName);
-            }
-
-            img_frame.src = "input/frame_b2.png";
-            // use nested loading to make sure both imgs have been loaded.
-            img_frame.onload = function() {
-
-                img_name = getImageNameForPainting();
-                img.src = img_name;
-                
-                img.onload = function() {
-                    drawImage();
+                } else {
+                    imgName = defaultImgLocation;
                 }
             }
+            rawFile.send(null);
+        } catch (err) {
+        }
+        return (imgName);
+    }
+
+    img_frame.src = "input/frame_b2.png";
+    // use nested loading to make sure both imgs have been loaded.
+    img_frame.onload = function () {
+
+        img_name = getImageNameForPainting();
+        img.src = img_name;
+
+        img.onload = function () {
+            drawImage();
+        }
+    }
 
 
-            /*##########################################################
-                DRAWING: GRADUALLY REVEAL PAINTING
-              ##########################################################
-            */
+    /*##########################################################
+     DRAWING: GRADUALLY REVEAL PAINTING
+     ##########################################################
+     */
 
 
-            drawImage = function() {
-                ctx.drawImage(img_frame, offsetX, offsetY,
-                                         width=imgSizeX,
-                                         height=imgSizeY);
+    drawImage = function () {
+        ctx.drawImage(img_frame, offsetX, offsetY,
+            width = imgSizeX,
+            height = imgSizeY);
 
-                ctx.drawImage(img, offsetX+marginX, offsetY+marginY,
-                                   width = paintingWidth,
-                                   height = paintingWidth);
-                imageData = ctx.getImageData(offsetX+marginX, offsetY+marginY,
-                                             paintingWidth, paintingWidth);
+        ctx.drawImage(img, offsetX + marginX, offsetY + marginY,
+            width = paintingWidth,
+            height = paintingWidth);
+        imageData = ctx.getImageData(offsetX + marginX, offsetY + marginY,
+            paintingWidth, paintingWidth);
 
-                for (var i = 0; i < imageData.data.length; i += 4) {
-                    imageData.data[i + 3] = defaultAlphaValue;
-                }
-                ctx.putImageData(imageData, offsetX+marginX, offsetY+marginY);
+        for (var i = 0; i < imageData.data.length; i += 4) {
+            imageData.data[i + 3] = defaultAlphaValue;
+        }
+        ctx.putImageData(imageData, offsetX + marginX, offsetY + marginY);
+    }
+
+    isOnImage = function (xPos, yPos) {
+
+        isOnX = (offsetX + marginX <= xPos) & (xPos <= offsetX + marginX + paintingWidth);
+        isOnY = (offsetY + marginY <= yPos) & (yPos <= offsetY + marginY + paintingWidth);
+
+        return (isOnX & isOnY);
+    }
+
+
+    linearFunction = function (x) {
+        return (x);
+    }
+
+    revealImage = function (xPos, yPos,
+                            innerRadius, outerRadius,
+                            transitionFunction) {
+        // position: (x, y); both in [0, 1]
+        // transitionFunction: [0, 1] -> [0, 1]
+
+        if (xPos < 0.0 || xPos > 1.0) {
+            alert("Problem with xPos!");
+        }
+        if (yPos < 0.0 || yPos > 1.0) {
+            alert("Problem with yPos!");
+        }
+
+        row = 0;
+        col = 0;
+        completelyPaintedThreshold = 150; // 255 would be perfect, allow some margin
+        completelyPainted = true;
+
+        nc = Math.sqrt(imageData.data.length / 4);
+        var alpha = 0.0;
+
+        for (var i = 0; i < imageData.data.length; i += 4) {
+
+            if (col % nc == 0) {
+                row += 1;
+            }
+            col = col % nc;
+
+            if (imageData.data[i + 3] < completelyPaintedThreshold) {
+                completelyPainted = false;
             }
 
-            isOnImage = function(xPos, yPos) {
-             
-                isOnX = (offsetX+marginX <= xPos) & (xPos <= offsetX+marginX+paintingWidth);
-                isOnY = (offsetY+marginY <= yPos) & (yPos <= offsetY+marginY+paintingWidth);
-
-                return(isOnX & isOnY);
-            }
- 
-   
-            linearFunction = function(x) {
-                return(x);
-            }
-
-            revealImage = function(xPos, yPos,
-                                   innerRadius, outerRadius,
-                                   transitionFunction) {
-                // position: (x, y); both in [0, 1]
-                // transitionFunction: [0, 1] -> [0, 1]
-
-                if(xPos < 0.0 || xPos > 1.0) {
-                    alert("Problem with xPos!");
+            x_dist = Math.abs(xPos - (col / nc));
+            y_dist = Math.abs(yPos - (row / nc));
+            distance = Math.sqrt(Math.pow(x_dist, 2) + Math.pow(y_dist, 2));
+            if (distance < outerRadius) {
+                if (distance < innerRadius) {
+                    imageData.data[i + 3] = 255; //alpha channel
+                } else {
+                    imageData.data[i + 3] = Math.max(255.0 *
+                        transitionFunction((outerRadius - distance) /
+                            (outerRadius - innerRadius)),
+                        imageData.data[i + 3]);
                 }
-                if(yPos < 0.0 || yPos > 1.0) {
-                    alert("Problem with yPos!");
-                }
-
-                row = 0;
-                col = 0;
-                completelyPaintedThreshold = 150; // 255 would be perfect, allow some margin
-                completelyPainted = true;
-               
-                nc = Math.sqrt(imageData.data.length/4);
-                var alpha = 0.0;
-
-                for (var i = 0; i < imageData.data.length; i += 4) {
-
-                    if (col % nc == 0) {
-                        row += 1;
-                    }
-                    col = col % nc;
-
-                    if(imageData.data[i + 3] < completelyPaintedThreshold) {
-                        completelyPainted = false;
-                    }
-
-                    x_dist = Math.abs(xPos - (col/nc));
-                    y_dist = Math.abs(yPos - (row/nc));
-                    distance = Math.sqrt(Math.pow(x_dist, 2) + Math.pow(y_dist, 2));
-                    if (distance < outerRadius) {
-                        if (distance < innerRadius) {
-                            imageData.data[i + 3] = 255; //alpha channel
-                        } else {
-                            imageData.data[i+3] = Math.max(255.0*
-                                transitionFunction((outerRadius-distance)/
-                                                   (outerRadius-innerRadius)),
-                                                             imageData.data[i + 3]);
-                        }
-                    }
-
-                    col += 1;
-                }
-                isImgCompletelyPainted = completelyPainted;
-                ctx.putImageData(imageData, marginX+offsetX, marginY+offsetY);
             }
 
+            col += 1;
+        }
+        isImgCompletelyPainted = completelyPainted;
+        ctx.putImageData(imageData, marginX + offsetX, marginY + offsetY);
+    }
 
-        </script>
 
-    </body>
+</script>
+
+</body>
 </html>
