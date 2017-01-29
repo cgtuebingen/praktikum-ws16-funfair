@@ -157,6 +157,7 @@ class SocketHandler(websocket.WebSocketHandler):
             print 'message received: \"%s\"' % message
 
     def on_close(self):
+        emoDev.set_emodev(0)
         print 'connection closed'
 
 
