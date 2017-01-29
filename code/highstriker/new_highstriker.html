@@ -10,34 +10,160 @@
             <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
 
             <img src="../../design/bude_fg_highstriker.svg" style="position: absolute; z-index: 3; width: 100%">
-            <div style="position: relative; z-index: 5; border: 1px solid; width:60%; margin:auto"> <canvas id="canvas"></canvas></div>
+            <div style="position: relative; z-index: 2; border: 1px solid"> <canvas id="canvas"></canvas></div>
 
         </div>
 
         <script src="../js/common.js"></script>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r66/three.js"></script>
-        <script src="http://js.leapmotion.com/leap-0.6.4.min.js"></script>
-        <script src="http://js.leapmotion.com/leap-plugins-0.1.6.1.js"></script>
-        <script src="http://js.leapmotion.com/leap.rigged-hand-0.1.3.min.js"></script>
         <script>
 
 
             var canvas = $("#canvas");
             canvas[0].width = window.innerWidth;
             canvas[0].height = window.innerHeight;
+            var ctx = canvas.getContext("2d");
+
+            var off = canvas.offset(); // get the offset of the canvas once
+
+            var col_pillar   = "rgb(165, 30, 55)";
+            var col_stand    = "rgb(180, 160, 105)";
+            var col_puck     = "rgb(50, 65, 75)";
+            var col_bar      = "rgb(0, 105, 170)";
+            var col_platform = "rgb(50, 65, 75)";
+            var col_plat_top = "rgb(210, 150, 0)";
+            var numLevels = 5;
+
+            var width;
+            var height;
+            var offsetX;
+            var offsetY;
+            var surroundingWidth;
+            var textPx;
+
+            initialize = function() {
+
+                width = window.innerWidth/13;
+                height = window.innerWidth / 5;
+                offsetX = window.innerWidth/2.7;
+                offsetY = window.innerWidth / 4;
+                surroundingWidth = window.innerWidth / 185;
+                textPx = window.innerWidth /71;
+                
+                drawHighstriker(0.5);
+
+            }
+
+            drawHighstriker = function(barHeightProportion) {
+
+                // barHeightProportion: \in [0, 1], denoting height of bar.
+                // The higher this is, the better for the striker.
+
+                // big middle rectangle
+                ctx.fillStyle = col_pillar;
+                ctx.fillRect(offsetX, offsetY, width, height);
+
+                // surrounding
+                ctx.strokeStyle = col_platform;
+                ctx.lineWidth=surroundingWidth;
+                ctx.strokeRect(offsetX, offsetY, width, height);
+
+
+                // bar background
+                ctx.fillStyle = col_plat_top;
+                var barBackgroundWidth  = (1/3) * (width-2*surroundingWidth);
+                ctx.fillRect(offsetX + 0.5*width - 0.5*barBackgroundWidth,
+                             offsetY,
+                             barBackgroundWidth, height);
+
+                // bar
+                ctx.fillStyle = col_bar;
+                var barWidth  = (1/6) * (width-2*surroundingWidth);
+                var barHeight = barHeightProportion * height;
+                ctx.fillRect(offsetX + 0.5*width - 0.5*barWidth,
+                             offsetY+height-barHeight,
+                             barWidth,
+                             barHeight);
+
+                // middle lines
+                ctx.strokeStyle = col_platform;
+                for(var i=0; i<=numLevels; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(offsetX, offsetY+i*(height / numLevels));
+                    ctx.lineWidth = surroundingWidth;
+                    ctx.lineTo(offsetX + width, offsetY+i*(height / numLevels));
+                    ctx.stroke();
+                }
+
+                // YOGA levels
+                 
+                ctx.font=String(textPx)+"px Georgia";
+ 
+                for(var i=0; i<numLevels; i++) {
+
+                    ctx.fillStyle = col_platform;
+                    ctx.fillText("Master of Yoga", 
+                                 offsetX-250,
+                                 offsetY+i*(height / numLevels));
+
+                }
+
+
+            }
+
+            initialize();
+
+
+
+            /*#########################################################
+                     ACTION HANDLING
+            ########################################################*/
 
 
             window.onresize = function() {
-                console.log(window.innerWidth, window.innerHeight);
                 canvas[0].width = window.innerWidth;
-                canvas[0].height= window.innerHeight;
+                canvas[0].height = window.innerHeight;
+                
+                initialize();
             }
 
-            var ctx = canvas.getContext("2d");
-            var off = canvas.offset(); // get the offset of the canvas once
 
-            $.animate('mousemove', function() {
-            });
+            /*#########################################################
+                     DRAWING FUNCTIONS
+            #########################################################*/
+
+            function drawCylinder(ctx, x, y,
+                                  height, radiusX, radiusY,
+                                  col1, col2) {
+
+                ctx.beginPath();
+                ctx.fillStyle = col2;
+                ctx.ellipse(x=x, y=y+height, 
+                            radiusX = radiusX,
+                            radiusY = radiusY,
+                            rotation = 0,
+                            startAngle = 0, 
+                            endAngle = 2 * Math.PI);
+                ctx.stroke();
+                ctx.fill();
+                ctx.closePath();
+ 
+                ctx.fillStyle = col2;
+                ctx.fillRect(x-radiusX, y-height,
+                             x+2*radiusX, height);
+
+                ctx.beginPath();
+                ctx.fillStyle = col1;
+                ctx.ellipse(x=x, y=y-height, 
+                            radiusX = radiusX,
+                            radiusY = radiusY,
+                            rotation = 0,
+                            startAngle = 0, 
+                            endAngle = 2 * Math.PI);
+                ctx.stroke();
+                ctx.fill();
+                ctx.closePath();
+            }
+
 
 
         </script>
