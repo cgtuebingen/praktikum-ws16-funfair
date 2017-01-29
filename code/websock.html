@@ -1,3 +1,5 @@
+<input type="button" onclick="doIt()">
+
 <script>
 
 var ws = new WebSocket('ws://localhost:8080/ws');
@@ -17,4 +19,10 @@ ws.onerror = function(ev){
 ws.onmessage = function(ev){
   console.log(ev.data)
 }
+
+function doIt() {
+    ws.send('painter:take')
+}
+
+
 </script>

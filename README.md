@@ -38,14 +38,14 @@ pip install -r dependencies.txt
 
 ## Usage
 ### Basic Usage
-Funfair consists of several submodules, each implementing exactly one game.  Note that currently, the games can only be played individually. However we're working on combining them in a unified framework; as soon as that's ready you'll be able to start playing directly following the instructions as they are given here (-> Main Project).
+Funfair consists of several submodules, each implementing exactly one game.  Note that currently, the games can only be played individually. However we're working on combining them in a unified framework; as soon as that's ready you'll be able to start playing directly following the instructions as they are given here (see section 'Main Project').
 
 #### Painter-game
 Currently, "painter" is a game that is already playable.
 In order to play this game, follow these simple steps:
 
 ```
-bash cd code/painter
+cd code/painter
 ```
 
 If you possess a leap motion device (not necessary to play this game! But still fun...), plug it in and activate it via:
@@ -62,9 +62,9 @@ python2 submit_painting.py
 
 Finally, open painter.html, e.g. via
 ```
-bash firefox painter.html
+firefox painter.html
 ```
-You should then see a picture frame containg the 'Lena' image or a snapshot of yourself. Use your mouse to draw, or your hands that move in the air above the leap motion device.
+You should then see a picture frame containg either the famous 'Lena' image or a snapshot of yourself. Use your mouse to draw, or your hands moving in the air above the leap motion device.
 
 #### Main Project
 The project can be started with python:
