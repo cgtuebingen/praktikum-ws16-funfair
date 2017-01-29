@@ -15,6 +15,8 @@ WINDOW_SIZE = 250
 SD_UPPER_LIMIT = 100
 SD_LOWER_LIMIT = 50
 
+STYLE = 0
+
 class EmoWorker:
 
     def __init__(self):
@@ -55,6 +57,10 @@ class EmoWorker:
         else:
             return 0.0
 
+    def get_brain_imagestyle(self):
+        # TODO
+        return 42
+
     def do_start(self):
 
         with Emotiv(display_output=False, verbose=True) as headset:
@@ -68,6 +74,8 @@ class EmoWorker:
 
                 if self.emodev:
                     self.emodev.write_message("brain:activity:" + str(self.get_brain_activity()))
+
+                STYLE = self.get_brain_imagestyle()
 
                 #data = ",".join([
                 #    str(packet.sensors['F3']['value']),
@@ -149,7 +157,7 @@ class SocketHandler(websocket.WebSocketHandler):
                 painted_path = os.path.join(img_path, sp.SNAPSHOT_PAINTED_NAME)
 
                 sp.resize_image(orig_path, resized_path)
-                sp.paint_image(resized_path, painted_path)
+                sp.paint_image(resized_path, painted_path, STYLE)
 
                 self.write_message("painter:finished")
 
