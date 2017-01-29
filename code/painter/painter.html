@@ -81,6 +81,7 @@
 
                 initialize();
                 drawImage();
+                drawPaintButton();
             }
 
 
@@ -150,7 +151,45 @@
 
             riggedHandPlugin = Leap.loopController.plugins.riggedHand;
 
-           
+
+
+             /*##########################################################
+                "PAINT ME" BUTTON
+              ##########################################################
+            */
+
+
+            // photo icon taken from: 
+            // http://www.clker.com/clipart-camera-icon-8.html
+
+            drawPaintButton = function() {
+                var radius = imgSizeX / 10;
+                var centerX = offsetX+imgSizeX+marginX;
+                var centerY = offsetY + 0.5*imgSizeY;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY,
+                        radius, 0, 2*Math.PI, false);
+                ctx.fillStyle = "green";
+                ctx.fillStyle = "#9c2364";
+                ctx.fill();
+            
+                ctx.lineWidth = imgSizeX / 75;
+                ctx.strokeStyle="#003300";
+                ctx.stroke();   
+
+                var photo = new Image();
+                photo.src = "camera/photo_icon.png";
+                var iconWidth = imgSizeX/9;
+                var iconHeight = iconWidth/600*430;
+                photo.onload = function() {
+                    ctx.drawImage(photo, centerX-radius/1.8, centerY-radius/2.4,
+                                         width=iconWidth,
+                                         height=iconHeight);
+
+                }
+            }
+
+            drawPaintButton(); 
 
             /*##########################################################
                 LOADING FRAME AND PAINTING
