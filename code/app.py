@@ -3,6 +3,8 @@ import tornado as tornado
 import tornado.web as web
 import tornado.websocket as websocket
 import cv2
+import os
+import painter.submit_painting as sp
 from sys import platform
 
 
@@ -17,10 +19,18 @@ class SocketHandler(websocket.WebSocketHandler):
 
     def on_message(self, message):
 
+        img_path = "painter/result_imgs"
+
         if message == "painter:take":
 
+            camera_success_flag = False
+
             if platform == "linux" or platform == "linux2":
-                pass
+                print "Taking a snapshot."
+                sp.take_image(img_path, sp.SNAPSHOT_ORIG_NAME)
+                print "Completed taking a snapshot."
+                camera_success_flag = True
+
             elif platform == "darwin":
                 cv2.namedWindow("preview")
                 vc = cv2.VideoCapture(0)
@@ -30,15 +40,30 @@ class SocketHandler(websocket.WebSocketHandler):
                 else:
                     rval = False
 
+                print "Taking a snapshot."
                 while rval:
                     cv2.imshow("preview", frame)
                     rval, frame = vc.read()
                     key = cv2.waitKey(20)
                     if key == 27: # exit on ESC
-                        cv2.imwrite('capture.jpg', frame)
+                        if not os.path.exists(img_path):
+                            os.makedirs(img_path)
+                        cv2.imwrite(os.path.join(img_path, "snapshot.jpg"), frame)
                         break
                 vc.release()
                 cv2.destroyAllWindows()
+                print "Completed taking a snapshot."
+                camera_success_flag = True
+
+            if camera_success_flag:
+
+                # resize and paint
+                orig_path = os.path.join(img_path, sp.SNAPSHOT_ORIG_NAME)
+                resized_path = os.path.join(img_path, sp.SNAPSHOT_RESIZED_NAME)
+                painted_path = os.path.join(img_path, sp.SNAPSHOT_PAINTED_NAME)
+
+                sp.resize_image(orig_path, resized_path)
+                sp.paint_image(resized_path, painted_path)
 
         else:
             print 'message received: \"%s\"' % message
@@ -47,7 +72,7 @@ class SocketHandler(websocket.WebSocketHandler):
         print 'connection closed'
 
     def test(self):
-        self.write_message("GOT SENSOR DATAAAAAA")
+        self.write_message("GOT SENSOR DATA")
         tornado.ioloop.IOLoop.instance().add_timeout(datetime.timedelta(seconds=1), self.test)
 
 
