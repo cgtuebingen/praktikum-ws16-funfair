@@ -1,22 +1,28 @@
 <html>
-  
+
     <head>
-        <title>Example</title>
+        <title>Highstriker</title>
     </head>
 
     <body style="background:#ebe3d9;margin:0">
 
-        <canvas id="canvas" width="800" height="600"></canvas>
+        <div style="position: relative; width:80%; margin:auto"> 
+            <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
 
-        <div style="position:absolute;bottom: 0px;left:0px;height:55px;background:#e84d58;width:100%;font-family: 'Bevan', cursive;font-size:40pt;text-align:center;color:#EEE1DA">FUNFAIR</div>
+            <img src="../../design/bude_fg_highstriker.svg" style="position: absolute; z-index: 3; width: 100%">
+            <div style="position: relative; z-index: 2"> <canvas id="canvas"></canvas></div>
 
-        <img src="../../design/baloon2.svg" style="position:absolute;left:80px;top:60px;width:15%" alt="">
+        </div>
 
         <script src="../js/common.js"></script>
         <script>
 
+
             var canvas = $("#canvas");
+            canvas[0].width = window.innerWidth;
+            canvas[0].height = window.innerHeight;
             var ctx = canvas.getContext("2d");
+            var off = canvas.offset(); // get the offset of the canvas once
 
             var col_pillar   = "rgb(165, 30, 55)";
             var col_stand    = "rgb(180, 160, 105)";
@@ -24,147 +30,175 @@
             var col_bar      = "rgb(0, 105, 170)";
             var col_platform = "rgb(50, 65, 75)";
             var col_plat_top = "rgb(210, 150, 0)";
-
-            var height = 600;
-            var width  = 800;
-
-            var bsize = 4 // border size
-
-            var left_x = width/17
-            var top_y  = 2*height/6
-
-            var middle_x = width/2+0.5;
-            var middle_y = height/2+0.5;
   
-            var minBarHeight = 20;
+            var levels = ["Burnout candidate", 
+                          "Amateur Yogi", 
+                          "Medidation junkie",
+                          "Yoga expert", 
+                          "Master of Yoga"];
+            var numLevels = levels.length;
 
-            ctx.translate(middle_x, middle_y);
+            var width;
+            var height;
+            var offsetX;
+            var offsetY;
+            var surroundingWidth;
+            var textPx;
 
+            var barStartValue = 0.05;
+            var bar = barStartValue;
+        
+
+            initialize = function() {
+
+                width = window.innerWidth / 13;
+                height = window.innerWidth / 5;
+                offsetX = window.innerWidth / 2.3;
+                offsetY = window.innerWidth / 4;
+                surroundingWidth = window.innerWidth / 185;
+                textPx = Math.trunc(window.innerWidth / 71);
+                
+                drawHighstriker(bar);
+
+            }
+
+            drawHighstriker = function(barHeightProportion) {
+            /* barHeightProportion: \in [0, 1], denoting height of bar.
+               The higher this is, the better for the striker.*/
+
+
+                barHeightProportion = Math.max(barStartValue, barHeightProportion);
+                barHeightProportion = Math.min(1.0, barHeightProportion); 
+
+                // big middle rectangle
+                ctx.fillStyle = col_pillar;
+                ctx.fillRect(offsetX, offsetY, width, height);
+
+                // surrounding
+                ctx.strokeStyle = col_platform;
+                ctx.lineWidth=surroundingWidth;
+                ctx.strokeRect(offsetX, offsetY, width, height);
+
+
+                // bar background
+                ctx.fillStyle = col_plat_top;
+                var barBackgroundWidth  = (1/3) * (width-2*surroundingWidth);
+                ctx.fillRect(offsetX + 0.5*width - 0.5*barBackgroundWidth,
+                             offsetY,
+                             barBackgroundWidth, height);
+
+                // bar
+                ctx.fillStyle = col_bar;
+                var barWidth  = (1/6) * (width-2*surroundingWidth);
+                var barHeight = barHeightProportion * height;
+                ctx.fillRect(offsetX + 0.5*width - 0.5*barWidth,
+                             offsetY+height-barHeight,
+                             barWidth,
+                             barHeight);
+                // middle lines
+                ctx.strokeStyle = col_platform;
+                for(var i=0; i<=numLevels; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(offsetX, offsetY+i*(height / numLevels));
+                    ctx.lineWidth = surroundingWidth;
+                    ctx.lineTo(offsetX + width, offsetY+i*(height / numLevels));
+                    ctx.stroke();
+                }
+
+                // YOGA levels
+                ctx.font=String(textPx)+"px Georgia";
+
+                var ellipseCenterX = offsetX-window.innerWidth/7.2;
+                var ellipseWidth = window.innerWidth / 11;
+                var ellipseHeight = window.innerWidth / 74;
+
+                // strings for the level indicators
+                ctx.beginPath();
+                ctx.moveTo(ellipseCenterX-0.45*ellipseWidth, offsetY / 2);
+                ctx.lineWidth = surroundingWidth*2;
+                ctx.lineTo(ellipseCenterX-0.45*ellipseWidth, offsetY * 1.7);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(ellipseCenterX+0.45*ellipseWidth, offsetY / 2);
+                ctx.lineWidth = surroundingWidth*2;
+                ctx.lineTo(ellipseCenterX+0.45*ellipseWidth, offsetY * 1.7);
+                ctx.stroke();
+
+                for(var i=0; i<numLevels; i++) {
+
+                    if(barHeightProportion*numLevels >= (numLevels-i-1)) {
+                        var y = offsetY+i*(height / numLevels) +0.5*(height/numLevels);
+                        var ellipseCenterY = y - window.innerWidth / 185;
+                        // elliptic level indicator
+                        drawEllipse(ctx, ellipseCenterX, ellipseCenterY,
+                                    ellipseWidth, ellipseHeight,
+                                    col_pillar, col_platform);
+                                     
+                        // level text: "Master of Yoga" etc
+                        ctx.fillStyle = col_plat_top;
+                        ctx.fillText(levels[numLevels-i-1], 
+                                     offsetX-370,
+                                     y);
+                    }
+                }
+            }
+
+            initialize();
+
+            /*#########################################################
+                     ACTION HANDLING
+            ########################################################*/
+            window.onresize = function() {
+                canvas[0].width = window.innerWidth;
+                canvas[0].height = window.innerHeight;
+                
+                initialize();
+            }
+
+
+            // TODO delete this: for demonstration purpose only
+            document.onmousemove = function(ev) {
+                bar += 0.003;
+                initialize();
+            }
+
+
+            /*#########################################################
+                     DRAWING FUNCTIONS
+            #########################################################*/
 
             function drawCylinder(ctx, x, y,
                                   height, radiusX, radiusY,
-                                  col1, col2) {
+                                  col1, col2, colStroke) {
+
+                drawEllipse(ctx, x, y+height,
+                            radiusX, radiusY, col1, colStroke);
+
+                drawEllipse(ctx, x, y-height,
+                            radiusX, radiusY,
+                            col2, colStroke);
+            }
+
+            function drawEllipse(ctx, x, y,
+                                 radiusX, radiusY,
+                                 col, colStroke) {
 
                 ctx.beginPath();
-                ctx.fillStyle = col2;
-                ctx.ellipse(x=x, y=y+height, 
+                ctx.fillStyle = col;
+                ctx.ellipse(x, y, 
                             radiusX = radiusX,
                             radiusY = radiusY,
                             rotation = 0,
                             startAngle = 0, 
                             endAngle = 2 * Math.PI);
-                ctx.stroke();
-                ctx.fill();
-                ctx.closePath();
- 
-                ctx.fillStyle = col2;
-                ctx.fillRect(x-radiusX, y-height,
-                             x+2*radiusX, height);
-
-                ctx.beginPath();
-                ctx.fillStyle = col1;
-                ctx.ellipse(x=x, y=y-height, 
-                            radiusX = radiusX,
-                            radiusY = radiusY,
-                            rotation = 0,
-                            startAngle = 0, 
-                            endAngle = 2 * Math.PI);
+                ctx.strokeStyle = colStroke;
                 ctx.stroke();
                 ctx.fill();
                 ctx.closePath();
             }
-
-            // bottom
-            drawCylinder(ctx=ctx, x=0, y=top_y,
-                         height=20, radiusX=130, radiusY=65,
-                         col_plat_top, col_platform);
-
-            // hit button
-            drawCylinder(ctx=ctx, x=0, y=top_y+30,
-                         height=5, radiusX=135/5, radiusY=65/5,
-                         col_bar, col_platform);
-
-
-            // surrounding lines
-            ctx.fillStyle = col_puck;
-            ctx.fillRect(-left_x - bsize, -top_y - bsize,
-                         2*left_x + 2*bsize, 2*top_y + 2*bsize);
-
-            // main pillar (filled)
-            ctx.fillStyle = col_pillar;
-            ctx.fillRect(-left_x, -top_y, 2*left_x, 2*top_y);
-
-            // left surrounding
-            var offset_x = width / 80;
-            var offset_y = height / 20;
-            ctx.beginPath();
-            ctx.fillStyle = col_stand;
-            ctx.moveTo(-left_x - bsize, -top_y-bsize);
-            ctx.lineTo(-left_x - bsize - offset_x, -top_y - bsize + offset_y);
-            ctx.lineTo(-left_x - bsize - offset_x,  top_y + bsize - offset_y);
-            ctx.lineTo(-left_x - bsize, top_y + bsize);
-            ctx.closePath();
-            ctx.fill();
-
-            // right surrounding
-            ctx.beginPath();
-            ctx.fillStyle = col_stand;
-            ctx.moveTo(left_x + bsize, -top_y-bsize);
-            ctx.lineTo(left_x + bsize + offset_x, -top_y - bsize + offset_y);
-            ctx.lineTo(left_x + bsize + offset_x, top_y + bsize - offset_y);
-            ctx.lineTo(left_x + bsize, top_y + bsize);
-            ctx.closePath();
-            ctx.fill();
-
-
-            function drawMiddleBar(height) {
-
-                offset_x = 40;
-                offset_y = (400 - height); //result: 20 to 400
- 
-                // make sure background is again background-colored
-                ctx.fillStyle = col_pillar;
-                ctx.fillRect(-left_x+offset_x, -top_y,
-                             2*left_x-2*offset_x, 2*top_y);
-
- 
-
-                // middle bar
-                ctx.fillStyle = col_bar;
-                ctx.fillRect(-left_x+offset_x, -top_y+offset_y,
-                             2*left_x-2*offset_x, 2*top_y-offset_y);
-
-                // middle lines
-                ctx.fillStyle = col_puck;
-                for(var i=1; i<6; i++) {
-                    ctx.fillRect(-left_x, -top_y+65*i, 2*left_x, bsize);
-                }
-
-            }
-
-            drawMiddleBar(minBarHeight);
-
-            var i = 0;
-
-            // Endless animation
-            $.animate('test', function () {
-              
-              i++;
-            });
-            // stopAnimate('test'); // to stop it again
-
-
-            canvas.on('click', function () {
-
-              $.animate('click', function (pos) {
-
-                drawMiddleBar(210 + Math.sin(pos * Math.PI * 2) * 190);
-
-              }, 4000); // Run for 2sec
-            });
 
         </script>
 
     </body>
 </html>
-
