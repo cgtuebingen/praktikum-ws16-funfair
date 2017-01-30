@@ -64,6 +64,12 @@
             var counterBalanceForce = 0.0065;
             var gravityForce = 0.003;
 
+            var gameLost = false;
+
+            // use emotiv XOR mouse?
+            var useEmotiv = false;
+            var useMouse = !useEmotiv;
+
             // the little man...
             var man = new Image();
             var manWidth;
@@ -138,21 +144,36 @@
                      ACTION HANDLING
             #########################################################*/
 
+            /* here: emotiv embedding
+
+            pass std here; then the following LOC will do the rest:
+ 
+            counterBalance = std - 75;
+
+            This will have the following effect:
+              - for std < 75: force will be applied on the left side
+              - for std > 75: force will be applied on the right side
+            (all that matters is the sign of counterBalance)
+            */
+
             document.onclick = function() {
-                //TODO
+                // restart game
+                gameLost = false;
+                angle = angleStartValue;
             }
 
-            document.onmousemove = function(ev) {
-                cursorX = ev.pageX - off.left;
-                cursorY = ev.pageY - off.top;
-                counterBalance = cursorX - offsetX;
+            if(useMouse) {
+                document.onmousemove = function(ev) {
+                    cursorX = ev.pageX - off.left;
+                    cursorY = ev.pageY - off.top;
+                    counterBalance = cursorX - offsetX;
+                }
             }
 
 
             // image source (modified from):
             // https://tobintouch.wordpress.com/2012/08/14/balancing-freedom-and-security-in-a-freelance-career/
 
-            var gameLost = false;
             man.src = "balancing.png";
             man.onload = function() {
  
