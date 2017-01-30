@@ -1,0 +1,167 @@
+<html>
+
+    <head>
+        <title>Highstriker</title>
+    </head>
+
+    <body style="background:#ebe3d9;margin:0">
+
+        <div style="position: relative; width:80%; margin:auto"> 
+            <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
+
+            <img src="../../design/bude_fg_balancing.svg" style="position: absolute; z-index: 3; width: 100%">
+            <div style="position: relative; z-index: 5"> <canvas id="canvas"></canvas></div>
+
+        </div>
+
+        <script src="../js/common.js"></script>
+        <script>
+
+
+            /*#########################################################
+                     ACTION HANDLING
+            ########################################################*/
+
+            window.onresize = function() {
+                canvas[0].width = window.innerWidth;
+                canvas[0].height = window.innerHeight;
+                
+                initialize();
+            }
+
+
+
+            /*#########################################################
+                     INITIALIZATION
+            ########################################################*/
+
+            var canvas = $("#canvas");
+            canvas[0].width = window.innerWidth;
+            canvas[0].height = window.innerHeight;
+            var ctx = canvas.getContext("2d");
+            var off = canvas.offset(); // get the offset of the canvas once
+
+            var col_red   = "rgb(165, 30, 55)";
+            var col_bar      = "rgb(0, 105, 170)";
+            var col_surrounding = "rgb(50, 65, 75)";
+            var col_yellow = "rgb(210, 150, 0)";
+  
+            var width;
+            var height;
+            var offsetX;
+            var offsetY;
+            var surroundingWidth;
+            var rectWidth;
+            var rectHeight;
+
+            var angleStartValue = 0.3;
+            var angle = angleStartValue;
+
+            initialize = function() {
+
+                width = window.innerWidth / 19;
+                height = window.innerWidth / 11;
+                offsetX = window.innerWidth / 2.5;
+                offsetY = window.innerWidth / 2.7;
+                surroundingWidth = window.innerWidth / 960;
+                rectWidth = window.innerWidth / 4;
+                rectHeight = window.innerWidth / 80;
+                
+                drawBalancing(angle);
+                drawLittleMan(angle);
+            }
+
+            /*#########################################################
+                     DRAWING THE HIGHSTRIKER
+            ########################################################*/
+
+            drawBalancing = function(angle) {
+
+                // bottom triangle
+                ctx.fillStyle = col_red;
+                ctx.beginPath();
+                ctx.moveTo(offsetX, offsetY);
+                ctx.lineTo(offsetX - width, offsetY + height);
+                ctx.lineTo(offsetX + width, offsetY + height);
+                ctx.lineTo(offsetX, offsetY);
+                ctx.fill();
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = surroundingWidth;
+                ctx.stroke();
+                 
+
+
+                // rectangle
+                ctx.save();
+                ctx.translate(offsetX, offsetY);
+                ctx.rotate(angle);
+                ctx.beginPath();
+                ctx.rect(-0.5*rectWidth, -0.5*rectHeight,
+                         rectWidth, rectHeight);
+                ctx.fillStyle = col_red;
+                ctx.fill();
+                ctx.lineWidth = surroundingWidth;
+                ctx.strokeStyle = "black";
+                ctx.stroke();
+                ctx.restore();
+
+                // middle circle
+                var circleRadius = window.innerWidth / 92;
+                drawEllipse(ctx, offsetX, offsetY,
+                            circleRadius, circleRadius, col_bar);
+
+
+            }
+
+            drawLittleMan = function(angle) {
+
+                // image source (modified from):
+                // https://tobintouch.wordpress.com/2012/08/14/balancing-freedom-and-security-in-a-freelance-career/
+
+                var man = new Image();
+                man.src = "balancing.png";
+                man.onload = function() {
+                    ctx.drawImage(man, offsetX, offsetY, 200, 200);
+                }
+            }
+
+
+            initialize();
+
+            /*#########################################################
+                     DRAWING FUNCTIONS
+            #########################################################*/
+
+            function drawCylinder(ctx, x, y,
+                                  height, radiusX, radiusY,
+                                  col1, col2, colStroke) {
+
+                drawEllipse(ctx, x, y+height,
+                            radiusX, radiusY, col1, colStroke);
+
+                drawEllipse(ctx, x, y-height,
+                            radiusX, radiusY,
+                            col2, colStroke);
+            }
+
+            function drawEllipse(ctx, x, y,
+                                 radiusX, radiusY,
+                                 col, colStroke) {
+
+                ctx.beginPath();
+                ctx.fillStyle = col;
+                ctx.ellipse(x, y, 
+                            radiusX = radiusX,
+                            radiusY = radiusY,
+                            rotation = 0,
+                            startAngle = 0, 
+                            endAngle = 2 * Math.PI);
+                ctx.strokeStyle = colStroke;
+                ctx.stroke();
+                ctx.fill();
+                ctx.closePath();
+            }
+        </script>
+
+    </body>
+</html>
