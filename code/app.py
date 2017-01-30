@@ -15,7 +15,7 @@ WINDOW_SIZE = 250
 SD_UPPER_LIMIT = 100
 SD_LOWER_LIMIT = 50
 
-STYLE = 0
+STYLE = 45
 
 class EmoWorker:
 
