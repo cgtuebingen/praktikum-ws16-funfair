@@ -1,7 +1,7 @@
 <html>
 
     <head>
-        <title>Highstriker</title>
+        <title>Balancing</title>
     </head>
 
     <body style="background:#ebe3d9;margin:0">
@@ -40,6 +40,8 @@
             canvas[0].height = window.innerHeight;
             var ctx = canvas.getContext("2d");
             var off = canvas.offset(); // get the offset of the canvas once
+            var cursorX = 42;
+            var cursorY = 42;
 
             var col_red   = "rgb(165, 30, 55)";
             var col_bar      = "rgb(0, 105, 170)";
@@ -54,8 +56,18 @@
             var rectWidth;
             var rectHeight;
 
-            var angleStartValue = 0.3;
+            var angleStartValue = 0.00;
             var angle = angleStartValue;
+            var maxAngle = 0.74;
+            var sign = 1.0;
+            var counterBalance = 0.0; // <0: left, >0: right
+            var counterBalanceForce = 0.0065;
+            var gravityForce = 0.003;
+
+            // the little man...
+            var man = new Image();
+            var manWidth;
+            var manHeight;
 
             initialize = function() {
 
@@ -66,13 +78,12 @@
                 surroundingWidth = window.innerWidth / 960;
                 rectWidth = window.innerWidth / 4;
                 rectHeight = window.innerWidth / 80;
-                
-                drawBalancing(angle);
-                drawLittleMan(angle);
+                manWidth = window.innerWidth / 13;
+                manHeight = manWidth / 1.3;
             }
 
             /*#########################################################
-                     DRAWING THE HIGHSTRIKER
+                     DRAWING THE BALANCING
             ########################################################*/
 
             drawBalancing = function(angle) {
@@ -109,27 +120,74 @@
                 var circleRadius = window.innerWidth / 92;
                 drawEllipse(ctx, offsetX, offsetY,
                             circleRadius, circleRadius, col_bar);
-
-
             }
+
 
             drawLittleMan = function(angle) {
-
-                // image source (modified from):
-                // https://tobintouch.wordpress.com/2012/08/14/balancing-freedom-and-security-in-a-freelance-career/
-
-                var man = new Image();
-                man.src = "balancing.png";
-                man.onload = function() {
-                    ctx.drawImage(man, offsetX, offsetY, 200, 200);
-                }
+                ctx.save();
+                ctx.translate(offsetX, offsetY);
+                ctx.rotate(angle);
+                ctx.drawImage(man, -0.5*manWidth, -manHeight,
+                              manWidth, manHeight);
+                ctx.restore();
             }
-
 
             initialize();
 
             /*#########################################################
-                     DRAWING FUNCTIONS
+                     ACTION HANDLING
+            #########################################################*/
+
+            document.onclick = function() {
+                //TODO
+            }
+
+            document.onmousemove = function(ev) {
+                cursorX = ev.pageX - off.left;
+                cursorY = ev.pageY - off.top;
+                counterBalance = cursorX - offsetX;
+            }
+
+
+            // image source (modified from):
+            // https://tobintouch.wordpress.com/2012/08/14/balancing-freedom-and-security-in-a-freelance-career/
+
+            var gameLost = false;
+            man.src = "balancing.png";
+            man.onload = function() {
+ 
+                // endless animation
+                $.animate('test', function () {
+
+                    // clear everything
+                    ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
+   
+                    if (Math.abs(angle) >= maxAngle) {
+                        gameLost = true;
+                    }
+                
+                    if (angle == 0.0) {
+                        // never reach perfect balance
+                        angle = -sign * 0.001;
+                    } else if (angle < 0.0) {
+                        sign = -1.0;
+                    } else {
+                        sign = 1.0;
+                    }
+
+                    angle = angle + (gravityForce*sign) +
+                            Math.sign(counterBalance)*counterBalanceForce;
+                    angle = Math.min(Math.max(-maxAngle, angle), maxAngle);
+                    drawBalancing(angle);
+
+                    if (! gameLost) {
+                        drawLittleMan(angle);
+                    }
+                });
+            }
+
+            /*#########################################################
+                     GENERIC DRAWING FUNCTIONS
             #########################################################*/
 
             function drawCylinder(ctx, x, y,
