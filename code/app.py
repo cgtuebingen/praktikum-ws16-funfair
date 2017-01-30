@@ -68,7 +68,7 @@ class EmoWorker:
             return 6
 
         elif std < 110:
-            return 10
+            return 24
 
         elif std < 180:
             return 26
