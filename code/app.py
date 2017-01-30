@@ -78,6 +78,7 @@ class EmoWorker:
 
 
     def do_start(self):
+        global STYLE
 
         with Emotiv(display_output=False, verbose=True) as headset:
             while self.run:
@@ -171,6 +172,8 @@ class SocketHandler(websocket.WebSocketHandler):
                 orig_path = os.path.join(img_path, sp.SNAPSHOT_ORIG_NAME)
                 resized_path = os.path.join(img_path, sp.SNAPSHOT_RESIZED_NAME)
                 painted_path = os.path.join(img_path, sp.SNAPSHOT_PAINTED_NAME)
+
+                print "Take Style " + str(STYLE)
 
                 sp.resize_image(orig_path, resized_path)
                 sp.paint_image(resized_path, painted_path, STYLE)
