@@ -32,7 +32,8 @@ pip install -r dependencies.txt
 #### Optional dependencies:
 * Leap Motion device
 
-#### Recommended setup:
+#### Tested setup:
+* **OS:** Mac OSX 10.12.2
 * **OS:** Linux Ubuntu 16.04.1 LTS 64-bit
 
 
