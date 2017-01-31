@@ -48,7 +48,7 @@
 
                 if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
 
-                    var val = -ev.data.slice("brain:activity:".length);
+                    var val = -ev.data.slice("brain:activity:".length).split(";")[0];
 
                     bar += val * 3e-4;
 

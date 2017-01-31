@@ -17,6 +17,8 @@ SD_LOWER_LIMIT = 50
 
 STYLE = 45
 
+ROTATE = 0
+
 class EmoWorker:
 
     def __init__(self):
@@ -40,13 +42,16 @@ class EmoWorker:
         self.index = (self.index + 1) % WINDOW_SIZE
         self.step_counter += 1
 
+    def get_std(self):
+        return np.std(self.last_values_list, ddof=1)
+
     def get_brain_activity(self):
         """Return value between 0 (bad) and 1(good), based on sensor values."""
 
         if self.step_counter < WINDOW_SIZE:
             return 0.0
 
-        std = np.std(self.last_values_list, ddof=1) # sample standard deviation
+        std = self.get_std()
 
         if std < SD_LOWER_LIMIT:
             return -1.0
@@ -79,6 +84,7 @@ class EmoWorker:
 
     def do_start(self):
         global STYLE
+        global ROTATE
 
         with Emotiv(display_output=False, verbose=True) as headset:
             while self.run:
@@ -90,9 +96,12 @@ class EmoWorker:
                 self.update_sensor_values(packet.sensors)
 
                 if self.emodev:
-                    self.emodev.write_message("brain:activity:" + str(self.get_brain_activity()))
+                    self.emodev.write_message("brain:activity:" + str(self.get_brain_activity()) + ";" + str(self.get_std()))
 
                 STYLE = self.get_brain_imagestyle()
+
+                #ROTATE+= (packet.sensors['F8']['value']-115)/4000.0
+                #print str(ROTATE) + " - " + str((packet.sensors['F8']['value']-115)/4000.0)
 
                 #data = ",".join([
                 #    str(packet.sensors['F3']['value']),
