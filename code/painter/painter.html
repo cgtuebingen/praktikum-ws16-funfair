@@ -2,6 +2,15 @@
 
 <head>
     <title>Painter</title>
+    <style>
+        canvas {
+            z-index: 10;
+        }
+
+        #canvas {
+            z-index:2;
+        }
+    </style>
 </head>
 
 <body style="background:#ebe3d9;margin:0">
@@ -67,7 +76,7 @@
     var outerRadius = 0.20;
     var paintedImgLocation = "result_imgs/snapshot_painted.jpg";
     var defaultImgLocation = "input/lena_default.jpg";
-    document.body.style.background = "white";
+
 
 
     // initializing flexible variables (depending on canvas size)
@@ -281,7 +290,7 @@
     img_frame.onload = function () {
 
         img_name = getImageNameForPainting();
-        img.src = img_name;
+        img.src = img_name + "?cache" + Math.random();
 
         img.onload = function () {
             drawImage();
@@ -332,10 +341,12 @@
         // transitionFunction: [0, 1] -> [0, 1]
 
         if (xPos < 0.0 || xPos > 1.0) {
-            alert("Problem with xPos!");
+            //alert("Problem with xPos!");
+            return;
         }
         if (yPos < 0.0 || yPos > 1.0) {
-            alert("Problem with yPos!");
+            //alert("Problem with yPos!");
+            return;
         }
 
         row = 0;
