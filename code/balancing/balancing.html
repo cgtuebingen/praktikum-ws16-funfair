@@ -19,19 +19,6 @@
 
 
             /*#########################################################
-                     ACTION HANDLING
-            ########################################################*/
-
-            window.onresize = function() {
-                canvas[0].width = window.innerWidth;
-                canvas[0].height = window.innerHeight;
-                
-                initialize();
-            }
-
-
-
-            /*#########################################################
                      INITIALIZATION
             ########################################################*/
 
@@ -61,13 +48,13 @@
             var maxAngle = 0.74;
             var sign = 1.0;
             var counterBalance = 0.0; // <0: left, >0: right
-            var counterBalanceForce = 0.0065;
-            var gravityForce = 0.003;
+            var counterBalanceForce = 0.0045;
+            var gravityForce = 0.001;
 
             var gameLost = false;
 
             // use emotiv XOR mouse?
-            var useEmotiv = false;
+            var useEmotiv = true;
             var useMouse = !useEmotiv;
 
             // the little man...
@@ -144,17 +131,37 @@
                      ACTION HANDLING
             #########################################################*/
 
-            /* here: emotiv embedding
 
-            pass std here; then the following LOC will do the rest:
- 
-            counterBalance = std - 75;
+            var ws = new WebSocket('ws://localhost:8080/ws');
 
-            This will have the following effect:
-              - for std < 75: force will be applied on the left side
-              - for std > 75: force will be applied on the right side
-            (all that matters is the sign of counterBalance)
-            */
+            ws.onopen = function () {
+                console.log("Connected!");
+            }
+
+            ws.onclose = function (ev) {
+                console.log("Closed!");
+            }
+
+            ws.onerror = function (ev) {
+                console.log("Error!", ev)
+            }
+
+            ws.onmessage = function (ev) {
+
+                if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
+
+                    var std = +ev.data.slice("brain:activity:".length).split(";")[1];
+
+                    counterBalance = std - 75;
+                }
+            }
+
+            window.onresize = function() {
+                canvas[0].width = window.innerWidth;
+                canvas[0].height = window.innerHeight;
+
+                initialize();
+            }
 
             document.onclick = function() {
                 // restart game
