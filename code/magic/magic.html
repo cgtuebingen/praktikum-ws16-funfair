@@ -1,0 +1,106 @@
+<html>
+<head>
+
+</head>
+<body style="background:#E7D7B6;margin:0">
+
+<div style="width:7px; height: 85px; background:black;position:absolute;border-top: 8px solid white; transform: translate(100px 100px) rotate(45deg)"></div>
+
+
+<img src="../../design/magic_bg.svg" style="width:100%;height:100%;position: absolute;">
+
+
+<canvas id="scene" style="border:1px solid red; position: absolute;
+margin-left: auto;
+margin-right: auto;
+left: 0;
+right: 0;top:36%"></canvas>
+
+<script src="../js/common.js"></script>
+<script>
+
+    var scene = $('#scene');
+    var eyes = $('#eyes')[0];
+
+    scene[0].width = 780;
+    scene[0].height = 400;
+
+    var ctx = scene.getContext("2d");
+
+    var img = new Image;
+    img.src = "../../design/magic_eyes.svg";
+    img.onload = function () {
+
+        $.animate('eyes', function () {
+
+            ctx.clearRect(0,0, scene[0].width, scene[0].height);
+
+            if (Math.abs(enemy.x - enemy.xdest) < 1e-2 && Math.abs(enemy.y - enemy.ydest) < 1e-2) {
+
+                enemy.xdest = 60 + Math.random() * 600;
+                enemy.ydest = 20 + Math.random() * 300;
+            }
+
+            enemy.x += (enemy.xdest - enemy.x) / 50;
+            enemy.y += (enemy.ydest - enemy.y) / 50;
+            enemy.z += -MOVE *0.7 + 0.4;
+
+
+            var scale = 0.2+enemy.z / 100;
+
+            scale = Math.max(0, scale);
+
+            ctx.save();
+            ctx.translate(enemy.x - 155/2, enemy.y - 29/2);
+            ctx.scale(scale, scale);
+            ctx.drawImage(img, 0, 0, 155, 29);
+            ctx.restore();
+        });
+
+
+    };
+
+    var enemy = {
+        x: 60 + Math.random() * 400,
+        y: 20 + Math.random() * 200,
+        z: 0,
+        scale: 1,
+        xdest: 60 + Math.random() * 400,
+        ydest: 20 + Math.random() * 200,
+        zdest: 0
+    };
+
+
+
+    var ws = new WebSocket('ws://localhost:8080/ws');
+
+    ws.onopen = function () {
+        console.log("Connected!");
+    }
+
+    ws.onclose = function (ev) {
+        console.log("Closed!");
+    }
+
+    ws.onerror = function (ev) {
+        console.log("Error!", ev)
+    }
+
+    var MOVE = 0;
+    ws.onmessage = function (ev) {
+
+        if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
+
+            var val = +ev.data.slice("brain:activity:".length).split(";")[0];
+
+            MOVE = Math.max(0, val);
+
+        }
+    }
+
+
+</script>
+
+
+</body>
+</html>
