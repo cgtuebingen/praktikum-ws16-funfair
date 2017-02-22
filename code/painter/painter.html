@@ -33,6 +33,12 @@
 <script>
 
 
+    /*##########################################################
+       WEBSOCKET HANDLING
+     ##########################################################
+     */
+
+
     var ws = new WebSocket('ws://localhost:8080/ws');
 
     ws.onopen = function () {
@@ -76,6 +82,10 @@
     var outerRadius = 0.20;
     var paintedImgLocation = "result_imgs/snapshot_painted.jpg";
     var defaultImgLocation = "input/lena_default.jpg";
+    var completelyPaintedThreshold = 100; // 255 would be perfect, allow some margin
+    var isCompletelyPainted;
+    var gameIsWon = false;
+    var wonMessageShown = false;
 
 
 
@@ -88,7 +98,6 @@
     var offsetX;
     var offsetY;
     var off;
-    var isCompletelyPainted;
 
     initialize = function () {
         imgSizeX = 0.27 * window.innerWidth;
@@ -351,7 +360,6 @@
 
         row = 0;
         col = 0;
-        completelyPaintedThreshold = 150; // 255 would be perfect, allow some margin
         completelyPainted = true;
 
         nc = Math.sqrt(imageData.data.length / 4);
@@ -385,6 +393,13 @@
             col += 1;
         }
         isImgCompletelyPainted = completelyPainted;
+
+        gameIsWon = isImgCompletelyPainted;
+        if(gameIsWon & !wonMessageShown) {
+            alert("Game won!")
+            wonMessageShown = true;
+        }
+
         ctx.putImageData(imageData, marginX + offsetX, marginY + offsetY);
     }
 
