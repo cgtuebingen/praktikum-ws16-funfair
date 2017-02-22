@@ -22,6 +22,12 @@
                      ACTION HANDLING
             ########################################################*/
 
+            //then: 'mouse moving' equates to 'being relaxed'
+            var useMouseControlForDemo = false;
+
+            var gameIsWon = false;
+            var wonMessageShown = false;
+
             window.onresize = function() {
                 canvas[0].width = window.innerWidth;
                 canvas[0].height = window.innerHeight;
@@ -53,6 +59,14 @@
                     bar += val * 3e-4;
 
                     bar = Math.min(1, Math.max(0, bar));
+                    drawHighstriker(bar);
+
+                }
+            }
+
+            if(useMouseControlForDemo) {
+                document.onmousemove = function (ev) {
+                    bar += 0.001;
                     drawHighstriker(bar);
                 }
             }
@@ -189,13 +203,20 @@
                     }
                 }
                 
+                if((1.0 - barHeightProportion) < 0.001) {
+                    gameIsWon = true;
+                }
 
+                if(gameIsWon & !wonMessageShown) {
+                    alert("Game won!");
+                    wonMessageShown = true;
+                }
             }
 
             initialize();
 
             /*#########################################################
-                     DRAWING FUNCTIONS
+                     GENERIC DRAWING FUNCTIONS
             #########################################################*/
 
             function drawCylinder(ctx, x, y,
