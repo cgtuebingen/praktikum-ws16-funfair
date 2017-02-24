@@ -59,7 +59,10 @@
 
             var gameLost;
             var secondsNeededForWin = 30;
+            var secondsUntilRestart = 2;
             var timeRemainingUntilGameWon;
+            var timeSinceGameLost;
+            var gameLostTime;
             var startTime; 
             var timeCompleted;
             var wonMessageShown;
@@ -84,8 +87,10 @@
                 wonMessageShown = false;
                 gameLost = false;
                 timeCompleted = 0;
+                timeSinceGameLost = 0;
                 startTime = new Date().getTime() / 1000;
                 timeRemainingUntilGameWon = secondsNeededForWin;
+                angle = -0.003;
             }
 
             /*#########################################################
@@ -200,9 +205,18 @@
 
                     // clear everything
                     ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
+
+                    if(gameLost) {
+                        timeSinceGameLost = new Date().getTime() / 1000 - gameLostTime;
+                    }
+
+                    if(gameLost & timeSinceGameLost > secondsUntilRestart) {
+                        initialize();
+                    }
    
-                    if (Math.abs(angle) >= maxAngle) {
+                    if (! gameLost & Math.abs(angle) >= maxAngle) {
                         gameLost = true;
+                        gameLostTime = new Date().getTime() / 1000;
                     }
                 
                     if (angle == 0.0) {
