@@ -23,7 +23,7 @@
             ########################################################*/
 
             //then: 'mouse moving' equates to 'being relaxed'
-            var useMouseControlForDemo = false;
+            var useMouseControlForDemo = true;
 
             var gameIsWon = false;
             var wonMessageShown = false;
@@ -113,7 +113,7 @@
                 offsetY = window.innerWidth / 4;
                 surroundingWidth = window.innerWidth / 185;
                 textPx = Math.trunc(window.innerWidth / 71);
-                
+                bar = barStartValue; 
                 drawHighstriker(bar);
 
             }
@@ -210,6 +210,7 @@
                 if(gameIsWon & !wonMessageShown) {
                     alert("Game won!");
                     wonMessageShown = true;
+                    initialize();
                 }
             }
 
