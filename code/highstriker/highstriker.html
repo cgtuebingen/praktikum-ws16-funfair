@@ -31,6 +31,7 @@
 
     <body style="background:#ebe3d9;margin:0">
 
+        <div id="overlay"></div>
         <div style="position: relative; width:80%; margin:auto"> 
             <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
 
@@ -79,20 +80,21 @@
 
                 if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
 
-                    var val = -ev.data.slice("brain:activity:".length).split(";")[0];
-
-                    bar += val * 3e-4;
-
-                    bar = Math.min(1, Math.max(0, bar));
-                    drawHighstriker(bar);
-
+                    if(gameRunning) {
+                        var val = -ev.data.slice("brain:activity:".length).split(";")[0];
+                        bar += val * 3e-4;
+                        bar = Math.min(1, Math.max(0, bar));
+                        drawHighstriker(bar);
+                    }
                 }
             }
 
             if(useMouseControlForDemo) {
                 document.onmousemove = function (ev) {
-                    bar += 0.001;
-                    drawHighstriker(bar);
+                    if(gameRunning) {
+                        bar += 0.001;
+                        drawHighstriker(bar);
+                    }
                 }
             }
 
@@ -128,7 +130,8 @@
 
             var barStartValue = 0.05;
             var bar = barStartValue;
-        
+            
+            var gameRunning = false;
 
             initialize = function() {
 
@@ -140,7 +143,10 @@
                 textPx = Math.trunc(window.innerWidth / 71);
                 bar = barStartValue; 
                 drawHighstriker(bar);
-
+                wonMessageShown = false;
+                gameIsWon = false;
+                $.countdown("Relax!");
+                window.setTimeout(function(){gameRunning = true;}, 4000);
             }
 
 
@@ -233,9 +239,9 @@
                 }
 
                 if(gameIsWon & !wonMessageShown) {
-                    alert("Game won!");
+                    gameRunning = false;
+                    $.displayText("Game won!");
                     wonMessageShown = true;
-                    initialize();
                 }
             }
 
