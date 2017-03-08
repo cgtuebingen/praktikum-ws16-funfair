@@ -112,6 +112,28 @@
     delete animations[name];
   }
 
+  function countdown(text) {
+     var n = 3; 
+    
+     function loop() {
+
+        displayText(n);
+        if (n == 0) {
+            displayText(text);
+            window.setTimeout(function() {displayText("");}, 1000);
+            return;
+        }
+        n--;
+        window.setTimeout(loop, 1000);
+     }
+     loop();
+  }
+
+  function displayText(text) {
+    var id = document.getElementById("overlay");
+    id.innerHTML = text;
+  }
+
   requestAnimationFrame(loop = function (time) {
 
     now = time;
@@ -140,6 +162,8 @@
 
   $.animate = animate;
   $.stopAnimtate = stopAnimate;
+  $.displayText = displayText;
+  $.countdown = countdown;
 
   window.$ = $;
 
