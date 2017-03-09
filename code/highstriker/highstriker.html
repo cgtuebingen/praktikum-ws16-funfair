@@ -145,6 +145,9 @@
                 drawHighstriker(bar);
                 wonMessageShown = false;
                 gameIsWon = false;
+
+                var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80))+"px";
+                document.getElementById("overlay").style.paddingTop =  overlayDist;
                 $.countdown("Relax!");
                 window.setTimeout(function(){gameRunning = true;}, 4000);
             }
