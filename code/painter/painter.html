@@ -74,10 +74,10 @@
         if (ev.data == "painter:finished") {
             // Draw image =)
             window.setTimeout(function() {
-                img_frame.onload(); // it's a bit dirty to directly call the callback but...yea =)
+                img_frame.onload();
             }, 1000);
         }
-        console.log("LOL!", ev.data)
+        console.log("event data: ", ev.data)
     }
 
 
@@ -102,6 +102,7 @@
     var isCompletelyPainted;
     var gameIsWon = false;
     var wonMessageShown = false;
+    var gameRunning = false;
 
 
 
@@ -121,6 +122,7 @@
         marginX = imgSizeX * 0.2;
         marginY = marginX;
         paintingWidth = imgSizeX * 0.6;
+        gameRunning = false;
 
         offsetX = 0.5 * window.innerWidth - imgSizeX + 0.5 * marginX;
         offsetY = 0.46 * window.innerWidth - imgSizeY;
@@ -130,7 +132,11 @@
         
         var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80))+"px";
         document.getElementById("overlay").style.paddingTop =  overlayDist;
-        $.countdown("PAINT!");
+
+        $.displayText("Click on the foto icon!");
+        window.setTimeout(function() {
+            $.displayText("");
+        }, 4000);
     }
 
     initialize();
@@ -241,7 +247,18 @@
         // Check if button was clicked
         if(Math.hypot(x - buttonPos.x, y - buttonPos.y) <= buttonPos.r) {
             // Send signal to backend
-            ws.send('painter:take');
+
+            $.countdown("Smile!");
+            window.setTimeout(function() {
+                
+                //ws.send('painter:take');
+
+                $.countdown("Paint!");
+                window.setTimeout(function() {
+                    gameRunning = true;
+                }, 4000);
+           }, 8000);
+
         }
     };
 
@@ -385,34 +402,39 @@
         nc = Math.sqrt(imageData.data.length / 4);
         var alpha = 0.0;
 
-        for (var i = 0; i < imageData.data.length; i += 4) {
-
-            if (col % nc == 0) {
-                row += 1;
-            }
-            col = col % nc;
-
-            if (imageData.data[i + 3] < completelyPaintedThreshold) {
-                completelyPainted = false;
-            }
-
-            x_dist = Math.abs(xPos - (col / nc));
-            y_dist = Math.abs(yPos - (row / nc));
-            distance = Math.sqrt(Math.pow(x_dist, 2) + Math.pow(y_dist, 2));
-            if (distance < outerRadius) {
-                if (distance < innerRadius) {
-                    imageData.data[i + 3] = 255; //alpha channel
-                } else {
-                    imageData.data[i + 3] = Math.max(255.0 *
-                        transitionFunction((outerRadius - distance) /
-                            (outerRadius - innerRadius)),
-                        imageData.data[i + 3]);
+        if(gameRunning) {
+            for (var i = 0; i < imageData.data.length; i += 4) {
+    
+                if (col % nc == 0) {
+                    row += 1;
                 }
-            }
+                col = col % nc;
+ 
+                if (imageData.data[i + 3] < completelyPaintedThreshold) {
+                    completelyPainted = false;
+                }
 
-            col += 1;
+                x_dist = Math.abs(xPos - (col / nc));
+                y_dist = Math.abs(yPos - (row / nc));
+                distance = Math.sqrt(Math.pow(x_dist, 2) + Math.pow(y_dist, 2));
+                if (distance < outerRadius) {
+                    if (distance < innerRadius) {
+                        imageData.data[i + 3] = 255; //alpha channel
+                    } else {
+                        imageData.data[i + 3] = Math.max(255.0 *
+                            transitionFunction((outerRadius - distance) /
+                                (outerRadius - innerRadius)),
+                            imageData.data[i + 3]);
+                    }
+                }
+
+                col += 1;
+            }
+        } else {
+            completelyPainted = false;
         }
         isImgCompletelyPainted = completelyPainted;
+ 
 
         gameIsWon = isImgCompletelyPainted;
         if(gameIsWon & !wonMessageShown) {
