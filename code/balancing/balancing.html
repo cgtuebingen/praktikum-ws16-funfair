@@ -30,6 +30,7 @@
 
     <body style="background:#ebe3d9;margin:0">
 
+        <div id="overlay"></div>
         <div style="position: relative; width:80%; margin:auto"> 
             <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
 
@@ -82,8 +83,10 @@
             var gravityForce = 0.001;
 
             var gameLost;
+            var gameWon;
+            var gameRunning;
             var secondsNeededForWin = 30;
-            var secondsUntilRestart = 2;
+            var secondsUntilRestart = 1;
             var timeRemainingUntilGameWon;
             var timeSinceGameLost;
             var gameLostTime;
@@ -98,6 +101,7 @@
 
             initialize = function() {
 
+                gameRunning = false;
                 width = window.innerWidth / 19;
                 height = window.innerWidth / 11;
                 offsetX = window.innerWidth / 2.5;
@@ -110,11 +114,19 @@
                 textPx = Math.trunc(window.innerWidth / 71);
                 wonMessageShown = false;
                 gameLost = false;
+                gameWon = false;
                 timeCompleted = 0;
                 timeSinceGameLost = 0;
-                startTime = new Date().getTime() / 1000;
                 timeRemainingUntilGameWon = secondsNeededForWin;
                 angle = -0.003;
+
+                var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80))+"px";
+                document.getElementById("overlay").style.paddingTop =  overlayDist; 
+                $.countdown("Start!");
+                window.setTimeout(function(){
+                    gameRunning = true;
+                    startTime = new Date().getTime() / 1000;
+                }, 4000);
             }
 
             /*#########################################################
@@ -230,31 +242,34 @@
                     // clear everything
                     ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
 
-                    if(gameLost) {
-                        timeSinceGameLost = new Date().getTime() / 1000 - gameLostTime;
-                    }
+                    if(gameRunning) {
+                        if(gameLost) {
+                            timeSinceGameLost = new Date().getTime() / 1000 - gameLostTime;
+                        }
 
-                    if(gameLost & timeSinceGameLost > secondsUntilRestart) {
-                        initialize();
-                    }
+                        if(gameLost & timeSinceGameLost > secondsUntilRestart) {
+                            initialize();
+                        }
    
-                    if (! gameLost & Math.abs(angle) >= maxAngle) {
-                        gameLost = true;
-                        gameLostTime = new Date().getTime() / 1000;
-                    }
+                        if (! gameLost & Math.abs(angle) >= maxAngle) {
+                            gameLost = true;
+                            gameLostTime = new Date().getTime() / 1000;
+                        }
                 
-                    if (angle == 0.0) {
-                        // never reach perfect balance
-                        angle = -sign * 0.003;
-                    } else if (angle < 0.0) {
-                        sign = -1.0;
-                    } else {
-                        sign = 1.0;
-                    }
+                        if (angle == 0.0) {
+                            // never reach perfect balance
+                            angle = -sign * 0.003;
+                        } else if (angle < 0.0) {
+                            sign = -1.0;
+                        } else {
+                            sign = 1.0;
+                        }
 
-                    angle = angle + (gravityForce*sign) +
-                            Math.sign(counterBalance)*counterBalanceForce;
-                    angle = Math.min(Math.max(-maxAngle, angle), maxAngle);
+                        angle = angle + (gravityForce*sign) +
+                                Math.sign(counterBalance)*counterBalanceForce;
+                        angle = Math.min(Math.max(-maxAngle, angle), maxAngle);
+
+                    }
                     drawBalancing(angle);
 
 
@@ -279,19 +294,28 @@
                                  hintYPos + offsetY / 70.0);
 
                     // draw time till won
-                    timeCompleted = Math.round(new Date().getTime() / 1000 - startTime, 0);
-                    if(! gameLost) {
-                        timeRemainingUntilGameWon = secondsNeededForWin - timeCompleted;
-                        timeRemainingUntilGameWon = Math.max(0, timeRemainingUntilGameWon);
+                    if(gameRunning) {
+                        timeCompleted = Math.round(new Date().getTime() / 1000 - startTime, 0);
+                        if(! gameLost) {
+                            timeRemainingUntilGameWon = secondsNeededForWin - timeCompleted;
+                            timeRemainingUntilGameWon = Math.max(0, timeRemainingUntilGameWon);
+                        }
+                    } else {
+                        if(gameWon) {
+                            timeRemainingUntilGameWon = 0;
+                        } else {
+                            timeRemainingUntilGameWon = secondsNeededForWin;
+                        }
                     }
                     ctx.fillText(timeRemainingUntilGameWon,
                                  offsetX - offsetX / 70,
                                  offsetY + offsetY / 6.0);
 
                     if (! gameLost & timeRemainingUntilGameWon == 0 & !wonMessageShown) {
-                        alert("Game won!")
+                        gameRunning = false;
+                        gameWon = true;
+                        $.displayText("Game won!");
                         wonMessageShown = true;
-                        initialize();
                     }
 
                     if (! gameLost) {
