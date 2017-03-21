@@ -1,23 +1,21 @@
-
-
-(function (window) {
+(function(window) {
 
   var requestAnimationFrame =
     window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
     window.mozRequestAnimationFrame ||
-    (function () {
+    (function() {
 
       var timeLast = 0;
 
-      return function (cb) {
+      return function(cb) {
         var timeCurrent = Date.now();
 
         var timeDelta = Math.max(0, 16 - (timeCurrent - timeLast));
 
         timeLast = timeCurrent + timeDelta;
 
-        return setTimeout(function () {
+        return setTimeout(function() {
           cb(timeCurrent + timeDelta);
         }, timeDelta);
       };
@@ -30,7 +28,7 @@
 
   $.fn = $.prototype = {
     constructor: $,
-    init: function (selector) {
+    init: function(selector) {
 
       if (typeof selector === "string") {
 
@@ -52,24 +50,24 @@
         }
 
       } else if (selector.nodeType) {
-        this[ 0 ] = selector;
+        this[0] = selector;
         this.length = 1;
         return this;
       }
       alert("wrong selector");
     },
-    on: function (type, fn) {
+    on: function(type, fn) {
       for (var i = 0; i < this.length; i++) {
         this[i].addEventListener(type, fn, false);
       }
     },
-    getContext: function (kind) {
+    getContext: function(kind) {
       return this[0].getContext(kind);
     },
-    offset: function () {
+    offset: function() {
 
       var docElem, win, rect, doc,
-              elem = this[ 0 ];
+        elem = this[0];
 
       if (!elem) {
         return;
@@ -113,20 +111,23 @@
   }
 
   function countdown(text) {
-     var n = 3; 
-    
-     function loop() {
+    var n = 3;
 
-        displayText(n);
-        if (n == 0) {
-            displayText(text);
-            window.setTimeout(function() {displayText("");}, 1000);
-            return;
-        }
-        n--;
-        window.setTimeout(loop, 1000);
-     }
-     loop();
+    function loop() {
+
+      displayText(n);
+      if (n == 0) {
+        displayText(text);
+        window.setTimeout(function() {
+          displayText("");
+        }, 1000);
+        return;
+      }
+      n--;
+      window.setTimeout(loop, 1000);
+    }
+
+    loop();
   }
 
   function displayText(text) {
@@ -134,7 +135,7 @@
     id.innerHTML = text;
   }
 
-  requestAnimationFrame(loop = function (time) {
+  requestAnimationFrame(loop = function(time) {
 
     now = time;
 
@@ -160,10 +161,54 @@
     requestAnimationFrame(loop);
   });
 
+  function Indicator(id) {
+
+    var indic = document.getElementById(id);
+    var ictx = indic.getContext("2d");
+
+    indic.width = 50;
+    indic.height = 400;
+
+    ictx.translate(0.5, 0.5);
+
+    this.ctx = ictx;
+  }
+
+  Indicator.SENSE = 10;
+
+  Indicator.prototype = {
+    draw: function() {
+
+      var ictx = this.ctx;
+
+      ictx.clearRect(0, 0, 50, 400);
+
+      ictx.fillStyle = "#0c0";
+      ictx.fillRect(20, 2 + Math.max(0, 396 * 0.5 * (1 - this.value)), 10, Math.max(0, 396 * 0.5 * this.value));
+      ictx.fillStyle = "#c00";
+      ictx.fillRect(20, 2 + 396 * 0.5, 10, Math.max(0, -396 * 0.5 * this.value));
+      ictx.strokeRect(20, 2, 10, 396);
+      ictx.beginPath();
+      ictx.moveTo(6, 2 + 396 * 0.5);
+      ictx.lineTo(44, 2 + 396 * 0.5);
+      ictx.stroke();
+      return this;
+    },
+
+    addValue: function(val) {
+
+      this.value = Math.max(-1, Math.min(1, this.value + val / Indicator.SENSE));
+      return this;
+    },
+    value: 0
+  };
+
+
   $.animate = animate;
   $.stopAnimtate = stopAnimate;
   $.displayText = displayText;
   $.countdown = countdown;
+  $.Indicator = Indicator;
 
   window.$ = $;
 

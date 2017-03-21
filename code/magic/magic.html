@@ -8,22 +8,28 @@
         }
 
         #canvas {
-            z-index:2;
+            z-index: 2;
         }
 
-        #overlay{
-           text-align: center;
-           color: white;
-           position: absolute;
-           width: 100%;
-           z-index: 2000;
-           font-size: 160px;
-           font-family: "Arial";
-           font-weight: bold;
-           padding-top: 200px;
-           text-shadow: 0px 4px 3px rgba(0,0,0,0.4),
-                        0px 8px 13px rgba(0,0,0,0.1),
-                        0px 18px 23px rgba(0,0,0,0.1);
+        #overlay {
+            text-align: center;
+            color: white;
+            position: absolute;
+            width: 100%;
+            z-index: 2000;
+            font-size: 160px;
+            font-family: "Arial";
+            font-weight: bold;
+            padding-top: 200px;
+            text-shadow: 0px 4px 3px rgba(0, 0, 0, 0.4),
+            0px 8px 13px rgba(0, 0, 0, 0.1),
+            0px 18px 23px rgba(0, 0, 0, 0.1);
+        }
+
+        #indic {
+            position: absolute;
+            right: 30px;
+            top: 100px;
         }
     </style>
 </head>
@@ -41,87 +47,93 @@ margin-right: auto;
 left: 0;
 right: 0;top:36%"></canvas>
 
+<canvas id="indic"></canvas>
+
 <script src="../js/common.js"></script>
 <script>
 
-    var scene = $('#scene');
-    var eyes = $('#eyes')[0];
+  var scene = $('#scene');
+  var eyes = $('#eyes')[0];
 
-    scene[0].width = 780;
-    scene[0].height = 400;
+  scene[0].width = 780;
+  scene[0].height = 400;
 
-    var ctx = scene.getContext("2d");
+  var ctx = scene.getContext("2d");
 
-    var img = new Image;
-    img.src = "../../design/magic_eyes.svg";
-    img.onload = function () {
+  $.Indicator.SENSE = 2;
 
-        $.animate('eyes', function () {
+  var img = new Image;
+  img.src = "../../design/magic_eyes.svg";
+  img.onload = function() {
 
-            ctx.clearRect(0,0, scene[0].width, scene[0].height);
+    $.animate('eyes', function() {
 
-            if (Math.abs(enemy.x - enemy.xdest) < 1e-2 && Math.abs(enemy.y - enemy.ydest) < 1e-2) {
+      ctx.clearRect(0, 0, scene[0].width, scene[0].height);
 
-                enemy.xdest = 60 + Math.random() * 600;
-                enemy.ydest = 20 + Math.random() * 300;
-            }
+      if (Math.abs(enemy.x - enemy.xdest) < 1e-2 && Math.abs(enemy.y - enemy.ydest) < 1e-2) {
 
-            enemy.x += (enemy.xdest - enemy.x) / 50;
-            enemy.y += (enemy.ydest - enemy.y) / 50;
-            enemy.z += -MOVE *0.7 + 0.4;
+        enemy.xdest = 60 + Math.random() * 600;
+        enemy.ydest = 20 + Math.random() * 300;
+      }
 
+      enemy.x += (enemy.xdest - enemy.x) / 50;
+      enemy.y += (enemy.ydest - enemy.y) / 50;
+      enemy.z += -MOVE * 0.7 + 0.4;
 
-            var scale = 0.2+enemy.z / 100;
+      INDICATOR.addValue(-MOVE)
 
-            scale = Math.max(0, scale);
+      var scale = 0.2 + enemy.z / 100;
 
-            ctx.save();
-            ctx.translate(enemy.x - 155/2, enemy.y - 29/2);
-            ctx.scale(scale, scale);
-            ctx.drawImage(img, 0, 0, 155, 29);
-            ctx.restore();
-        });
+      scale = Math.max(0, scale);
 
+      ctx.save();
+      ctx.translate(enemy.x - 155 / 2, enemy.y - 29 / 2);
+      ctx.scale(scale, scale);
+      ctx.drawImage(img, 0, 0, 155, 29);
+      ctx.restore();
 
-    };
-
-    var enemy = {
-        x: 60 + Math.random() * 400,
-        y: 20 + Math.random() * 200,
-        z: 0,
-        scale: 1,
-        xdest: 60 + Math.random() * 400,
-        ydest: 20 + Math.random() * 200,
-        zdest: 0
-    };
+      INDICATOR.draw();
+    });
 
 
+  };
 
-    var ws = new WebSocket('ws://localhost:8080/ws');
+  var enemy = {
+    x: 60 + Math.random() * 400,
+    y: 20 + Math.random() * 200,
+    z: 0,
+    scale: 1,
+    xdest: 60 + Math.random() * 400,
+    ydest: 20 + Math.random() * 200,
+    zdest: 0
+  };
 
-    ws.onopen = function () {
-        console.log("Connected!");
+  var INDICATOR = new $.Indicator('indic');
+
+  var ws = new WebSocket('ws://localhost:8080/ws');
+
+  ws.onopen = function() {
+    console.log("Connected!");
+  };
+
+  ws.onclose = function(ev) {
+    console.log("Closed!");
+  };
+
+  ws.onerror = function(ev) {
+    console.log("Error!", ev)
+  };
+
+  var MOVE = 0;
+  ws.onmessage = function(ev) {
+
+    if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
+
+      var val = +ev.data.slice("brain:activity:".length).split(";")[0];
+
+      MOVE = Math.max(0, val);
     }
-
-    ws.onclose = function (ev) {
-        console.log("Closed!");
-    }
-
-    ws.onerror = function (ev) {
-        console.log("Error!", ev)
-    }
-
-    var MOVE = 0;
-    ws.onmessage = function (ev) {
-
-        if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
-
-            var val = +ev.data.slice("brain:activity:".length).split(";")[0];
-
-            MOVE = Math.max(0, val);
-
-        }
-    }
+  }
 
 
 </script>
