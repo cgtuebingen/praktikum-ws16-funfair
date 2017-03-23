@@ -105,7 +105,8 @@
 
                 for(var i=0; i<numRows; i++) {
                     FIELD[i] = Math.ceil(Math.random()*(COLS.length-1));
-                    GUESSES[i][numCols-1] = FIELD[i];
+                    // uncomment the following line if you want to see the ground truth.
+                    // GUESSES[i][numCols-1] = FIELD[i];
                 }
 
                 width = window.innerWidth / 2.6;
@@ -121,7 +122,7 @@
 
                 var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80))+"px";
                 document.getElementById("overlay").style.paddingTop =  overlayDist;
-                $.countdown("Start!");
+                $.countdown("Start guessing!");
                 window.setTimeout(function(){gameRunning = true;}, 4000);
             }
 
@@ -147,8 +148,13 @@
                         var xPos = x+(width/(numCols-1))*j;
 
                         if(i == curr.i && j == curr.j) {
-                            drawRect(ctx, xPos-radius, yPos-radius, radius*2, radius*2, col_black);
-                        }
+                            // 'HERE WE ARE' INDICATOR
+                            //drawRect(ctx, xPos-radius, yPos-radius, radius*2, radius*2, col_black);
+                            drawCircle(ctx, xPos+2*radius, yPos+radius/1.5, radius,
+                                       COLS[(GUESSES[i][j]+2) % COLS.length], col_surrounding, true, 1.0);
+                            drawCircle(ctx, xPos+radius*1.1, yPos+radius/6, radius,
+                                       COLS[(GUESSES[i][j]+1) % COLS.length], col_surrounding, true, 1.0);
+                       }
 
                         drawCircle(ctx, xPos, yPos,
                                     radius, COLS[GUESSES[i][j]], col_surrounding);
@@ -158,7 +164,12 @@
                             var counter = 0;
                             for(m=-1; m<2; m+=2) {
                                 for(n=-1; n<2; n+=2) {
-                                    drawCircle(ctx, xPos-offset*m, y+height-offset*n, radius/2.5, FEEDBACK_COLS[FEEDBACK[counter][j]], col_surrounding);
+                                    var fill = false;
+                                    if(FEEDBACK[counter][j] != 0) {
+                                        fill = true;
+                                    }
+
+                                    drawCircle(ctx, xPos-offset*m, y+height-offset*n, radius/2.5, FEEDBACK_COLS[FEEDBACK[counter][j]], col_surrounding, fill);
                                     counter++;
                                 }
                             }
@@ -181,8 +192,8 @@
                 ctx.stroke();
             }
 
-            function drawCircle(ctx, x, y, radius, col, colStroke) {
-                drawEllipse(ctx, x, y, radius, radius, col, colStroke);
+            function drawCircle(ctx, x, y, radius, col, colStroke, fill=true, alpha=1.0) {
+                drawEllipse(ctx, x, y, radius, radius, col, colStroke, fill, alpha);
             }
 
             function drawCylinder(ctx, x, y,
@@ -199,7 +210,9 @@
 
             function drawEllipse(ctx, x, y,
                                  radiusX, radiusY,
-                                 col, colStroke) {
+                                 col, colStroke, fill=true, alpha=1.0) {
+
+                ctx.globalAlpha = alpha;
 
                 ctx.beginPath();
                 ctx.fillStyle = col;
@@ -211,8 +224,11 @@
                             endAngle = 2 * Math.PI);
                 ctx.strokeStyle = colStroke;
                 ctx.stroke();
-                ctx.fill();
+                if(fill) {
+                    ctx.fill();
+                }
                 ctx.closePath();
+                ctx.globalAlpha = 1.0;
             }
 
             /*#########################################################
@@ -294,6 +310,16 @@
                 return currGuess;
             }
 
+            getIsGameWon = function() {
+
+                for(var i=0; i<numRows; i++) {
+                    if(GUESSES[i][curr.j] != FIELD[i]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
             /*#########################################################
                      ACTION HANDLING
             ########################################################*/
@@ -350,17 +376,23 @@
                         if(ev.button == 0) { // left button
                             curr.i = (curr.i + 1) % numRows;
                         } else if (ev.button == 1) { // middle button
-                            if(curr.j < (numCols - 1)) {
-                                if(currentColIsComplete()) {
+                            if(currentColIsComplete()) {
 
-                                    var feedback = getSortedResult(getCurrentGuess(), FIELD);
-                                    for(var i=0; i<feedback.length; i++) {
-                                        console.log(feedback[i]);
-                                        FEEDBACK[i][curr.j] = feedback[i];
+                                var feedback = getSortedResult(getCurrentGuess(), FIELD);
+                                for(var i=0; i<feedback.length; i++) {
+                                    FEEDBACK[i][curr.j] = feedback[i];
+                                }
+
+                                if(getIsGameWon()) {
+                                    gameIsWon = true;
+                                    gameRunning = false;
+                                    $.displayText("Game won!");
+                                    wonMessageShown = true;
+                                } else {
+                                    if(curr.j < (numCols - 1)) {
+                                        curr.j += 1;
+                                        curr.i = 0;
                                     }
-
-                                    curr.j += 1;
-                                    curr.i = 0;
                                 }
                             }
                         }
