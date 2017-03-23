@@ -35,7 +35,7 @@
         <div style="position: relative; width:80%; margin:auto"> 
             <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
 
-            <img src="../../design/bude_fg_highstriker.svg" style="position: absolute; z-index: 3; width: 100%">
+            <img src="../../design/bude_fg_mastermind.svg" style="position: absolute; z-index: 3; width: 100%">
             <div style="position: relative; z-index: 2"> <canvas id="canvas"></canvas></div>
 
         </div>
@@ -43,6 +43,256 @@
         <script src="../js/common.js"></script>
         <script>
 
+
+            /*#########################################################
+                     INITIALIZATION
+            ########################################################*/
+
+            var canvas = $("#canvas");
+            canvas[0].width = window.innerWidth;
+            canvas[0].height = window.innerHeight;
+            var ctx = canvas.getContext("2d");
+            var off = canvas.offset(); // get the offset of the canvas once
+
+            var col_bar      = "rgb(0, 105, 170)";
+            var col_surrounding = "rgb(50, 65, 75)";
+            var col_black = "rgb(0,0,0)";
+            var col_grey = "rgb(200,200,200)";
+            var col_white = "rgb(255,255,255)";
+
+            var col_blue = "rgb(0,206,209)";
+            var col_green = "rgb(0,255,0)";
+            var col_yellow = "rgb(255,255,0)";
+            var col_red = "rgb(255,0,0)";
+            var col_orange = "rgb(255,140,0)";
+            var col_brown = "rgb(128,0,0)";
+
+            var BLACK = 1;
+            var WHITE = 2;
+
+            var COLS = [col_grey, col_blue, col_green, col_yellow,
+                        col_red, col_orange, col_brown];
+            var FEEDBACK_COLS = [col_grey, col_black, col_white];
+  
+            var width;
+            var height;
+            var offsetX;
+            var offsetY;
+            var textPx;
+
+            var numRows = 4;
+            var numCols = 6;
+            var FIELD = [];
+            var GUESSES = [];
+            var FEEDBACK = [];
+            var curr = {i:0, j:0};
+            
+            var gameRunning = false;
+
+            initialize = function() {
+
+                curr.i = 0;
+                curr.j = 0;
+
+                for(var i=0; i<numRows; i++) {
+                    GUESSES[i] = [];
+                    FEEDBACK[i] = [];
+                    for(var j=0; j<numCols; j++) {
+                        GUESSES[i][j] = 0;
+                        FEEDBACK[i][j] = 0;
+                    }
+                } 
+
+                for(var i=0; i<numRows; i++) {
+                    FIELD[i] = Math.ceil(Math.random()*(COLS.length-1));
+                    GUESSES[i][numCols-1] = FIELD[i];
+                }
+
+                width = window.innerWidth / 2.6;
+                height = window.innerWidth / 6.5;
+                offsetX = window.innerWidth / 5;
+                offsetY = window.innerWidth / 3.8;
+
+                textPx = Math.trunc(window.innerWidth / 71);
+                wonMessageShown = false;
+                gameIsWon = false;
+
+                drawGame(offsetX, offsetY, width, height);
+
+                var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80))+"px";
+                document.getElementById("overlay").style.paddingTop =  overlayDist;
+                $.countdown("Start!");
+                window.setTimeout(function(){gameRunning = true;}, 4000);
+            }
+
+
+            /*#########################################################
+                     DRAWING THE HIGHSTRIKER
+            ########################################################*/
+
+            drawGame = function(x, y, width, height) {
+
+                ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+                var radius = width / 24;
+                var offset = radius / 2;
+
+                for(i=0; i<numRows; i++) {
+
+                    var yPos = y+(height/(numRows))*i;
+
+                    // MAIN GAME 'CIRCLES'
+                    for(j=0; j<numCols; j++) {
+ 
+                        var xPos = x+(width/(numCols-1))*j;
+
+                        if(i == curr.i && j == curr.j) {
+                            drawRect(ctx, xPos-radius, yPos-radius, radius*2, radius*2, col_black);
+                        }
+
+                        drawCircle(ctx, xPos, yPos,
+                                    radius, COLS[GUESSES[i][j]], col_surrounding);
+
+                        // FEEDBACK 'CIRCLES'
+                        if(i==0) { // execute only once for every row.
+                            var counter = 0;
+                            for(m=-1; m<2; m+=2) {
+                                for(n=-1; n<2; n+=2) {
+                                    drawCircle(ctx, xPos-offset*m, y+height-offset*n, radius/2.5, FEEDBACK_COLS[FEEDBACK[counter][j]], col_surrounding);
+                                    counter++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            initialize();
+
+
+            /*#########################################################
+                     GENERIC DRAWING FUNCTIONS
+            #########################################################*/
+
+            function drawRect(ctx, x, y, lengthX, lengthY, col) {
+                ctx.beginPath();
+                ctx.strokeStyle = col;
+                ctx.rect(x, y, lengthX, lengthY);
+                ctx.stroke();
+            }
+
+            function drawCircle(ctx, x, y, radius, col, colStroke) {
+                drawEllipse(ctx, x, y, radius, radius, col, colStroke);
+            }
+
+            function drawCylinder(ctx, x, y,
+                                  height, radiusX, radiusY,
+                                  col1, col2, colStroke) {
+
+                drawEllipse(ctx, x, y+height,
+                            radiusX, radiusY, col1, colStroke);
+
+                drawEllipse(ctx, x, y-height,
+                            radiusX, radiusY,
+                            col2, colStroke);
+            }
+
+            function drawEllipse(ctx, x, y,
+                                 radiusX, radiusY,
+                                 col, colStroke) {
+
+                ctx.beginPath();
+                ctx.fillStyle = col;
+                ctx.ellipse(x, y, 
+                            radiusX = radiusX,
+                            radiusY = radiusY,
+                            rotation = 0,
+                            startAngle = 0, 
+                            endAngle = 2 * Math.PI);
+                ctx.strokeStyle = colStroke;
+                ctx.stroke();
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            /*#########################################################
+                     GAME CONTROLLING FUNCTIONALITY
+            ########################################################*/
+
+            currentColIsComplete = function() {
+
+                for(var i=0; i<numRows; i++) {
+                    if(GUESSES[i][curr.j] == 0) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            getSortedResult = function(guess, solution) {
+
+                var fieldIsOk = [];
+                var guessIsOk = [];
+                var result = [];
+                var counter = 0;
+ 
+                for(var i=0; i<guess.length; i++) {
+                    fieldIsOk[i] = true;
+                    guessIsOk[i] = true;
+                    if(guess[i] == solution[i]) {
+                        fieldIsOk[i] = false;
+                        guessIsOk[i] = false;
+                        result[counter] = BLACK;
+                        counter++;
+                    }
+                }
+
+                for(var i=0; i<guess.length; i++) { // guess
+                    for(var j=0; j<guess.length; j++) {
+                        if(fieldIsOk[j] && guessIsOk[i]) {
+                            if(solution[j] == guess[i]) {
+                                result[counter] = WHITE;
+                                fieldIsOk[j] = false;
+                                guessIsOk[i] = false;
+                                counter++;
+                                break;
+                            }
+                        }
+                    }
+                }
+                return sortResult(result)
+            }
+
+            sortResult = function(unsorted) {
+
+                var sorted = [];
+                var index = 0;
+                for(var i=0; i<numRows; i++) {
+                    if(unsorted[i] == BLACK) {
+                        sorted[index] = BLACK;
+                        index++;
+                    }
+                }
+                for(var i=0; i<numRows; i++) {
+                    if(unsorted[i]==WHITE) {
+                        sorted[index] = WHITE;
+                        index++;
+                    }
+                }
+                for(var i=index; i<numRows; i++) {
+                    sorted[index] = 0;
+                }
+                return sorted;
+            }
+
+            getCurrentGuess = function() {
+
+                currGuess = [];
+                for(var i=0; i<numRows; i++) {
+                    currGuess[i] = GUESSES[i][curr.j];
+                }
+                return currGuess;
+            }
 
             /*#########################################################
                      ACTION HANDLING
@@ -81,10 +331,7 @@
                 if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
 
                     if(gameRunning) {
-                        var val = -ev.data.slice("brain:activity:".length).split(";")[0];
-                        bar += val * 3e-4;
-                        bar = Math.min(1, Math.max(0, bar));
-                        drawHighstriker(bar);
+
                     }
                 }
             }
@@ -92,197 +339,43 @@
             if(useMouseControlForDemo) {
                 document.onmousemove = function (ev) {
                     if(gameRunning) {
-                        bar += 0.001;
-                        drawHighstriker(bar);
+                        drawGame(offsetX, offsetY, width, height);
+                        //drawGame();
+                    }
+                }
+
+                document.onclick = function(ev) {
+                    if(gameRunning) {
+
+                        if(ev.button == 0) { // left button
+                            curr.i = (curr.i + 1) % numRows;
+                        } else if (ev.button == 1) { // middle button
+                            if(curr.j < (numCols - 1)) {
+                                if(currentColIsComplete()) {
+
+                                    var feedback = getSortedResult(getCurrentGuess(), FIELD);
+                                    for(var i=0; i<feedback.length; i++) {
+                                        console.log(feedback[i]);
+                                        FEEDBACK[i][curr.j] = feedback[i];
+                                    }
+
+                                    curr.j += 1;
+                                    curr.i = 0;
+                                }
+                            }
+                        }
+                        drawGame(offsetX, offsetY, width, height);
+                    }
+                }
+
+                document.onwheel = function() {
+                    if(gameRunning) {
+                        GUESSES[curr.i][curr.j] = (GUESSES[curr.i][curr.j]+1) % COLS.length;
+                        drawGame(offsetX, offsetY, width, height);
                     }
                 }
             }
 
-
-            /*#########################################################
-                     INITIALIZATION
-            ########################################################*/
-
-            var canvas = $("#canvas");
-            canvas[0].width = window.innerWidth;
-            canvas[0].height = window.innerHeight;
-            var ctx = canvas.getContext("2d");
-            var off = canvas.offset(); // get the offset of the canvas once
-
-            var col_red   = "rgb(165, 30, 55)";
-            var col_bar      = "rgb(0, 105, 170)";
-            var col_surrounding = "rgb(50, 65, 75)";
-            var col_yellow = "rgb(210, 150, 0)";
-  
-            var levels = ["Burnout candidate", 
-                          "Amateur Yogi", 
-                          "Meditation junkie",
-                          "Yoga expert", 
-                          "Master of Yoga"];
-            var numLevels = levels.length;
-
-            var width;
-            var height;
-            var offsetX;
-            var offsetY;
-            var surroundingWidth;
-            var textPx;
-
-            var barStartValue = 0.05;
-            var bar = barStartValue;
-            
-            var gameRunning = false;
-
-            initialize = function() {
-
-                width = window.innerWidth / 13;
-                height = window.innerWidth / 5;
-                offsetX = window.innerWidth / 2.3;
-                offsetY = window.innerWidth / 4;
-                surroundingWidth = window.innerWidth / 185;
-                textPx = Math.trunc(window.innerWidth / 71);
-                bar = barStartValue; 
-                drawHighstriker(bar);
-                wonMessageShown = false;
-                gameIsWon = false;
-
-                var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80))+"px";
-                document.getElementById("overlay").style.paddingTop =  overlayDist;
-                $.countdown("Relax!");
-                window.setTimeout(function(){gameRunning = true;}, 4000);
-            }
-
-
-            /*#########################################################
-                     DRAWING THE HIGHSTRIKER
-            ########################################################*/
-
-            drawHighstriker = function(barHeightProportion) {
-            /* barHeightProportion: \in [0, 1], denoting height of bar.
-               The higher this is, the better for the striker.*/
-
-                barHeightProportion = Math.min(1, Math.max(0, barHeightProportion));
-
-                // big middle rectangle
-                ctx.fillStyle = col_red;
-                ctx.fillRect(offsetX, offsetY, width, height);
-
-                // surrounding
-                ctx.strokeStyle = col_surrounding;
-                ctx.lineWidth=surroundingWidth;
-                ctx.strokeRect(offsetX, offsetY, width, height);
-
-
-                // bar background
-                ctx.fillStyle = col_yellow;
-                var barBackgroundWidth  = (1/3) * (width-2*surroundingWidth);
-                ctx.fillRect(offsetX + 0.5*width - 0.5*barBackgroundWidth,
-                             offsetY,
-                             barBackgroundWidth, height);
-
-                // bar
-                ctx.fillStyle = col_bar;
-                var barWidth  = (1/6) * (width-2*surroundingWidth);
-                var barHeight = barHeightProportion * height;
-                ctx.fillRect(offsetX + 0.5*width - 0.5*barWidth,
-                             offsetY+height-barHeight,
-                             barWidth,
-                             barHeight);
-                // middle lines
-                ctx.strokeStyle = col_surrounding;
-                for(var i=0; i<=numLevels; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(offsetX, offsetY+i*(height / numLevels));
-                    ctx.lineWidth = surroundingWidth;
-                    ctx.lineTo(offsetX + width, offsetY+i*(height / numLevels));
-                    ctx.stroke();
-                }
-
-                // YOGA levels
-                ctx.font=String(textPx)+"px Georgia";
-                ctx.clearRect(0, 0, window.innerWidth/2.5, window.innerWidth/2);
-                var ellipseCenterX = offsetX-window.innerWidth/7.2;
-                var ellipseWidth = window.innerWidth / 11;
-                var ellipseHeight = window.innerWidth / 74;
-
-               
-                // strings for the level indicators
-                ctx.beginPath();
-                ctx.moveTo(ellipseCenterX-0.45*ellipseWidth, offsetY / 2);
-                ctx.lineWidth = surroundingWidth*2;
-                ctx.lineTo(ellipseCenterX-0.45*ellipseWidth, offsetY * 1.7);
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.moveTo(ellipseCenterX+0.45*ellipseWidth, offsetY / 2);
-                ctx.lineWidth = surroundingWidth*2;
-                ctx.lineTo(ellipseCenterX+0.45*ellipseWidth, offsetY * 1.7);
-                ctx.stroke();
-
-                for(var i=0; i<numLevels; i++) {
-
-                    if(barHeightProportion*numLevels >= (numLevels-i-1)) {
-                        var y = offsetY+i*(height / numLevels) +0.5*(height/numLevels);
-                        var ellipseCenterY = y - window.innerWidth / 185;
-                        // elliptic level indicator
-                        drawEllipse(ctx, ellipseCenterX, ellipseCenterY,
-                                    ellipseWidth, ellipseHeight,
-                                    col_red, col_surrounding);
-                                     
-                        // level text: "Master of Yoga" etc
-                        ctx.fillStyle = col_yellow;
-                        ctx.fillText(levels[numLevels-i-1], 
-                                     offsetX-window.innerWidth/5,
-                                     y);
-                    }
-                }
-                
-                if((1.0 - barHeightProportion) < 0.001) {
-                    gameIsWon = true;
-                }
-
-                if(gameIsWon & !wonMessageShown) {
-                    gameRunning = false;
-                    $.displayText("Game won!");
-                    wonMessageShown = true;
-                }
-            }
-
-            initialize();
-
-            /*#########################################################
-                     GENERIC DRAWING FUNCTIONS
-            #########################################################*/
-
-            function drawCylinder(ctx, x, y,
-                                  height, radiusX, radiusY,
-                                  col1, col2, colStroke) {
-
-                drawEllipse(ctx, x, y+height,
-                            radiusX, radiusY, col1, colStroke);
-
-                drawEllipse(ctx, x, y-height,
-                            radiusX, radiusY,
-                            col2, colStroke);
-            }
-
-            function drawEllipse(ctx, x, y,
-                                 radiusX, radiusY,
-                                 col, colStroke) {
-
-                ctx.beginPath();
-                ctx.fillStyle = col;
-                ctx.ellipse(x, y, 
-                            radiusX = radiusX,
-                            radiusY = radiusY,
-                            rotation = 0,
-                            startAngle = 0, 
-                            endAngle = 2 * Math.PI);
-                ctx.strokeStyle = colStroke;
-                ctx.stroke();
-                ctx.fill();
-                ctx.closePath();
-            }
 
         </script>
 
