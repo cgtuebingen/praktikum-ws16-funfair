@@ -19,6 +19,64 @@ STYLE = 45
 
 ROTATE = 0
 
+
+def clip(value, minValue, maxValue):
+    """Clip value in [minValue, maxValue]."""
+
+    return np.amax([minValue, np.amin([maxValue, value])])
+
+
+def get_fano_factor(value_list):
+    """Return Fano factor of values in a time window."""
+
+    std = np.std(value_list, ddof=1) # sample standard deviation
+    return (std*std) / np.mean(value_list)
+
+
+class Sensor:
+
+    def __init__(self, name, minVal, maxVal, window_size, adaptive=False):
+
+        assert(minVal < maxVal), "minVal >= maxVal: not possible"
+
+        self.name = name
+        self.minVal = minVal
+        self.maxVal = maxVal
+        self.window_size = window_size
+        self.adaptive = adaptive
+        self.last_value = 0.5
+        self.last_values_list = [0 for i in range(window_size)]
+        self.value_index = 0
+
+
+    def get_normalized_value(self, unnormalized_value):
+        """Return value will be within [0, 1]."""
+
+        val = clip(unnormalized_value, self.minVal, self.maxVal)
+        return (val - self.minVal) / (self.maxVal - self.minVal)
+
+
+    def update_values_list(self, new_value):
+        """Update value buffer."""
+
+        if self.adaptive:
+            if new_value > self.maxVal:
+                self.maxVal = new_value
+            elif new_value < self.minVal:
+                self.minVal = new_value
+        self.last_value =  self.get_normalized_value(new_value)
+        self.last_values_list[self.value_index] = self.last_value
+        self.value_index = (self.value_index + 1) % self.window_size
+
+    def get_sensor_fano(self):
+        return get_fano_factor(self.last_values_list)
+
+    def get_sensor_std(self):
+        return np.std(self.last_values_list, ddof=1) # sample standard deviation
+
+
+
+
 class EmoWorker:
 
     def __init__(self):
