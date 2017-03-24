@@ -93,7 +93,7 @@
     $.Indicator.SENSE = 200;
 
     ws.onmessage = function(ev) {
-console.log(ev.data)
+
       if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
 
         if (gameRunning) {
@@ -264,6 +264,10 @@ console.log(ev.data)
         gameRunning = false;
         $.displayText("Game won!");
         wonMessageShown = true;
+
+        $.progress.setComplete($.progress.game.HIGHSTRIKER);
+
+        $.goto('/', 1500);
       }
 
       INDICATOR.draw();

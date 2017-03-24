@@ -440,6 +440,10 @@
         if(gameIsWon & !wonMessageShown) {
             $.displayText("Game won!");
             wonMessageShown = true;
+
+          $.progress.setComplete($.progress.game.PAINTER);
+
+          $.goto('/', 1500);
         }
 
         ctx.putImageData(imageData, marginX + offsetX, marginY + offsetY);

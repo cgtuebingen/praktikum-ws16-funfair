@@ -196,7 +196,7 @@
     var INDICATOR = new $.Indicator('indic');
 
     // Set sensibility
-    $.Indicator.SENSE = 222;
+    $.Indicator.SENSE = 200;
 
     var ws = new WebSocket('ws://localhost:8080/ws');
 
@@ -213,12 +213,13 @@
     }
 
     ws.onmessage = function(ev) {
-      console.log(ev.data)
+
       if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
 
-        var std = +ev.data.slice("brain:activity:".length).split(";")[1];
+        var tmp = ev.data.slice("brain:activity:".length).split(";");
+        var std = +tmp[1];
 
-        INDICATOR.addValue(std);
+        INDICATOR.addValue(tmp[0]);
         counterBalance = std - 75;
       }
     }
@@ -262,11 +263,11 @@
             timeSinceGameLost = new Date().getTime() / 1000 - gameLostTime;
           }
 
-          if (gameLost & timeSinceGameLost > secondsUntilRestart) {
+          if (gameLost && timeSinceGameLost > secondsUntilRestart) {
             initialize();
           }
 
-          if (!gameLost & Math.abs(angle) >= maxAngle) {
+          if (!gameLost && Math.abs(angle) >= maxAngle) {
             gameLost = true;
             gameLostTime = new Date().getTime() / 1000;
           }
@@ -328,11 +329,16 @@
           offsetX - offsetX / 70,
           offsetY + offsetY / 6.0);
 
-        if (!gameLost & timeRemainingUntilGameWon == 0 & !wonMessageShown) {
+        if (!gameLost && timeRemainingUntilGameWon == 0 && !wonMessageShown) {
           gameRunning = false;
           gameWon = true;
           $.displayText("Game won!");
           wonMessageShown = true;
+
+
+          $.progress.setComplete($.progress.game.BALANCING);
+
+          $.goto('/', 1500);
         }
 
         if (!gameLost) {
