@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Funfair</title>
+
+    <style>
+
+        body {
+            background: #e7d7b6;
+            margin: 0;
+        }
+
+        #horizon {
+            background: #b6cde7;
+            height: 150px;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+        }
+
+        #land {
+            position: relative;
+        }
+
+    </style>
+</head>
+<body>
+
+
+<div id="horizon">
+
+    <img src="../design/cloud.png" style="position:absolute;left: 400px; top: 50px">
+    <img src="../design/cloud.png" style="position:absolute;width:110px;left: 800px; top: 20px">
+
+    <img src="../design/baloon.svg" style="position:absolute;width:100px;left:450px;">
+    <img src="../design/baloon2.svg" style="position:absolute;width:150px;left:580px;">
+</div>
+
+<div id="land">
+
+
+    <img src="../design/tent.svg" style="width:400px;position:absolute;right: 150px;">
+
+    <img src="../design/path.png" style="position:absolute;left:200px;top:250px;">
+    <iframe src="../design/carusell.html"
+            style="border:0px; position:absolute;width:600px;height:600px;left:0px;top:-100px;"></iframe>
+
+
+    <a id="Lhigh" href="highstriker/highstriker.html"
+       style="position:absolute;left:510px;top:380px;background:url(../design/button.png);background-size:cover;display:block;width:79px;height:100px;">HIGH</a>
+    <a id="Lpaint" href="painter/painter.html"
+       style="position:absolute;left:420px;top:340px;background:url(../design/button.png);background-size:cover;display:block;width:63px;height:80px;">PAINT</a>
+    <a id="Lmagic" href="magic/magic.html"
+       style="position:absolute;left:300px;top:320px;background:url(../design/button.png);background-size:cover;display:block;width:46px;height:60px;">MAGIC</a>
+    <a id="Lbalance" href="balancing/balancing.html"
+       style="position:absolute;left:200px;top:300px;background:url(../design/button.png);background-size:cover;display:block;width:32px;height:43px;">BALANCE</a>
+
+
+</div>
+
+
+<script src="js/common.js"></script>
+<script>
+
+  var links = [
+    {id: document.getElementById('Lhigh'), sh: $.progress.game.HIGHSTRIKER},
+    {id: document.getElementById('Lpaint'), sh: $.progress.game.PAINTER},
+    {id: document.getElementById('Lmagic'), sh: $.progress.game.MAGIC},
+    {id: document.getElementById('Lbalance'), sh: $.progress.game.BALANCING}
+  ];
+
+  for (var i = 1; i < links.length; i++) {
+
+    if ($.progress.isComplete(links[i].sh)) {
+
+    } else {
+console.log(i)
+      links[i].id.onclick = function(ev) {
+        //ev.preventDefault();
+      };
+
+      links[i].id.style.opacity = 0.5;
+    }
+
+
+  }
+
+
+</script>
+
+
+</body>
+</html>
