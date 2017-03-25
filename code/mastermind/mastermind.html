@@ -88,7 +88,7 @@
             var curr = {i:0, j:0};
             
             var timeOfLastAction;
-            var minSecondsBetweenTwoActions = 2.5;
+            var minSecondsBetweenTwoActions = 1.5;
             var gameRunning = false;
 
             initialize = function() {
@@ -340,7 +340,7 @@
 
             changeColumn = function() {
                 if(gameRunning) {
-                    if(currentColIsComplete()) {
+                    if(1||currentColIsComplete()) {
                         var feedback = getSortedResult(getCurrentGuess(), FIELD);
                         for(var i=0; i<feedback.length; i++) {
                             FEEDBACK[i][curr.j] = feedback[i];
@@ -398,8 +398,11 @@
 
                 if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
                     if(gameRunning) {
-                    
-                        var action = Number(ev.data.slice("brain:activity:".length).split(";")[2]);
+
+                        var data = ev.data.slice("brain:activity:".length).split(";");
+
+                        var std = Number(data[1]);
+                        var action = Number(data[2]);
 
                         var currentTime = new Date().getTime() / 1000;
 
@@ -410,7 +413,7 @@
                                 changeColumn();
                             } else if(action == 2) {
                                 changeRow();
-                            } else if(action == 3) {
+                            } else if(action == 3 /*|| std > 60*/) {
                                 changeColor();
                             }
 

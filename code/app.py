@@ -10,6 +10,8 @@ from emokit.emotiv import Emotiv
 import threading
 import numpy as np
 
+from datetime import datetime as dt
+
 
 WINDOW_SIZE = 250
 SD_UPPER_LIMIT = 100
@@ -96,7 +98,8 @@ class EmoWorker:
         self.sensorlist = []
         self.sensorlist.append(Sensor("F3", -3241, 4630, WINDOW_SIZE))
         self.sensorlist.append(Sensor("FC5", -1287, 1718, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("AF3", -5911, 7491, WINDOW_SIZE))
+        #self.sensorlist.append(Sensor("AF3", -5911, 7491, WINDOW_SIZE), adaptive=True)
+        self.sensorlist.append(Sensor("AF3", -1, 1, WINDOW_SIZE, adaptive=True))
         self.sensorlist.append(Sensor("F7", -2169, -2148, WINDOW_SIZE))
         self.sensorlist.append(Sensor("T7", -531, 2359, WINDOW_SIZE))
         self.sensorlist.append(Sensor("P7", -5026, -2850, WINDOW_SIZE))
@@ -124,7 +127,7 @@ class EmoWorker:
 
 
         for i, s in enumerate(self.meaningful_sensor_names):
-            self.sensorlist[i].update_values_list(sensors[s]["value"]
+            self.sensorlist[i].update_values_list(sensors[s]["value"])
 
 
         self.last_values_list[self.index] = new_value
@@ -145,16 +148,17 @@ class EmoWorker:
            3  ->  squint one's eyes
         """
 
+        #return ("%.6f" % self.sensorlist[2].get_sensor_std())
         # shaking of the head
-        if self.sensorlist[0].get_sensor_std() > 0.001 & self.sensorlist[1].get_sensor_std() > 0.001:
+        if self.sensorlist[0].get_sensor_std() > 0.001 and self.sensorlist[1].get_sensor_std() > 0.001:
             return 1
 
         # nodding
-        if self.sensorlist[15].get_sensor_std() > 0.01:
+        if self.sensorlist[15].get_sensor_std() > 0.005:
             return 2
 
         # squint one's eyes
-        if self.sensorlist[11].get_sensor_std() > 0.01 & self.sensorlist[2].get_sensor_std() > 0.035:
+        if self.sensorlist[2].get_sensor_std() > 0.035: #self.sensorlist[11].get_sensor_std() > 0.001:# and :
             return 3 
 
         return 0
@@ -211,31 +215,36 @@ class EmoWorker:
                 self.update_sensor_values(packet.sensors)
 
                 if self.emodev:
-                    self.emodev.write_message("brain:activity:" + str(self.get_brain_activity()) + ";" + str(self.get_std()) +";" + str(self.get_thought())
+                    self.emodev.write_message("brain:activity:" + str(self.get_brain_activity()) + ";" + str(self.get_std()) +";" + str(self.get_thought()))
+
+
 
                 STYLE = self.get_brain_imagestyle()
 
                 #ROTATE+= (packet.sensors['F8']['value']-115)/4000.0
                 #print str(ROTATE) + " - " + str((packet.sensors['F8']['value']-115)/4000.0)
 
-                #data = ",".join([
-                #    str(packet.sensors['F3']['value']),
-                #    str(packet.sensors['FC5']['value']),
-                #    str(packet.sensors['AF3']['value']),
-                #    str(packet.sensors['F7']['value']),
-                #    str(packet.sensors['T7']['value']),
-                #    str(packet.sensors['P7']['value']),
-                #    str(packet.sensors['O1']['value']),
-                #    str(packet.sensors['O2']['value']),
-                #    str(packet.sensors['P8']['value']),
-                #    str(packet.sensors['T8']['value']),
-                #    str(packet.sensors['F8']['value']),
-                #    str(packet.sensors['AF4']['value']),
-                #    str(packet.sensors['FC6']['value']),
-                #    str(packet.sensors['F4']['value']),
-                #    str(packet.sensors['X']['value']),
-                #    str(packet.sensors['Y']['value'])
-                #])
+                data = ",".join([
+                   str(packet.sensors['F3']['value']),
+                   str(packet.sensors['FC5']['value']),
+                   str(packet.sensors['AF3']['value']),
+                   str(packet.sensors['F7']['value']),
+                   str(packet.sensors['T7']['value']),
+                   str(packet.sensors['P7']['value']),
+                   str(packet.sensors['O1']['value']),
+                   str(packet.sensors['O2']['value']),
+                   str(packet.sensors['P8']['value']),
+                   str(packet.sensors['T8']['value']),
+                   str(packet.sensors['F8']['value']),
+                   str(packet.sensors['AF4']['value']),
+                   str(packet.sensors['FC6']['value']),
+                   str(packet.sensors['F4']['value']),
+                   str(packet.sensors['X']['value']),
+                   str(packet.sensors['Y']['value']),
+                   str(dt.now())
+                ])
+
+                print data
 
                 time.sleep(0.0001)
 
