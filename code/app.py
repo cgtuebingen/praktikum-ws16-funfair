@@ -19,6 +19,64 @@ STYLE = 45
 
 ROTATE = 0
 
+
+def clip(value, minValue, maxValue):
+    """Clip value in [minValue, maxValue]."""
+
+    return np.amax([minValue, np.amin([maxValue, value])])
+
+
+def get_fano_factor(value_list):
+    """Return Fano factor of values in a time window."""
+
+    std = np.std(value_list, ddof=1) # sample standard deviation
+    return (std*std) / np.mean(value_list)
+
+
+class Sensor:
+
+    def __init__(self, name, minVal, maxVal, window_size, adaptive=False):
+
+        assert(minVal < maxVal), "minVal >= maxVal: not possible"
+
+        self.name = name
+        self.minVal = minVal
+        self.maxVal = maxVal
+        self.window_size = window_size
+        self.adaptive = adaptive
+        self.last_value = 0.5
+        self.last_values_list = [0 for i in range(window_size)]
+        self.value_index = 0
+
+
+    def get_normalized_value(self, unnormalized_value):
+        """Return value will be within [0, 1]."""
+
+        val = clip(unnormalized_value, self.minVal, self.maxVal)
+        return (val - self.minVal) / (self.maxVal - self.minVal)
+
+
+    def update_values_list(self, new_value):
+        """Update value buffer."""
+
+        if self.adaptive:
+            if new_value > self.maxVal:
+                self.maxVal = new_value
+            elif new_value < self.minVal:
+                self.minVal = new_value
+        self.last_value =  self.get_normalized_value(new_value)
+        self.last_values_list[self.value_index] = self.last_value
+        self.value_index = (self.value_index + 1) % self.window_size
+
+    def get_sensor_fano(self):
+        return get_fano_factor(self.last_values_list)
+
+    def get_sensor_std(self):
+        return np.std(self.last_values_list, ddof=1) # sample standard deviation
+
+
+
+
 class EmoWorker:
 
     def __init__(self):
@@ -29,6 +87,32 @@ class EmoWorker:
         self.index = 0
         self.emodev = 0
 
+        self.meaningful_sensor_names = ["F3", "FC5", "AF3", "F7", 
+                                        "T7", "P7", "O1", "O2",
+                                        "P8", "T8", "F8", "AF4",
+                                        "FC6", "F4", "X", "Y"]
+
+        # build list with Sensor object for each sensor
+        self.sensorlist = []
+        self.sensorlist.append(Sensor("F3", -3241, 4630, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("FC5", -1287, 1718, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("AF3", -5911, 7491, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("F7", -2169, -2148, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("T7", -531, 2359, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("P7", -5026, -2850, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("O1", -3734, 3780, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("O2", -3763, 2101, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("P8", -675, 1473, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("T8", -3271, 6340, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("F8", 240, 383, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("AF4", -3551, 7129, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("FC6", -73, 273, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("F4", -140, 3, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("X", -29, 94, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("Y", -11, 56, WINDOW_SIZE))
+        self.num_sensors = len(self.sensorlist)
+
+
     def set_emodev(self, dev):
         self.emodev = dev
 
@@ -38,12 +122,43 @@ class EmoWorker:
         # c(1,2,4,6,8,9)
         new_value = sensors['F3']['value'] + sensors['FC5']['value'] + sensors['F7']['value'] + sensors['P7']['value'] + sensors['O2']['value'] + sensors['P8']['value']
 
+
+        for i, s in enumerate(self.meaningful_sensor_names):
+            self.sensorlist[i].update_values_list(sensors[s]["value"]
+
+
         self.last_values_list[self.index] = new_value
         self.index = (self.index + 1) % WINDOW_SIZE
         self.step_counter += 1
 
     def get_std(self):
         return np.std(self.last_values_list, ddof=1)
+
+
+    def get_thought(self):
+        """E.g. for mastermind game: Return action / 'thought':
+
+        Returns:
+           0  ->  no action
+           1  ->  shaking of the head
+           2  ->  nodding
+           3  ->  squint one's eyes
+        """
+
+        # shaking of the head
+        if self.sensorlist[0].get_sensor_std() > 0.001 & self.sensorlist[1].get_sensor_std() > 0.001:
+            return 1
+
+        # nodding
+        if self.sensorlist[15].get_sensor_std() > 0.01:
+            return 2
+
+        # squint one's eyes
+        if self.sensorlist[11].get_sensor_std() > 0.01 & self.sensorlist[2].get_sensor_std() > 0.035:
+            return 3 
+
+        return 0
+
 
     def get_brain_activity(self):
         """Return value between 0 (bad) and 1(good), based on sensor values."""
@@ -96,7 +211,7 @@ class EmoWorker:
                 self.update_sensor_values(packet.sensors)
 
                 if self.emodev:
-                    self.emodev.write_message("brain:activity:" + str(self.get_brain_activity()) + ";" + str(self.get_std()))
+                    self.emodev.write_message("brain:activity:" + str(self.get_brain_activity()) + ";" + str(self.get_std()) +";" + str(self.get_thought())
 
                 STYLE = self.get_brain_imagestyle()
 

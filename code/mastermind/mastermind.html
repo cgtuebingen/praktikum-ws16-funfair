@@ -87,9 +87,13 @@
             var FEEDBACK = [];
             var curr = {i:0, j:0};
             
+            var timeOfLastAction;
+            var minSecondsBetweenTwoActions = 2.5;
             var gameRunning = false;
 
             initialize = function() {
+
+                timeOfLastAction = new Date().getTime() / 1000;
 
                 curr.i = 0;
                 curr.j = 0;
@@ -320,6 +324,44 @@
                 return true;
             }
 
+            changeColor = function() {
+                if(gameRunning) {
+                    GUESSES[curr.i][curr.j] = (GUESSES[curr.i][curr.j]+1) % COLS.length;
+                    drawGame(offsetX, offsetY, width, height);
+                }
+            }
+
+            changeRow = function() {
+                if(gameRunning) {
+                    curr.i = (curr.i + 1) % numRows;
+                    drawGame(offsetX, offsetY, width, height);
+                }
+            }
+
+            changeColumn = function() {
+                if(gameRunning) {
+                    if(currentColIsComplete()) {
+                        var feedback = getSortedResult(getCurrentGuess(), FIELD);
+                        for(var i=0; i<feedback.length; i++) {
+                            FEEDBACK[i][curr.j] = feedback[i];
+                        }
+
+                        if(getIsGameWon()) {
+                            gameIsWon = true;
+                            gameRunning = false;
+                            $.displayText("Game won!");
+                            wonMessageShown = true;
+                        } else {
+                            if(curr.j < (numCols - 1)) {
+                                curr.j += 1;
+                                curr.i = 0;
+                            }
+                        }
+                    }
+                    drawGame(offsetX, offsetY, width, height);
+                }
+            }
+
             /*#########################################################
                      ACTION HANDLING
             ########################################################*/
@@ -355,9 +397,25 @@
             ws.onmessage = function (ev) {
 
                 if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
-
                     if(gameRunning) {
+                    
+                        var action = Number(ev.data.slice("brain:activity:".length).split(";")[2]);
 
+                        var currentTime = new Date().getTime() / 1000;
+
+                        if((currentTime - timeOfLastAction) > minSecondsBetweenTwoActions) {
+
+                            console.log("current action: ", action);
+                            if(action == 1) {
+                                changeColumn();
+                            } else if(action == 2) {
+                                changeRow();
+                            } else if(action == 3) {
+                                changeColor();
+                            }
+
+                            timeOfLastAction = currentTime;
+                        }
                     }
                 }
             }
@@ -365,46 +423,21 @@
             if(useMouseControlForDemo) {
                 document.onmousemove = function (ev) {
                     if(gameRunning) {
-                        drawGame(offsetX, offsetY, width, height);
-                        //drawGame();
+                        //drawGame(offsetX, offsetY, width, height);
                     }
                 }
 
                 document.onclick = function(ev) {
-                    if(gameRunning) {
 
-                        if(ev.button == 0) { // left button
-                            curr.i = (curr.i + 1) % numRows;
-                        } else if (ev.button == 1) { // middle button
-                            if(currentColIsComplete()) {
-
-                                var feedback = getSortedResult(getCurrentGuess(), FIELD);
-                                for(var i=0; i<feedback.length; i++) {
-                                    FEEDBACK[i][curr.j] = feedback[i];
-                                }
-
-                                if(getIsGameWon()) {
-                                    gameIsWon = true;
-                                    gameRunning = false;
-                                    $.displayText("Game won!");
-                                    wonMessageShown = true;
-                                } else {
-                                    if(curr.j < (numCols - 1)) {
-                                        curr.j += 1;
-                                        curr.i = 0;
-                                    }
-                                }
-                            }
-                        }
-                        drawGame(offsetX, offsetY, width, height);
+                    if(ev.button == 0) { // left button
+                        changeRow();
+                    } else if (ev.button == 1) { // middle button
+                        changeColumn();
                     }
                 }
 
                 document.onwheel = function() {
-                    if(gameRunning) {
-                        GUESSES[curr.i][curr.j] = (GUESSES[curr.i][curr.j]+1) % COLS.length;
-                        drawGame(offsetX, offsetY, width, height);
-                    }
+                    changeColor();
                 }
             }
 
