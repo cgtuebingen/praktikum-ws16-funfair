@@ -369,15 +369,15 @@
 
     isOnImage = function (xPos, yPos) {
 
-        isOnX = (offsetX + marginX <= xPos) & (xPos <= offsetX + marginX + paintingWidth);
-        isOnY = (offsetY + marginY <= yPos) & (yPos <= offsetY + marginY + paintingWidth);
+        isOnX = (offsetX + marginX <= xPos) && (xPos <= offsetX + marginX + paintingWidth);
+        isOnY = (offsetY + marginY <= yPos) && (yPos <= offsetY + marginY + paintingWidth);
 
-        return (isOnX & isOnY);
+        return (isOnX && isOnY);
     }
 
 
     linearFunction = function (x) {
-        return (x);
+        return x;
     }
 
     revealImage = function (xPos, yPos,
@@ -437,7 +437,7 @@
  
 
         gameIsWon = isImgCompletelyPainted;
-        if(gameIsWon & !wonMessageShown) {
+        if(gameIsWon && !wonMessageShown) {
             $.displayText("Game won!");
             wonMessageShown = true;
 
