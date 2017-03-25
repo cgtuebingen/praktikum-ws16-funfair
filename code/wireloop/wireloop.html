@@ -1,0 +1,74 @@
+<canvas id="canvas" width="1000" height="400"></canvas>
+<script>
+
+  // Implementation of cardinal splines
+  // https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Cardinal_spline
+  function getSpline(pts, tension, numOfSegments) {
+
+    var _pts = [];
+    var _ret = [];
+
+    _pts = pts.slice(0);
+
+    _pts.unshift(pts[1]);
+    _pts.unshift(pts[0]);
+    _pts.push(pts[pts.length - 2]);
+    _pts.push(pts[pts.length - 1]);
+
+    for (var i = 2; i < (_pts.length - 4); i += 2) {
+      for (var t = 0; t <= numOfSegments; t++) {
+
+        var t1x = (_pts[i + 2] - _pts[i - 2]) * tension;
+        var t1y = (_pts[i + 3] - _pts[i - 1]) * tension;
+
+        var t2x = (_pts[i + 4] - _pts[i]) * tension;
+        var t2y = (_pts[i + 5] - _pts[i + 1]) * tension;
+
+        var st = t / numOfSegments;
+
+        var c1 = 2 * Math.pow(st, 3) - 3 * Math.pow(st, 2) + 1;
+        var c2 = -(2 * Math.pow(st, 3)) + 3 * Math.pow(st, 2);
+        var c3 = Math.pow(st, 3) - 2 * Math.pow(st, 2) + st;
+        var c4 = Math.pow(st, 3) - Math.pow(st, 2);
+
+        var x = c1 * _pts[i] + c2 * _pts[i + 2] + c3 * t1x + c4 * t2x;
+        var y = c1 * _pts[i + 1] + c2 * _pts[i + 3] + c3 * t1y + c4 * t2y;
+
+        _ret.push(x);
+        _ret.push(y);
+      }
+    }
+    return _ret;
+  }
+
+  var canvas = document.getElementById("canvas");
+  var ctx = canvas.getContext("2d");
+
+  var width = canvas.width;
+  var height = canvas.height;
+
+  var myPoints = [];
+  var points = width / 40;
+
+  for (var i = 0; i < points; i++) {
+    myPoints.push(i * width / points + Math.random() * width / 50 - Math.random() * width / 50);
+    myPoints.push(Math.random() * (height - 50) + 25);
+  }
+
+  var spline = getSpline(myPoints, 1, 10);
+
+  function draw() {
+
+    ctx.strokeStyle = "red";
+    ctx.beginPath();
+
+    ctx.moveTo(spline[0], spline[1]);
+    for (var i = 2; i < spline.length; i += 2) {
+      ctx.lineTo(spline[i], spline[i + 1]);
+    }
+    ctx.stroke();
+  }
+
+  draw();
+
+</script>

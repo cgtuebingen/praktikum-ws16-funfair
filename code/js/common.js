@@ -85,7 +85,7 @@
       }
     },
     getContext: function(kind) {
-      return this[0].getContext(kind);
+      return this[0].getContext("2d");
     },
     offset: function() {
 
