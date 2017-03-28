@@ -153,10 +153,9 @@
 
                         if(i == curr.i && j == curr.j) {
                             // 'HERE WE ARE' INDICATOR
-                            //drawRect(ctx, xPos-radius, yPos-radius, radius*2, radius*2, col_black);
-                            drawCircle(ctx, xPos+2*radius, yPos+radius/1.5, radius,
+                            drawCircle(ctx, xPos+2*radius, yPos+radius/1.5, radius*0.7,
                                        COLS[(GUESSES[i][j]+2) % COLS.length], col_surrounding, true, 1.0);
-                            drawCircle(ctx, xPos+radius*1.1, yPos+radius/6, radius,
+                            drawCircle(ctx, xPos+radius*1.1, yPos+radius/6, radius*0.85,
                                        COLS[(GUESSES[i][j]+1) % COLS.length], col_surrounding, true, 1.0);
                        }
 
