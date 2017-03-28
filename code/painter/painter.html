@@ -3,6 +3,18 @@
 <head>
     <title>Painter</title>
     <style>
+
+        #container {
+            position: absolute;
+            z-index: 3;
+        }
+
+        #videoElement {
+            position: absolute;
+            z-index: 3;
+            background-color: #666;
+        }
+
         canvas {
             z-index: 10;
         }
@@ -30,11 +42,16 @@
 
 <body style="background:#ebe3d9;margin:0">
 
+<div id="container">
+    <video autoplay="true" id="videoElement">
+    </video>
+</div>
+
 <div id="overlay"></div>
 <div style="position: relative; width:80%; margin:auto">
     <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
 
-    <img src="../../design/bude_fg_painter.svg" style="position: absolute; z-index: 3; width: 100%">
+    <img src="../../design/bude_fg_painter.svg" style="position: absolute; z-index: 4; width: 100%">
     <div style="position: relative; z-index: 2">
         <canvas id="canvas"></canvas>
     </div>
@@ -103,7 +120,7 @@
     var gameIsWon = false;
     var wonMessageShown = false;
     var gameRunning = false;
-
+    var video = document.querySelector("#videoElement");
 
 
     // initializing flexible variables (depending on canvas size)
@@ -117,6 +134,8 @@
     var off;
 
     initialize = function () {
+ 
+
         imgSizeX = 0.27 * window.innerWidth;
         imgSizeY = imgSizeX;
         marginX = imgSizeX * 0.2;
@@ -126,9 +145,19 @@
 
         offsetX = 0.5 * window.innerWidth - imgSizeX + 0.5 * marginX;
         offsetY = 0.46 * window.innerWidth - imgSizeY;
-        off = canvas.offset(); // get the offset of the canvas once
+        off = canvas.offset();
 
         isCompletelyPainted = false;
+
+        var contstyle = document.getElementById("container").style;
+        contstyle.width = paintingWidth+"px";
+        contstyle.height = paintingWidth+"px";
+        contstyle.left = offsetX + off.left + marginX + "px"; 
+        contstyle.top = offsetY + off.top + marginY + "px";
+
+        var videostyle = document.getElementById("videoElement").style;
+        videostyle.width = paintingWidth+"px";
+        videostyle.height = paintingWidth+"px";
         
         var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80))+"px";
         document.getElementById("overlay").style.paddingTop =  overlayDist;
@@ -139,6 +168,7 @@
         }, 4000);
     }
 
+    displayVideo();
     initialize();
 
     /*##########################################################
@@ -224,6 +254,13 @@
     riggedHandPlugin = Leap.loopController.plugins.riggedHand;
 
 
+    changeVideoVisibility = function(visibility) {
+        // visibility: one of {"hidden", "visible"}
+        document.getElementById("videoElement").style.visibility = visibility;
+        document.getElementById("container").style.visibility = visibility;
+    }
+
+
     /*##########################################################
      "PAINT ME" BUTTON
      ##########################################################
@@ -244,13 +281,19 @@
         var x = ev.pageX - off.left;
         var y = ev.pageY - off.top;
 
+
         // Check if button was clicked
         if(Math.hypot(x - buttonPos.x, y - buttonPos.y) <= buttonPos.r) {
             // Send signal to backend
+ 
 
             $.countdown("Smile!");
             window.setTimeout(function() {
-                
+
+                //TODO take correctly sized image and send to backend
+                changeVideoVisibility("hidden");
+                ctx.drawImage(video, offsetX+marginX, offsetY+marginY, paintingWidth, paintingWidth);
+               
                 //ws.send('painter:take');
 
                 $.countdown("Paint!");
@@ -299,6 +342,27 @@
      LOADING FRAME AND PAINTING
      ##########################################################
      */
+
+
+    function handleVideo(stream) {
+        video.src = window.URL.createObjectURL(stream);
+    }
+ 
+    function videoError(e) {
+        // do something
+    }
+
+    // example taken from: https://www.kirupa.com/html5/accessing_your_webcam_in_html5.htm
+    function displayVideo() {
+         
+        navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia
+                                  || navigator.mozGetUserMedia || navigator.msGetUserMedia
+                                  || navigator.oGetUserMedia);
+ 
+        if (navigator.getUserMedia) {       
+            navigator.getUserMedia({video: true}, handleVideo, videoError);
+        }
+    }
 
     // example frame taken from:
     // http://designdeko.blogspot.de/2015/04/bilderrahmen.html
