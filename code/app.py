@@ -76,6 +76,8 @@ class Sensor:
     def get_sensor_std(self):
         return np.std(self.last_values_list, ddof=1) # sample standard deviation
 
+    def get_sensor_variance(self):
+        return np.var(self.last_values_list)
 
 
 
@@ -98,8 +100,7 @@ class EmoWorker:
         self.sensorlist = []
         self.sensorlist.append(Sensor("F3", -3241, 4630, WINDOW_SIZE))
         self.sensorlist.append(Sensor("FC5", -1287, 1718, WINDOW_SIZE))
-        #self.sensorlist.append(Sensor("AF3", -5911, 7491, WINDOW_SIZE), adaptive=True)
-        self.sensorlist.append(Sensor("AF3", -1, 1, WINDOW_SIZE, adaptive=True))
+        self.sensorlist.append(Sensor("AF3", -5911, 7491, WINDOW_SIZE))
         self.sensorlist.append(Sensor("F7", -2169, -2148, WINDOW_SIZE))
         self.sensorlist.append(Sensor("T7", -531, 2359, WINDOW_SIZE))
         self.sensorlist.append(Sensor("P7", -5026, -2850, WINDOW_SIZE))
@@ -148,17 +149,18 @@ class EmoWorker:
            3  ->  squint one's eyes
         """
 
-        #return ("%.6f" % self.sensorlist[2].get_sensor_std())
         # shaking of the head
-        if self.sensorlist[0].get_sensor_std() > 0.001 and self.sensorlist[1].get_sensor_std() > 0.001:
+        # if self.sensorlist[0].get_sensor_std() > 0.001 and self.sensorlist[1].get_sensor_std() > 0.001:
+        if self.sensorlist[0].get_sensor_variance() > 0.01 and self.sensorlist[1].get_sensor_std() > 0.005:
             return 1
 
         # nodding
-        if self.sensorlist[15].get_sensor_std() > 0.005:
+        # if self.sensorlist[15].get_sensor_std() > 0.005:
+        if self.sensorlist[15].get_sensor_variance() > 0.01:
             return 2
 
-        # squint one's eyes
-        if self.sensorlist[2].get_sensor_std() > 0.035: #self.sensorlist[11].get_sensor_std() > 0.001:# and :
+        # grit one's teeth 
+        if self.sensorlist[9].get_sensor_variance() > 0.01:
             return 3 
 
         return 0
