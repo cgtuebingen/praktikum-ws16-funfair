@@ -24,7 +24,7 @@
 % Creates title of document and additional title page.
 \maketitle
 
-\section*{Abstract}
+\section*{Abstract [insg.: 6 Seiten, mind. 4 Seiten reiner Text]}
 
 Electroencephalography (EEG) is a technique for measuring brain activity. Although widely used in neuroscientific research, it has thus far only rarely been used for the purpose of computer game control. Here we show that a leightweight EEG device, the Emotiv XXX, can be successfully used to play a broad range of simple yet challenging computer games. Furthermore, we demonstrate that rather than merely substituting a mouse or keyboard, an EEG device enables the development of a new type of games which go beyond traditional means of game control. We specifically developed six games, all of which can be played by controlling one's mental activity. We anticipate our work to be a starting point for ever more complex games and a new, keyboard-free gaming experience.
 
@@ -46,22 +46,26 @@ Subsequently, your particular solution should be described. Spend at least one c
 \subsection{Sensor data analysis}
 All data, if not stated otherwise, were analyzed using R \cite{RCoreTeam}. Our goal was to build several sensor data classifier which, based on an analysis of the data, would be able to tell apart several menal states (\texttt{no\_action, action\_1, action\_2, ...}). In the process of building these classifiers, we faced two key challenges: Firstly, there was no prior mapping from the 16 sensors to a mental state - moreover, we did not even know which sensor would correspond to which mental signal (like $ \alpha $ or $ \beta $ waves). Secondly, the sensor data - as is the case for almost any recorded data - seemed to be noisy. We therefore approached both challenges not in a knowledge-driven, but rather in a data-driven way: We recorded data for a variety of different actions and mental commands (Fig. \ref{fig:sensor_values}) and carefully explored and visualized the sensor data recordings. As can be seen in the Figure, some commands such as \texttt{clench fist} were barely visible in the data, whereas other commands (e.g. \texttt{shake head, clench teeth}) produced considerably consistent spike-like patterns. We therefore decided to focus on the actions that seemed to be visually distinguishable in the data.
 
-As most actions and spikes in the data lasted for a very brief period of time, roughly 1-2 seconds, we convolved all sensor data individually with a sliding window of 2 seconds, which corresponds to 256 data points per sensor since the sampling frequency was approximately 128 Hz.
+As most actions and spikes in the data lasted for a very brief period of time, roughly 1-2 seconds, we buffered all sensor data individually with a sliding window of 2 seconds, which corresponds to 256 data points per sensor since the sampling frequency was approximately 128 Hz, and took this sliding window as the basis for all further data analysis. We implemented two different types of classification. The first one is a mapping based on all sensors to a continuous value indicating the degree of relaxation (from tense, agitated to very relaxed and calm). It was achieved by taking into account the variance of the sum of all sensor data, which is based on the observation that a very tense state cannot be traced back to one particular sensor, but elicits high variance in several sensor recordings. The second type of classification, detecting discrete events, directly focuses on specific sensors: 
+\texttt{Y} and \texttt{X} for \texttt{shake head} classification, \texttt{F3} for \texttt{nodding} and \texttt{O1} for the classification of \texttt{clench teeth}. It would have been possible to classify \texttt{squint eyes} as well, however the signals appeared to be hardly distinguishable from \texttt{clench teeth} (and furthermore closing one's eyes during gameplay was found to be rather annoying). This second type of classification was achieved through thresholding the windowed sample variance of a targeted sensor. As a result, we were able to classify one continuous mental state (\texttt{relaxation}) as well as three discrete events (\texttt{clench teeth, nodding, shake head}).
+
+\subsection{Gyro data analysis}
 
 
 \subsection{Highstriker}
 \subsection{Painter}
+incl. Leap Motion
 \subsection{Magic Duel}
-\subsection{Balancing}
 \subsection{Mastermind}
+\subsection{Wireloop}
+\subsection{Balancing}
 
-\subsection{Subsection}
+\subsection{Architecture \& Backend}
 
-Subsections look like this. If you need more hierarchy, use paragraphs.
 
 \begin{figure*}[h!]
 	\centering
-	\includegraphics[width=1.0\textwidth]{images/sensor_values.pdf}
+	\includegraphics[width=1.0\textwidth]{images/sensor_values.png}
 	\caption{Raw sensor data for ten different actions and mental commands. All data are normalized to lie within [0, 1]. Every sensor has a different offset here for better visibility. Sensors from top to bottom: \texttt{Y, X, F4, FC6, AF4, F8, T8, P8, O2, O1, P7, T7, F7, AF3, FC5, F3}. Every action corresponds to one minute of data recording, during which over the first 45 seconds the action was briefly executed every five seconds, followed by a short break until the next type of action began.}
 	\label{fig:sensor_values}
 \end{figure*}
@@ -69,6 +73,12 @@ Subsections look like this. If you need more hierarchy, use paragraphs.
 \section{Possible Extensions}
 
 Describe possible extensions and discuss why they could be useful.
+
+Viele Daten -> LSTM
+
+weitere Spiele beliebig hinzufuegbar
+
+Spiele fancier machen (3D, ...)
 
 
 \appendix

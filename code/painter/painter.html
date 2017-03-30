@@ -156,8 +156,8 @@
         contstyle.top = offsetY + off.top + marginY + "px";
 
         var videostyle = document.getElementById("videoElement").style;
-        videostyle.width = paintingWidth+"px";
-        videostyle.height = paintingWidth+"px";
+        video.width = paintingWidth;
+        video.height = paintingWidth;
         
         var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80))+"px";
         document.getElementById("overlay").style.paddingTop =  overlayDist;
