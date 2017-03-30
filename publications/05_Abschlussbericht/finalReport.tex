@@ -57,6 +57,8 @@ As most actions lasted for a very brief period of time, roughly 1-2 seconds, we 
 
 \subsection{Gyro data analysis}
 
+\subsection{Architecture \& Backend}
+
 
 \subsection{Highstriker}
 A highstriker is a classic game that can be found on most funfairs. We took the core idea of striking with a hammer to achieve a score on a vertical bar and made a few adaptions to it. Rather than a using a virtual hammer, we mapped current the mental state to a score: the more relaxed one is, the better the score (and the friendlier the status indicator, ranging from \texttt{Burnout candidate} to \texttt{Master of Yoga}). As this game is, in our experience, both quite fun and very easy to play, we made it the first game, enabling the user to get to know how he can control his mental activity to achieve a good score. This then prepares for more complex games such as the balancing game. So-called \textit{brain self-regulation} based on visual feedback has been successfully used in clinical settings, e.g. to teach psychopaths to control their aggression \cite{Konicar2015}. It would be interesting to see whether some of our games (the ones that can only be won when one learns how to calm down and relax quickly) could be used to train children suffering from ADHD (attention deficit hyperactivity disorder) in a fun way.
@@ -69,25 +71,27 @@ We achieved this by accessing the computer's camera through the browser, sending
 As an additional feature, the painted image is not only shown but lies behind a veil first (low alpha value). One then needs to use either the mouse to hover over the image and reveal it piece by piece, or use a Leap Motion controller\footnote{\url{https://www.leapmotion.com/}} to do so. A Leap Motion device measures hand gestures and translates them into a 3D hand model on the screen. We mapped the position of the hand model to a certain position on the canvas, which enables the user to simulate holding a paint brush in his or her hands and paint the image with painting-like movements.
 
 \begin{figure}
-	% produced by human_experiments/data_analysis/analysis.R
 	\centering
-	\subfloat{\includegraphics[width=0.2\columnwidth]{images/lena_6.jpg}}\hspace{0.05\columnwidth}
-	\subfloat{\includegraphics[width=0.2\columnwidth]{images/lena_24.jpg}}\hspace{0.05\columnwidth}
-	\subfloat{\includegraphics[width=0.2\columnwidth]{images/lena_26.jpg}}\hspace{0.05\columnwidth}
-	\subfloat{\includegraphics[width=0.2\columnwidth]{images/lena_21.jpg}}
+	\subfloat{\includegraphics[width=0.22\columnwidth]{images/lena_6.jpg}}\hspace{0.02\columnwidth}
+	\subfloat{\includegraphics[width=0.22\columnwidth]{images/lena_24.jpg}}\hspace{0.02\columnwidth}
+	\subfloat{\includegraphics[width=0.22\columnwidth]{images/lena_26.jpg}}\hspace{0.02\columnwidth}
+	\subfloat{\includegraphics[width=0.22\columnwidth]{images/lena_21.jpg}}
 	\caption{Four different style examples for the painter game. Images are sorted from a relaxed, calm style (left) to a more excited, agitated style (right).}
 	\label{fig:painter_styles}
 \end{figure}
 
 \subsection{Magic Duel}
 \subsection{Mastermind}
+Mastermind is a board game where one player selects a four-digit, order-sensitive color code and the other player tries to infer this code based on the feedback he receives in several rounds of guessing: Basically, for every token in the correct position (i.e. matching the code's color at this position), one receives a black feedback token; for every correctly colored token (that is, the color appears in the code) in the wrong position, one receives a white feedback token. This game serves as a demonstration that also games with four different control events can be controlled with the Emotiv device. The full list of game commands (in brackets: corresponding mental commands) is: change row (\texttt{nod}), change column (\texttt{shake head}), change color (\texttt{clench teeth}) and finally do nothing (every other mental state / action). In our experience, it is quite interesting to play this game with head movements and mental commands for the first time, however after a while, one would like to use a less cumbersome mouse instead. As this was not the case for other games, we think this might point to the fact that using an EEG device to replace a mouse is a bit boring - after all, we are pretty good in controlling computers with mouse and keyboard on a daily basis, whereas games that can only be played with such a device seem to be way more interesting.
+
+
 \subsection{Wireloop}
 \subsection{Balancing}
 Our balancing game is perhaps the most challenging game, as it requires to balance a little man on an inherently instable seesaw: if tilted to one side, one needs to strain oneself in order to get it back to balance - but then, it tilts to the other side and one instantly needs to switch to 'zen mode', to total relaxation... if one is able to do this for 30 seconds, the game is won, otherwise it is re-started.
 
 In some relaxation techniques such as \textit{Progressive Relaxation} \cite{Jacobson1938}, being able to consciously change from straining oneself to relaxation mode (and vice versa) is a core element: if one learns and trains how to change between these states, this can be effortlessly applied in situations where one is naturally stressed and tense, such as ahead of an exam or a job interview. It would be interesting to explore whether a game like our balancing game could be used in a similar fashion - which would then enable one to teach relaxation techniques to a broader variety of people than those attracted by, say, adult evening classes.
 
-\subsection{Architecture \& Backend}
+
 
 
 \begin{figure*}[h!]
