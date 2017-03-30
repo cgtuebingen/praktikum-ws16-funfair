@@ -5,7 +5,7 @@
 \lstset{numbers=left, numberstyle=\tiny, numbersep=5pt, xleftmargin=10mm}
 
 % Values for title generation
-\title{Funfair: game control with EEG}
+\title{Funfair: EEG game control}
 \author{Robert Eisele \& Robert Geirhos}
 \date{\today}
 
@@ -43,9 +43,28 @@ Describe your solution to the problem in detail. I propose to spend one chapter 
 
 Subsequently, your particular solution should be described. Spend at least one chapter on describing the (parallel) improvements you made upon the naive implementation. It might be advantageous to split the implementation description to parts, each filling a subsection, and to give an overview over those parts first.
 
+\subsection{Sensor data analysis}
+All data, if not stated otherwise, were analyzed using R \cite{RCoreTeam}. Our goal was to build several sensor data classifier which, based on an analysis of the data, would be able to tell apart several menal states (\texttt{no\_action, action\_1, action\_2, ...}). In the process of building these classifiers, we faced two key challenges: Firstly, there was no prior mapping from the 16 sensors to a mental state - moreover, we did not even know which sensor would correspond to which mental signal (like $ \alpha $ or $ \beta $ waves). Secondly, the sensor data - as is the case for almost any recorded data - seemed to be noisy. We therefore approached both challenges not in a knowledge-driven, but rather in a data-driven way: We recorded data for a variety of different actions and mental commands (Fig. \ref{fig:sensor_values}) and carefully explored and visualized the sensor data recordings. As can be seen in the Figure, some commands such as \texttt{clench fist} were barely visible in the data, whereas other commands (e.g. \texttt{shake head, clench teeth}) produced considerably consistent spike-like patterns. We therefore decided to focus on the actions that seemed to be visually distinguishable in the data.
+
+As most actions and spikes in the data lasted for a very brief period of time, roughly 1-2 seconds, we convolved all sensor data individually with a sliding window of 2 seconds, which corresponds to 256 data points per sensor since the sampling frequency was approximately 128 Hz.
+
+
+\subsection{Highstriker}
+\subsection{Painter}
+\subsection{Magic Duel}
+\subsection{Balancing}
+\subsection{Mastermind}
+
 \subsection{Subsection}
 
 Subsections look like this. If you need more hierarchy, use paragraphs.
+
+\begin{figure*}[h!]
+	\centering
+	\includegraphics[width=1.0\textwidth]{images/sensor_values.pdf}
+	\caption{Raw sensor data for ten different actions and mental commands. All data are normalized to lie within [0, 1]. Every sensor has a different offset here for better visibility. Sensors from top to bottom: \texttt{Y, X, F4, FC6, AF4, F8, T8, P8, O2, O1, P7, T7, F7, AF3, FC5, F3}. Every action corresponds to one minute of data recording, during which over the first 45 seconds the action was briefly executed every five seconds, followed by a short break until the next type of action began.}
+	\label{fig:sensor_values}
+\end{figure*}
 
 \section{Possible Extensions}
 
