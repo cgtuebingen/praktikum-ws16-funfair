@@ -7,7 +7,6 @@
 \usepackage{multirow,booktabs,setspace,caption}
 \usepackage{subfig}
 
-
 \lstset{numbers=left, numberstyle=\tiny, numbersep=5pt, xleftmargin=10mm}
 
 % Values for title generation
@@ -22,10 +21,11 @@
 
 % You can place a teaser as follows. (Otherwise, just uncomment the following part)
 \teaser{
-    \includegraphics[width=\textwidth]{images/teaser.jpg}
+    \includegraphics[width=\textwidth]{images/teaser_funfair.png}
     \caption{You can place a teaser here.}
     \label{fig:teaser}
 }     
+%TODO idea: why not include a fancy animated video teaser here? That'd be beautiful...
 
 % Creates title of document and additional title page.
 \maketitle
@@ -42,12 +42,19 @@ Electroencephalography (EEG) is a technique for measuring brain activity. Althou
 
 Give an introduction to the problem. This might start from history, motivate the problem and end with the computational demands. Motivate why to use GPUs. You should also introduce CUDA in a way that makes an average computer science student understand what it is.
 
-
 \section{Description of the Solution}
 
 Describe your solution to the problem in detail. I propose to spend one chapter on a general, simple solution strategy so that the reader is familiar with how to solve the problem. This could also be a summary of the paper or document you mainly used to base your work on.
 
 Subsequently, your particular solution should be described. Spend at least one chapter on describing the (parallel) improvements you made upon the naive implementation. It might be advantageous to split the implementation description to parts, each filling a subsection, and to give an overview over those parts first.
+
+Key points to mention:
+
+- Breite vor Schoenheit
+
+- no "boring replacement of keyboard through EEG"
+
+
 
 \subsection{Sensor data analysis}
 All data, if not stated otherwise, were analyzed using R \cite{RCoreTeam}. Our goal was to build several sensor data classifier which, based on an analysis of the data, would be able to tell apart several menal states (\texttt{no\_action, action\_1, action\_2, ...}). In the process of building these classifiers, we faced two key challenges: Firstly, there was no prior mapping from the 16 sensors to a mental state - moreover, we did not even know which sensor would correspond to which mental signal (like $ \alpha $ or $ \beta $ waves). Secondly, the sensor data - as is the case for almost any recorded data - seemed to be noisy. We therefore approached both challenges not in a knowledge-driven, but rather in a data-driven way: We recorded data for a variety of different actions and mental commands (Fig. \ref{fig:sensor_values}) and carefully explored and visualized the sensor data recordings. As can be seen in the Figure, some commands such as \texttt{clench fist} were barely visible in the data, whereas other commands (e.g. \texttt{shake head, clench teeth}) produced considerably consistent spike-like patterns. We therefore decided to focus on the actions that seemed to be visually distinguishable in the data.
