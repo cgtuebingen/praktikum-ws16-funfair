@@ -6,6 +6,4 @@ urllib
 time
 sys
 emokit
-requests
-urllib
 pillow
