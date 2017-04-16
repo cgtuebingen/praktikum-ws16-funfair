@@ -261,7 +261,9 @@
       PAINTER: 0,
       BALANCING: 1,
       HIGHSTRIKER: 2,
-      MAGIC: 3
+      MAGIC: 3,
+      WIRE: 4,
+      MASTERMIND: 5
     }
   };
 
