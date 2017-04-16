@@ -22,6 +22,18 @@
 
     })();
 
+    if(!HTMLCanvasElement.prototype.toBlob){
+    HTMLCanvasElement.prototype.toBlob = function(callback, type, encoderOptions){
+        var dataurl = this.toDataURL(type, encoderOptions);
+        var bstr = atob(dataurl.split(',')[1]), n = bstr.length, u8arr = new Uint8Array(n);
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        var blob = new Blob([u8arr], {type: type});
+        callback.call(this, blob);
+    };
+}
+
   function setCookie(cname, cvalue) {
     var d = new Date();
     d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000));

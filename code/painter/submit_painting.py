@@ -106,7 +106,7 @@ def take_snapshot_and_paint(path=DEFAULT_DIR,
     resized_path = os.path.join(path, SNAPSHOT_RESIZED_NAME)
     painted_path = os.path.join(path, SNAPSHOT_PAINTED_NAME)
 
-    take_image(path, SNAPSHOT_ORIG_NAME)
+    #take_image(path, SNAPSHOT_ORIG_NAME)
     resize_image(orig_path, resized_path)
     paint_image(resized_path, painted_path, style)
 

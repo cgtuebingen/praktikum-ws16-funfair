@@ -20,22 +20,22 @@
         }
 
         #canvas {
-            z-index:2;
+            z-index: 2;
         }
 
-        #overlay{
-           text-align: center; 
-           color: white;
-           position: absolute; 
-           width: 100%;
-           z-index: 2000;
-           font-size: 160px;
-           font-family: "Arial";
-           font-weight: bold;
-           padding-top: 200px;
-           text-shadow: 0px 4px 3px rgba(0,0,0,0.4),
-                        0px 8px 13px rgba(0,0,0,0.1),
-                        0px 18px 23px rgba(0,0,0,0.1);
+        #overlay {
+            text-align: center;
+            color: white;
+            position: absolute;
+            width: 100%;
+            z-index: 2000;
+            font-size: 160px;
+            font-family: "Arial";
+            font-weight: bold;
+            padding-top: 200px;
+            text-shadow: 0px 4px 3px rgba(0, 0, 0, 0.4),
+            0px 8px 13px rgba(0, 0, 0, 0.1),
+            0px 18px 23px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -67,34 +67,34 @@
 
 
     /*##########################################################
-       WEBSOCKET HANDLING
+     WEBSOCKET HANDLING
      ##########################################################
      */
 
 
     var ws = new WebSocket('ws://localhost:8080/ws');
 
-    ws.onopen = function () {
-        console.log("Connected!");
+    ws.onopen = function() {
+      console.log("Connected!");
     }
 
-    ws.onclose = function (ev) {
-        console.log("Closed!");
+    ws.onclose = function(ev) {
+      console.log("Closed!");
     }
 
-    ws.onerror = function (ev) {
-        console.log("Error!", ev)
+    ws.onerror = function(ev) {
+      console.log("Error!", ev)
     }
 
-    ws.onmessage = function (ev) {
+    ws.onmessage = function(ev) {
 
-        if (ev.data == "painter:finished") {
-            // Draw image =)
-            window.setTimeout(function() {
-                img_frame.onload();
-            }, 1000);
-        }
-        console.log("event data: ", ev.data)
+      if (ev.data == "painter:finished") {
+        // Draw image =)
+        window.setTimeout(function() {
+          img_frame.onload();
+        }, 1000);
+      }
+      console.log("event data: ", ev.data)
     }
 
 
@@ -133,39 +133,39 @@
     var offsetY;
     var off;
 
-    initialize = function () {
- 
+    initialize = function() {
 
-        imgSizeX = 0.27 * window.innerWidth;
-        imgSizeY = imgSizeX;
-        marginX = imgSizeX * 0.2;
-        marginY = marginX;
-        paintingWidth = imgSizeX * 0.6;
-        gameRunning = false;
 
-        offsetX = 0.5 * window.innerWidth - imgSizeX + 0.5 * marginX;
-        offsetY = 0.46 * window.innerWidth - imgSizeY;
-        off = canvas.offset();
+      imgSizeX = 0.27 * window.innerWidth;
+      imgSizeY = imgSizeX;
+      marginX = imgSizeX * 0.2;
+      marginY = marginX;
+      paintingWidth = imgSizeX * 0.6;
+      gameRunning = false;
 
-        isCompletelyPainted = false;
+      offsetX = 0.5 * window.innerWidth - imgSizeX + 0.5 * marginX;
+      offsetY = 0.46 * window.innerWidth - imgSizeY;
+      off = canvas.offset();
 
-        var contstyle = document.getElementById("container").style;
-        contstyle.width = paintingWidth+"px";
-        contstyle.height = paintingWidth+"px";
-        contstyle.left = offsetX + off.left + marginX + "px"; 
-        contstyle.top = offsetY + off.top + marginY + "px";
+      isCompletelyPainted = false;
 
-        var videostyle = document.getElementById("videoElement").style;
-        video.width = paintingWidth;
-        video.height = paintingWidth;
-        
-        var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80))+"px";
-        document.getElementById("overlay").style.paddingTop =  overlayDist;
+      var contstyle = document.getElementById("container").style;
+      contstyle.width = paintingWidth + "px";
+      contstyle.height = paintingWidth + "px";
+      contstyle.left = offsetX + off.left + marginX + "px";
+      contstyle.top = offsetY + off.top + marginY + "px";
 
-        $.displayText("Click on the foto icon!");
-        window.setTimeout(function() {
-            $.displayText("");
-        }, 4000);
+      var videostyle = document.getElementById("videoElement").style;
+      video.width = paintingWidth;
+      video.height = paintingWidth;
+
+      var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80)) + "px";
+      document.getElementById("overlay").style.paddingTop = overlayDist;
+
+      $.displayText("Click on the foto icon!");
+      window.setTimeout(function() {
+        $.displayText("");
+      }, 4000);
     }
 
     displayVideo();
@@ -176,88 +176,88 @@
      ##########################################################
      */
 
-    window.onresize = function () {
-        console.log(window.innerWidth, window.innerHeight);
-        canvas[0].width = window.innerWidth;
-        canvas[0].height = window.innerHeight;
+    window.onresize = function() {
+      console.log(window.innerWidth, window.innerHeight);
+      canvas[0].width = window.innerWidth;
+      canvas[0].height = window.innerHeight;
 
-        initialize();
-        drawImage();
-        drawPaintButton();
+      initialize();
+      drawImage();
+      drawPaintButton();
     }
 
 
-    document.onmousemove = function (ev) {
-        cursorX = ev.pageX - off.left;
-        cursorY = ev.pageY - off.top;
-    }
+    document.onmousemove = function(ev) {
+      cursorX = ev.pageX - off.left;
+      cursorY = ev.pageY - off.top;
+    };
 
-    $.animate('mousemove', function () {
-        handleMove();
+    $.animate('mousemove', function() {
+      handleMove();
     });
 
-    handleMove = function () {
+    handleMove = function() {
 
 
-        if (isOnImage(cursorX, cursorY)) {
+      if (isOnImage(cursorX, cursorY)) {
 
-            xPosOnImg = (cursorX - marginX - offsetX) / paintingWidth;
-            yPosOnImg = (cursorY - marginY - offsetY) / paintingWidth;
+        xPosOnImg = (cursorX - marginX - offsetX) / paintingWidth;
+        yPosOnImg = (cursorY - marginY - offsetY) / paintingWidth;
 
-            revealImage(xPosOnImg,
-                yPosOnImg,
-                innerRadius, outerRadius,
-                transitionFunction = linearFunction);
-        }
-    }
+        revealImage(xPosOnImg,
+          yPosOnImg,
+          innerRadius, outerRadius,
+          transitionFunction = linearFunction);
+      }
+    };
 
 
     var riggedHandPlugin;
     Leap.loop({
-        hand: function (hand) {
-            var label = hand.data('label');
+      hand: function(hand) {
+        var label = hand.data('label');
 
-            var handMesh = hand.data('riggedHand.mesh');
+        var handMesh = hand.data('riggedHand.mesh');
 
-            var screenPosition = handMesh.screenPosition(
-                hand.palmPosition,
-                riggedHandPlugin.camera
-            );
-        }
+        var screenPosition = handMesh.screenPosition(
+          hand.palmPosition,
+          riggedHandPlugin.camera
+        );
+      }
     })
-        .use('riggedHand')
-        .use('handEntry')
-        .on('handLost', function (hand) {
-            var label = hand.data('label');
-            if (label) {
-                document.body.removeChild(label);
-                hand.data({label: undefined});
-            }
-        });
-
-
-    Leap.loop(function (frame) {
-        if (frame.pointables.length > 0) {
-            var position = frame.pointables[0].stabilizedTipPosition;
-            var normalized = frame.interactionBox.normalizePoint(position);
-
-            var x = window.innerWidth * normalized[0];
-            var y = window.innerHeight * (1 - normalized[1]);
-            //TODO: what to do with x and y -> obsolete?
-            revealImage(normalized[0],
-                (1 - normalized[1]),
-                innerRadius, outerRadius,
-                transitionFunction = linearFunction);
+      .use('riggedHand')
+      .use('handEntry')
+      .on('handLost', function(hand) {
+        var label = hand.data('label');
+        if (label) {
+          document.body.removeChild(label);
+          hand.data({label: undefined});
         }
+      });
+
+
+    Leap.loop(function(frame) {
+      if (frame.pointables.length > 0) {
+        var position = frame.pointables[0].stabilizedTipPosition;
+        var normalized = frame.interactionBox.normalizePoint(position);
+
+        var x = window.innerWidth * normalized[0];
+        var y = window.innerHeight * (1 - normalized[1]);
+        //TODO: what to do with x and y -> obsolete?
+        revealImage(normalized[0],
+          (1 - normalized[1]),
+          innerRadius, outerRadius,
+          transitionFunction = linearFunction);
+      }
     });
 
     riggedHandPlugin = Leap.loopController.plugins.riggedHand;
 
 
     changeVideoVisibility = function(visibility) {
-        // visibility: one of {"hidden", "visible"}
-        document.getElementById("videoElement").style.visibility = visibility;
-        document.getElementById("container").style.visibility = visibility;
+      // visibility: one of {"hidden", "visible"}
+      document.getElementById("videoElement").style.visibility = visibility;
+      document.getElementById("container").style.visibility = visibility;
     }
 
 
@@ -271,70 +271,91 @@
     // http://www.clker.com/clipart-camera-icon-8.html
 
     var buttonPos = {
-        x: 0,
-        y: 0,
-        r: 0
+      x: 0,
+      y: 0,
+      r: 0
     };
 
-    document.onclick = function (ev) {
+    document.onclick = function(ev) {
 
-        var x = ev.pageX - off.left;
-        var y = ev.pageY - off.top;
+      var x = ev.pageX - off.left;
+      var y = ev.pageY - off.top;
 
 
-        // Check if button was clicked
-        if(Math.hypot(x - buttonPos.x, y - buttonPos.y) <= buttonPos.r) {
-            // Send signal to backend
- 
+      // Check if button was clicked
+      if (Math.hypot(x - buttonPos.x, y - buttonPos.y) <= buttonPos.r) {
 
-            $.countdown("Smile!");
-            window.setTimeout(function() {
+        $.countdown("Smile!");
+        window.setTimeout(function() {
 
-                //TODO take correctly sized image and send to backend
-                changeVideoVisibility("hidden");
-                ctx.drawImage(video, offsetX+marginX, offsetY+marginY, paintingWidth, paintingWidth);
-               
-                //ws.send('painter:take');
+          //TODO take correctly sized image and send to backend
+          changeVideoVisibility("hidden");
+          ctx.drawImage(video, offsetX + marginX, offsetY + marginY, paintingWidth, paintingWidth);
 
-                $.countdown("Paint!");
-                window.setTimeout(function() {
-                    gameRunning = true;
-                }, 4000);
-           }, 8000);
+          // Bring video image to a temporary canvas, we can finally upload
+          var tmpCanvas = document.createElement("canvas");
+          tmpCanvas.width = video.width;
+          tmpCanvas.height = video.height;
+          tmpCanvas.getContext("2d").drawImage(video, 0, 0, video.width, video.height);
 
-        }
+          tmpCanvas.toBlob(
+            function(blob) {
+
+              var fd = new FormData();
+              fd.append("myFile", blob, "thumb.jpg");
+
+              var xhr = new XMLHttpRequest();
+              xhr.open('POST', '/upload');
+
+              xhr.addEventListener('load', function(e) {
+                console.log('uploaded!', e);
+              });
+
+              xhr.send(fd);
+            },
+            'image/jpeg',
+            0.8
+          );
+
+          $.countdown("Paint!");
+          window.setTimeout(function() {
+            gameRunning = true;
+          }, 4000);
+        }, 8000);
+
+      }
     };
 
-    drawPaintButton = function () {
-        var radius = imgSizeX / 10;
-        var centerX = offsetX + imgSizeX + marginX;
-        var centerY = offsetY + 0.5 * imgSizeY;
-        buttonPos.x = centerX;
-        buttonPos.y = centerY;
+    drawPaintButton = function() {
+      var radius = imgSizeX / 10;
+      var centerX = offsetX + imgSizeX + marginX;
+      var centerY = offsetY + 0.5 * imgSizeY;
+      buttonPos.x = centerX;
+      buttonPos.y = centerY;
 
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-        ctx.fillStyle = "green";
-        ctx.fillStyle = "#9c2364";
-        ctx.fill();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+      ctx.fillStyle = "green";
+      ctx.fillStyle = "#9c2364";
+      ctx.fill();
 
-        ctx.lineWidth = imgSizeX / 75;
-        ctx.strokeStyle = "#003300";
-        ctx.stroke();
+      ctx.lineWidth = imgSizeX / 75;
+      ctx.strokeStyle = "#003300";
+      ctx.stroke();
 
-        var photo = new Image();
-        photo.src = "camera/photo_icon.png";
-        var iconWidth = imgSizeX / 9;
-        buttonPos.r = 32; // is this the correct radius?
+      var photo = new Image();
+      photo.src = "camera/photo_icon.png";
+      var iconWidth = imgSizeX / 9;
+      buttonPos.r = 32; // is this the correct radius?
 
-        var iconHeight = iconWidth / 600 * 430;
-        photo.onload = function () {
-            ctx.drawImage(photo, centerX - radius / 1.8, centerY - radius / 2.4,
-                width = iconWidth,
-                height = iconHeight);
+      var iconHeight = iconWidth / 600 * 430;
+      photo.onload = function() {
+        ctx.drawImage(photo, centerX - radius / 1.8, centerY - radius / 2.4,
+          width = iconWidth,
+          height = iconHeight);
 
-        }
-    }
+      }
+    };
 
     drawPaintButton();
 
@@ -345,23 +366,23 @@
 
 
     function handleVideo(stream) {
-        video.src = window.URL.createObjectURL(stream);
+      video.src = window.URL.createObjectURL(stream);
     }
- 
+
     function videoError(e) {
-        // do something
+      // do something
     }
 
     // example taken from: https://www.kirupa.com/html5/accessing_your_webcam_in_html5.htm
     function displayVideo() {
-         
-        navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia
-                                  || navigator.mozGetUserMedia || navigator.msGetUserMedia
-                                  || navigator.oGetUserMedia);
- 
-        if (navigator.getUserMedia) {       
-            navigator.getUserMedia({video: true}, handleVideo, videoError);
-        }
+
+      navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia
+      || navigator.mozGetUserMedia || navigator.msGetUserMedia
+      || navigator.oGetUserMedia);
+
+      if (navigator.getUserMedia) {
+        navigator.getUserMedia({video: true}, handleVideo, videoError);
+      }
     }
 
     // example frame taken from:
@@ -371,41 +392,41 @@
     var img = new Image();
 
     function getImageNameForPainting() {
-        // tries to open painted img; returns img path
+      // tries to open painted img; returns img path
 
-        var rawFile = new XMLHttpRequest();
-        imgName = defaultImgLocation;
+      var rawFile = new XMLHttpRequest();
+      imgName = defaultImgLocation;
 
-        try {
-            rawFile.open("GET", paintedImgLocation + "?cache="+Math.random(), false);
-            rawFile.onreadystatechange = function () {
-                if (rawFile.readyState === 4) {
-                    if (rawFile.status === 200 || rawFile.status == 0) {
-                        imgName = paintedImgLocation;
-                    } else {
-                        imgName = defaultImgLocation;
-                    }
-                } else {
-                    imgName = defaultImgLocation;
-                }
+      try {
+        rawFile.open("GET", paintedImgLocation + "?cache=" + Math.random(), false);
+        rawFile.onreadystatechange = function() {
+          if (rawFile.readyState === 4) {
+            if (rawFile.status === 200 || rawFile.status == 0) {
+              imgName = paintedImgLocation;
+            } else {
+              imgName = defaultImgLocation;
             }
-            rawFile.send(null);
-        } catch (err) {
-        }
-        return (imgName);
+          } else {
+            imgName = defaultImgLocation;
+          }
+        };
+        rawFile.send(null);
+      } catch (err) {
+      }
+      return (imgName);
     }
 
     img_frame.src = "input/frame_b2.png";
     // use nested loading to make sure both imgs have been loaded.
-    img_frame.onload = function () {
+    img_frame.onload = function() {
 
-        img_name = getImageNameForPainting();
-        img.src = img_name + "?cache" + Math.random();
+      img_name = getImageNameForPainting();
+      img.src = img_name + "?cache" + Math.random();
 
-        img.onload = function () {
-            drawImage();
-        }
-    }
+      img.onload = function() {
+        drawImage();
+      }
+    };
 
 
     /*##########################################################
@@ -414,103 +435,103 @@
      */
 
 
-    drawImage = function () {
-        ctx.drawImage(img_frame, offsetX, offsetY,
-            width = imgSizeX,
-            height = imgSizeY);
+    drawImage = function() {
+      ctx.drawImage(img_frame, offsetX, offsetY,
+        width = imgSizeX,
+        height = imgSizeY);
 
-        ctx.drawImage(img, offsetX + marginX, offsetY + marginY,
-            width = paintingWidth,
-            height = paintingWidth);
-        imageData = ctx.getImageData(offsetX + marginX, offsetY + marginY,
-            paintingWidth, paintingWidth);
+      ctx.drawImage(img, offsetX + marginX, offsetY + marginY,
+        width = paintingWidth,
+        height = paintingWidth);
+      imageData = ctx.getImageData(offsetX + marginX, offsetY + marginY,
+        paintingWidth, paintingWidth);
 
+      for (var i = 0; i < imageData.data.length; i += 4) {
+        imageData.data[i + 3] = defaultAlphaValue;
+      }
+      ctx.putImageData(imageData, offsetX + marginX, offsetY + marginY);
+    }
+
+    isOnImage = function(xPos, yPos) {
+
+      isOnX = (offsetX + marginX <= xPos) && (xPos <= offsetX + marginX + paintingWidth);
+      isOnY = (offsetY + marginY <= yPos) && (yPos <= offsetY + marginY + paintingWidth);
+
+      return (isOnX && isOnY);
+    }
+
+
+    linearFunction = function(x) {
+      return x;
+    }
+
+    revealImage = function(xPos, yPos,
+                           innerRadius, outerRadius,
+                           transitionFunction) {
+      // position: (x, y); both in [0, 1]
+      // transitionFunction: [0, 1] -> [0, 1]
+
+      if (xPos < 0.0 || xPos > 1.0) {
+        //alert("Problem with xPos!");
+        return;
+      }
+      if (yPos < 0.0 || yPos > 1.0) {
+        //alert("Problem with yPos!");
+        return;
+      }
+
+      row = 0;
+      col = 0;
+      completelyPainted = true;
+
+      nc = Math.sqrt(imageData.data.length / 4);
+      var alpha = 0.0;
+
+      if (gameRunning) {
         for (var i = 0; i < imageData.data.length; i += 4) {
-            imageData.data[i + 3] = defaultAlphaValue;
-        }
-        ctx.putImageData(imageData, offsetX + marginX, offsetY + marginY);
-    }
 
-    isOnImage = function (xPos, yPos) {
+          if (col % nc == 0) {
+            row += 1;
+          }
+          col = col % nc;
 
-        isOnX = (offsetX + marginX <= xPos) && (xPos <= offsetX + marginX + paintingWidth);
-        isOnY = (offsetY + marginY <= yPos) && (yPos <= offsetY + marginY + paintingWidth);
-
-        return (isOnX && isOnY);
-    }
-
-
-    linearFunction = function (x) {
-        return x;
-    }
-
-    revealImage = function (xPos, yPos,
-                            innerRadius, outerRadius,
-                            transitionFunction) {
-        // position: (x, y); both in [0, 1]
-        // transitionFunction: [0, 1] -> [0, 1]
-
-        if (xPos < 0.0 || xPos > 1.0) {
-            //alert("Problem with xPos!");
-            return;
-        }
-        if (yPos < 0.0 || yPos > 1.0) {
-            //alert("Problem with yPos!");
-            return;
-        }
-
-        row = 0;
-        col = 0;
-        completelyPainted = true;
-
-        nc = Math.sqrt(imageData.data.length / 4);
-        var alpha = 0.0;
-
-        if(gameRunning) {
-            for (var i = 0; i < imageData.data.length; i += 4) {
-    
-                if (col % nc == 0) {
-                    row += 1;
-                }
-                col = col % nc;
- 
-                if (imageData.data[i + 3] < completelyPaintedThreshold) {
-                    completelyPainted = false;
-                }
-
-                x_dist = Math.abs(xPos - (col / nc));
-                y_dist = Math.abs(yPos - (row / nc));
-                distance = Math.sqrt(Math.pow(x_dist, 2) + Math.pow(y_dist, 2));
-                if (distance < outerRadius) {
-                    if (distance < innerRadius) {
-                        imageData.data[i + 3] = 255; //alpha channel
-                    } else {
-                        imageData.data[i + 3] = Math.max(255.0 *
-                            transitionFunction((outerRadius - distance) /
-                                (outerRadius - innerRadius)),
-                            imageData.data[i + 3]);
-                    }
-                }
-
-                col += 1;
-            }
-        } else {
+          if (imageData.data[i + 3] < completelyPaintedThreshold) {
             completelyPainted = false;
+          }
+
+          x_dist = Math.abs(xPos - (col / nc));
+          y_dist = Math.abs(yPos - (row / nc));
+          distance = Math.sqrt(Math.pow(x_dist, 2) + Math.pow(y_dist, 2));
+          if (distance < outerRadius) {
+            if (distance < innerRadius) {
+              imageData.data[i + 3] = 255; //alpha channel
+            } else {
+              imageData.data[i + 3] = Math.max(255.0 *
+                transitionFunction((outerRadius - distance) /
+                  (outerRadius - innerRadius)),
+                imageData.data[i + 3]);
+            }
+          }
+
+          col += 1;
         }
-        isImgCompletelyPainted = completelyPainted;
- 
+      } else {
+        completelyPainted = false;
+      }
+      isImgCompletelyPainted = completelyPainted;
 
-        gameIsWon = isImgCompletelyPainted;
-        if(gameIsWon && !wonMessageShown) {
-            $.displayText("Game won!");
-            wonMessageShown = true;
 
-          $.progress.setComplete($.progress.game.PAINTER);
+      gameIsWon = isImgCompletelyPainted;
+      if (gameIsWon && !wonMessageShown) {
+        $.displayText("Game won!");
+        wonMessageShown = true;
 
-          $.goto('/', 1500);
-        }
+        $.progress.setComplete($.progress.game.PAINTER);
 
-        ctx.putImageData(imageData, marginX + offsetX, marginY + offsetY);
+        $.goto('/', 1500);
+      }
+
+      ctx.putImageData(imageData, marginX + offsetX, marginY + offsetY);
     }
 
 
