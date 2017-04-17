@@ -90,8 +90,9 @@ class EmoWorker:
         self.step_counter = 0
         self.index = 0
         self.emodev = 0
+        self.isRaw = False
 
-        self.meaningful_sensor_names = ["F3", "FC5", "AF3", "F7", 
+        self.meaningful_sensor_names = ["F3", "FC5", "AF3", "F7",
                                         "T7", "P7", "O1", "O2",
                                         "P8", "T8", "F8", "AF4",
                                         "FC6", "F4", "X", "Y"]
@@ -119,6 +120,9 @@ class EmoWorker:
 
     def set_emodev(self, dev):
         self.emodev = dev
+
+    def set_raw(self, mode):
+        self.isRaw = mode
 
     def update_sensor_values(self, sensors):
         """Write new sensor value to last_values_list."""
@@ -159,9 +163,9 @@ class EmoWorker:
         if self.sensorlist[15].get_sensor_variance() > 0.01:
             return 2
 
-        # grit one's teeth 
+        # grit one's teeth
         if self.sensorlist[9].get_sensor_variance() > 0.01:
-            return 3 
+            return 3
 
         return 0
 
@@ -186,7 +190,7 @@ class EmoWorker:
     def get_brain_imagestyle(self):
 
         std = np.std(self.last_values_list, ddof=1) # sample standard deviation
- 
+
         # idea: the lower std, the more relaxed the painting,
         # the higher std, the more excited it should be.
 
@@ -214,39 +218,36 @@ class EmoWorker:
                 if packet is None:
                     continue
 
+                if self.isRaw:
+                    data = ",".join([
+                        str(packet.sensors['F3']['value']),
+                        str(packet.sensors['FC5']['value']),
+                        str(packet.sensors['AF3']['value']),
+                        str(packet.sensors['F7']['value']),
+                        str(packet.sensors['T7']['value']),
+                        str(packet.sensors['P7']['value']),
+                        str(packet.sensors['O1']['value']),
+                        str(packet.sensors['O2']['value']),
+                        str(packet.sensors['P8']['value']),
+                        str(packet.sensors['T8']['value']),
+                        str(packet.sensors['F8']['value']),
+                        str(packet.sensors['AF4']['value']),
+                        str(packet.sensors['FC6']['value']),
+                        str(packet.sensors['F4']['value']),
+                        str(packet.sensors['X']['value']),
+                        str(packet.sensors['Y']['value'])
+                    ])
+                    if self.emodev:
+                        self.emodev.write_message(data)
+                    time.sleep(0.0001)
+                    continue
+
                 self.update_sensor_values(packet.sensors)
 
                 if self.emodev:
                     self.emodev.write_message("brain:activity:" + str(self.get_brain_activity()) + ";" + str(self.get_std()) +";" + str(self.get_thought()))
 
-
-
                 STYLE = self.get_brain_imagestyle()
-
-                #ROTATE+= (packet.sensors['F8']['value']-115)/4000.0
-                #print str(ROTATE) + " - " + str((packet.sensors['F8']['value']-115)/4000.0)
-
-                # data = ",".join([
-                #    str(packet.sensors['F3']['value']),
-                #    str(packet.sensors['FC5']['value']),
-                #    str(packet.sensors['AF3']['value']),
-                #    str(packet.sensors['F7']['value']),
-                #    str(packet.sensors['T7']['value']),
-                #    str(packet.sensors['P7']['value']),
-                #    str(packet.sensors['O1']['value']),
-                #    str(packet.sensors['O2']['value']),
-                #    str(packet.sensors['P8']['value']),
-                #    str(packet.sensors['T8']['value']),
-                #    str(packet.sensors['F8']['value']),
-                #    str(packet.sensors['AF4']['value']),
-                #    str(packet.sensors['FC6']['value']),
-                #    str(packet.sensors['F4']['value']),
-                #    str(packet.sensors['X']['value']),
-                #    str(packet.sensors['Y']['value']),
-                #    str(dt.now())
-                # ])
-                #
-                # print data
 
                 time.sleep(0.0001)
 
@@ -268,6 +269,7 @@ class SocketHandler(websocket.WebSocketHandler):
 
     def open(self):
         emoDev.set_emodev(self)
+        emoDev.set_raw(False)
         print 'new connection'
         #self.write_message("Hi, client: connection is made ...")
         #tornado.ioloop.IOLoop.instance().add_timeout(datetime.timedelta(seconds=1), self.test)
@@ -279,6 +281,21 @@ class SocketHandler(websocket.WebSocketHandler):
         emoDev.set_emodev(0)
         print 'connection closed'
 
+class RawSocketHandler(websocket.WebSocketHandler):
+    def check_origin(self, origin):
+        return True
+
+    def open(self):
+        emoDev.set_emodev(self)
+        emoDev.set_raw(True)
+        print 'new connection'
+
+    def on_message(self, message):
+        pass
+
+    def on_close(self):
+        emoDev.set_emodev(0)
+        print 'connection closed'
 
 if __name__ == "__main__":
 
@@ -287,6 +304,7 @@ if __name__ == "__main__":
     app = tornado.web.Application([
         (r'/()', web.StaticFileHandler, {'path': './index.html'}),
         (r'/ws', SocketHandler),
+        (r'/raw', RawSocketHandler),
         (r"/upload", UploadHandler),
         (r"/design/(.+)", web.StaticFileHandler, {'path': '../design/'}),
         (r"/(.+)", web.StaticFileHandler, {'path': './'})
