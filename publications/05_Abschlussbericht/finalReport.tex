@@ -30,9 +30,9 @@
 % Creates title of document and additional title page.
 \maketitle
 
-\section*{Abstract [insg.: 6 Seiten, mind. 4 Seiten reiner Text]}
+\section*{Abstract}
 
-Electroencephalography (EEG) is a technique for measuring brain activity. Although widely used in neuroscientific research, it has thus far only rarely been used for the purpose of computer game control. Here we show that a leightweight EEG device, the Emotiv XXX, can be successfully used to play a broad range of simple yet challenging computer games. Furthermore, we demonstrate that rather than merely substituting a mouse or keyboard, an EEG device enables the development of a new type of games which go beyond traditional means of game control. We specifically developed six games, all of which can be played by controlling one's mental activity. We anticipate our work to be a starting point for ever more complex games and a new, keyboard-free gaming experience.
+Electroencephalography (EEG) is a technique for measuring brain activity. While it has been widely used in neuroscientific research, it was used only rarely for other purposes like computer game control. Here we show that a leightweight consumer EEG device, the Emotiv Insight, can successfully be used to play a broad range of simple yet challenging computer games. Furthermore, we demonstrate that rather than merely substituting a mouse or keyboard, an EEG device enables the development of a new type of games which go beyond traditional means of game control by enhancing human computer interaction. We specifically developed six browser games, all of which can be played by controlling one's mental activity. We anticipate our work to be a starting point for even more complex games and a new, keyboard-free gaming experience.
 
 
 % Give an overview over your project here. Give a glimpse insight in the problem and write why it is important to be solved. Write what you did to make your implementation better than the state of the art implementations.
@@ -40,20 +40,16 @@ Electroencephalography (EEG) is a technique for measuring brain activity. Althou
 
 \section{Introduction}
 
-Give an introduction to the problem. This might start from history, motivate the problem and end with the computational demands. Motivate why to use GPUs. You should also introduce CUDA in a way that makes an average computer science student understand what it is.
+Traditionally, computer games were played with keyboards, mice and more specialized input devices like joysticks, gamepads and steering wheels. In order to improve gaming experience, much more sophisticated human computer interaction devices were developed, like virtual reality glasses and sensory gloves. All these efforts subserve to get games as realistic as possible. Only recently, cheaper consumer EEG devices came to market, which makes it possible to use them as input devices as well. By reading the players brain activity, a much better adaption to the gamers stress level can be applied, as well as a totally new way of computer game control can be brought up. One of such devices is the Emotiv Insight EEG, which consists of enough sensors to distinguish between several emotional levels and apply multiclass classification for higher order control mechanisms. 
+
 
 \section{Description of the Solution}
 
-Describe your solution to the problem in detail. I propose to spend one chapter on a general, simple solution strategy so that the reader is familiar with how to solve the problem. This could also be a summary of the paper or document you mainly used to base your work on.
+We wanted to show that it's possible to use a customer EEG as the input device for a browser game and not being just a replacement of an ordinary keyboard. As such, we developed multiple small games, which can be subsumed under the topic of a funfair. We decided against one big monolithic game, as the focus would be shifted towards real game-development instead of focusing on bringing up simple models, that don't need a training phase, work for every person out of the box and have a high reaction-time in multiple game-scenarios. In order to get the best performance out of the sensor data, we first tried several ways of integrating the Emotiv sensor into an application. We started with the official Emotiv SDK, as it is available for several computer programming languages, like C\#, Java and Python. Unfortunately, the SDK isn't really stable across different operating systems, like Linux and Mac OSX. The Objective-C version was doing fine on OSX, but Linux had several other problems. But as the features that were provided under the limiting licensing model as well as the limited data rate were not satisfying, we moved on and tried to reverse engineer the formerly Firefox extension, which was provided by Emotiv until December, 2016. As the official SDK as well as the Firefox extension did not provide the data we needed, due to licensing problems and shut down of API's, we finally tried the open source reverse engineered library Emokit by OpenYou, which was initially developed to get data out of an Emotiv EPOC EEG headset, but flawlessly works with an Emotiv Insight headset as well.
 
-Subsequently, your particular solution should be described. Spend at least one chapter on describing the (parallel) improvements you made upon the naive implementation. It might be advantageous to split the implementation description to parts, each filling a subsection, and to give an overview over those parts first.
+The final version of the software consists of a Python application, which forks a Tornado web-application server. This setup is ideal to stream the sensory data from Emokit directly to the browser via websockets. 
 
-Key points to mention:
-
-- Breite vor Schoenheit
-
-- no "boring replacement of keyboard through EEG"
-
+On the browser-side, the data is received asynchronously, both from the Emotiv data stream, as well as from the Leap Motion sensor, which was used for one of the games to bring in another way of non-standard interaction with games. The games themselves are organized in separate HTML files, which share one common JavaScript file. This JavaScript file handles the game-progress, implements a central animation loop, that can be used by every individual game as well as a status bar, which indicates the current concentration level of the player.
 
 
 \subsection{Sensor data analysis}
@@ -63,6 +59,9 @@ As most actions lasted for a very brief period of time, roughly 1-2 seconds, we 
 \texttt{Y} and \texttt{X} for \texttt{shake head} classification, \texttt{F3} for \texttt{nodding} and \texttt{O1} for the classification of \texttt{clench teeth}. It would have been possible to classify \texttt{squint eyes} as well, however the signals appeared to be hardly distinguishable from \texttt{clench teeth} (and furthermore closing one's eyes during gameplay was found to be rather annoying). This second type of classification was achieved through thresholding the windowed sample variance of a targeted sensor. As a result, we were able to classify one continuous mental state (\texttt{relaxation}) as well as three discrete events (\texttt{clench teeth, nodding, shake head}).
 
 \subsection{Gyro data analysis}
+
+It turned out that Emokit was the perfect fit for our needs, as it gives raw measurements at a pretty high rate. Unfortunately, there is no documentation of what channel actually delivers what information. When the headset is moved around, a lot of channels dramatically change their values, which must be kept in mind for normal sensor analysis. 
+
 
 \subsection{Architecture \& Backend}
 
@@ -93,6 +92,11 @@ Mastermind is a board game where one player selects a four-digit, order-sensitiv
 
 
 \subsection{Wireloop}
+Wireloop is a remake of the classical game whereby a metal loop has to be dragged from one end to the other, without touching the wire. Typically a loud sound is played when the wire is touched accidentally. In the Funfair setting, the wireloop game is controlled by the gyroscope only.
+
+By moving the head, the rotational change is translated into planar co-ordinates that enable the metal loop to move. The wire itself is generated randomly using cardinal splines and is fully parametrable. The game is restarted whenever the wire was touched. One simplification was made. The angle of the loop is automatically adapted to the current position by taking the derivative of the current line segment and is not needed to be set by the player.
+
+
 \subsection{Balancing}
 Our balancing game is perhaps the most challenging game, as it requires to balance a little man on an inherently instable seesaw: if tilted to one side, one needs to strain oneself in order to get it back to balance - but then, it tilts to the other side and one instantly needs to switch to 'zen mode', to total relaxation... if one is able to do this for 30 seconds, the game is won, otherwise it is re-started.
 
