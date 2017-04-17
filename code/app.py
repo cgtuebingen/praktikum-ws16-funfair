@@ -67,12 +67,12 @@ class Sensor:
                 self.maxVal = new_value
             elif new_value < self.minVal:
                 self.minVal = new_value
-                
+
         if self.normalize:
             self.last_value =  self.get_normalized_value(new_value)
         else:
 	    self.last_value = new_value
-	    
+
         self.last_values_list[self.value_index] = self.last_value
         self.value_index = (self.value_index + 1) % self.window_size
 
@@ -141,8 +141,8 @@ class EmoWorker:
             self.sensorlist[i].update_values_list(sensors[s]["value"])
 
         # update the feature buffer, a combination of the following selected sensor values:
-        # (1,2,4,6,8,9) -> these are the 1-based indices. 
-        new_value = (sensors['F3']['value'] + sensors['FC5']['value'] + 
+        # (1,2,4,6,8,9) -> these are the 1-based indices.
+        new_value = (sensors['F3']['value'] + sensors['FC5']['value'] +
                      sensors['F7']['value'] + sensors['P7']['value'] +
                      sensors['O2']['value'] + sensors['P8']['value'])
         self.last_values_list[self.index] = new_value
@@ -268,10 +268,10 @@ class UploadHandler(tornado.web.RequestHandler):
 
         output_file = open("painter/result_imgs/snapshot_orig.jpg", 'w')
         output_file.write(file1['body'])
-        self.finish('done')
 
         # Upload file to neural painting
         sp.take_snapshot_and_paint()
+        self.finish('done')
 
 class SocketHandler(websocket.WebSocketHandler):
     def check_origin(self, origin):

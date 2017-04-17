@@ -387,6 +387,20 @@ Plot.prototype = {
           break;
         }
 
+        case 'timeseries': {
+
+          var d = cur[1];
+
+          ctx.beginPath();
+
+          ctx.moveTo(0 * resX + mx, -d[0] * resY + my);
+          for (var i = 1; i < d.length; i++) {
+            ctx.lineTo(i * resX + mx, -d[i] * resY + my);
+          }
+          ctx.stroke();
+          break;
+        }
+
         case 'arrow': {
 
           var d = cur[1];
