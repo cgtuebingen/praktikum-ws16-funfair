@@ -135,7 +135,7 @@
           }
         }
 
-        if (Math.abs(spline[spline.length - 1] - y) < 70 && Math.abs(spline[spline.length - 2] - x) < 70) {
+        if (!isLost && Math.abs(spline[spline.length - 1] - y) < 70 && Math.abs(spline[spline.length - 2] - x) < 70) {
           isWon = true;
           okay = true;
           $.displayText('Won!');
