@@ -22,7 +22,7 @@
 % You can place a teaser as follows. (Otherwise, just uncomment the following part)
 \teaser{
     \includegraphics[width=\textwidth]{images/teaser_funfair.png}
-    \caption{You can place a teaser here.}
+    \caption{Screenshot of the funfair overview page.}
     \label{fig:teaser}
 }     
 %TODO idea: why not include a fancy animated video teaser here? That'd be beautiful...
@@ -93,7 +93,7 @@ Mastermind is a board game where one player selects a four-digit, order-sensitiv
 \subsection{Wireloop}
 Wireloop is a remake of the classic children's game in which a metal loop has to be dragged from one end to the other, without touching a wire. Typically a loud sound is played when the wire is touched accidentally. In our funfair setting, the wireloop game is controlled by the gyroscope: By moving the head, the rotational change is translated into planar co-ordinates that enable the metal loop to move. The wire itself is generated randomly using cardinal splines and is fully parametrized. The game is restarted whenever the wire was touched. The angle of the loop is automatically adapted to the current position by taking the derivative of the current line segment.
 
-The wireloop game demonstrates that the gyroscope of an Emotiv Insight device can be sufficient to play an interesting game, one that would allegedly be quite boring with a mouse but is a real challenge with head movement control. The wireloop's control mechanism could be used to build a more complex game where the loop itself is at a fixed x-position on the screen, whereas the wire itself moves from left to right (an adaption of the \texttt{flappy bird} game).
+The wireloop game demonstrates that the gyroscope of an Emotiv Insight device can be sufficient to play an interesting game, one that would allegedly be quite boring with a mouse but is a real challenge with head movement control. The wireloop's control mechanism could be used to build a more complex game where the loop itself is at a fixed x-position on the screen, whereas the wire itself moves from left to right (an adaption of the \texttt{flappy bird} game). Beyond that, one could use it in a simulation game - e.g. for an aircraft cockpit where tilting the head would correspond to the plane tilting to a side.
 
 \subsection{Balancing}
 Our balancing game is perhaps the most challenging game, as it requires to balance a little man on an inherently instable seesaw: if tilted to one side, one needs to strain oneself in order to get it back to balance - but then, it tilts to the other side and one instantly needs to switch to 'zen mode', to total relaxation... if one is able to do this for 30 seconds, the game is won, otherwise it is re-started.
@@ -109,27 +109,9 @@ In some relaxation techniques such as \textit{Progressive Relaxation} \cite{Jaco
 
 \section{Possible Extensions}
 
+Beyond the possible game-specific extensions and applications mentioned beforehand (highstriker: ADHD treatment through learning how to calm down, wireloop / gyroscope: flappy bird adaption with moving wire or aircraft simulation game, balancing: teach relaxation techniques), we could think of a couple of ways to enhance our funfair. It would be possible to add additional games without much effort, as the whole funfair is designed in a modular way. Beyond that, one could improve the visual experience of all our games by making them look more realistic, such as by using more sophisticated game engine or a 3D framework.
 
-
-Describe possible extensions and discuss why they could be useful.
-
-Viele Daten -> LSTM
-
-weitere Spiele beliebig hinzufuegbar
-
-Spiele fancier machen (3D, ...)
-
-
-\appendix
-
-\section{General Infos}
-
-You don't need an appendix. The two appendix sections are just there to give some additional or general information.
-
-This document describes roughly, what the documentation of the Praktikum project should look like.
-
-Note that your final documentation of your project should contain 6 text pages using this template plus the cover and the empty sheet at the beginning. Within the 6 pages, at least 4 pages should be only text.
-
+We anticipate our main contribution, however, to lie in an extensive exploration of different mouse- and keyboard-free game control mechanisms and the demonstration which forms of game control work well from a technical and data-driven perspective as well as from a user-centered point of view. Our work could be a starting point for future game designers implementing their own, unique ideas while being informed by our experiments on what forms of control serve a new, interesting gaming experience.
 
 \bibliographystyle{alpha}
 \bibliography{bibliography}
