@@ -32,7 +32,7 @@
     <body style="background:#ebe3d9;margin:0">
 
         <div id="overlay"></div>
-        <div style="position: relative; width:80%; margin:auto"> 
+        <div id="board" style="position: relative; width:80%; margin:auto"> 
             <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
 
             <img src="../../design/bude_fg_mastermind.svg" style="position: absolute; z-index: 3; width: 100%">
@@ -368,9 +368,13 @@
                 }
             }
 
-            changeRow = function() {
+            changeRow = function(decrement) {
+            
+                if(decrement === undefined) {
+                    decrement = 1;
+                }
                 if(gameRunning) {
-                    curr.i = (curr.i + 1) % numRows;
+                    curr.i = (curr.i + decrement + numRows) % numRows;
                     drawGame(offsetX, offsetY, width, height);
                 }
             }
@@ -433,6 +437,29 @@
             ws.onerror = function (ev) {
                 console.log("Error!", ev);
             }
+            
+            document.onkeydown = function (key) {
+            
+                key.preventDefault();
+            
+                if(key.keyCode == 39) { // right arrow
+                    changeColumn();
+                } else if(key.keyCode == 37) { // left arrow
+                    changeColor();
+                } else if(key.keyCode == 38) { // up
+                    if(explainModeCounter == 0) {
+                        changeRow(-1);
+                    } else {
+                        explainGame();
+                    }
+                } else if(key.keyCode == 40) { // up
+                    if(explainModeCounter == 0) {
+                        changeRow();
+                    } else {
+                        explainGame();
+                    }
+                }            
+            }
 
             ws.onmessage = function (ev) {
 
@@ -470,33 +497,31 @@
             explainGame = function() {
             
                 var id = document.getElementById("overlay");
-                var originalFontSize = id.style.fontSize;
-                var originalColor = id.style.color;
                 id.style.fontSize = String(parseInt(window.innerWidth / 34))+"px";
                 id.style.color = "black";
+                document.getElementById("board").style.opacity = 0.5;
             
                 if(explainModeCounter == 0) {
                     $.displayText("Click or nod to continue!");
                 } else if(explainModeCounter == 1) {
-                    $.displayText("change color: clench teeth or scroll mouse");
-                } else if(explainModeCounter == 2) {
-                    $.displayText("change column: nod or click mouse");
-                } else if(explainModeCounter == 3) {
-                    $.displayText("change row: shake head or click mouse middle button");
-                } else if(explainModeCounter == 4) {
                     $.displayText("Game rules: <br><br> Try to guess the computer's color code. <br> \
                     For every correct peg (correct color in correct position), you get a black feedback peg.<br><br> \
                     For a peg with the correct color at a wrong position, you get a black feedback peg. \
-                    ");
+                    ");                    
+                } else if(explainModeCounter == 2) {
+                    $.displayText("change color: clench teeth, scroll mouse or use left key");
+                } else if(explainModeCounter == 3) {
+                    $.displayText("change column: nod, click mouse or use right key");
+                } else if(explainModeCounter == 4) {
+                    $.displayText("change row: shake head, click mouse middle button or use up/down keys");
                 } else if(explainModeCounter == 5) {
                     $.displayText("Have fun!");
                 } else if(explainModeCounter == 6) {
                     $.displayText("");
+                    document.getElementById("board").style.opacity = 1.0;
                     explainModeCounter = -1;
                 }
                 explainModeCounter += 1;
-                //id.style.fontSize = originalFontSize;
-                //id.style.color = originalColor;
             }
 
             if(useMouseControlForDemo) {
