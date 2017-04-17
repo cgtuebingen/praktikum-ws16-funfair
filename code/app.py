@@ -37,7 +37,7 @@ def get_fano_factor(value_list):
 
 class Sensor:
 
-    def __init__(self, name, minVal, maxVal, window_size, adaptive=False):
+    def __init__(self, name, minVal, maxVal, window_size, adaptive=False, normalize=True):
 
         assert(minVal < maxVal), "minVal >= maxVal: not possible"
 
@@ -46,6 +46,7 @@ class Sensor:
         self.maxVal = maxVal
         self.window_size = window_size
         self.adaptive = adaptive
+        self.normalize = normalize
         self.last_value = 0.5
         self.last_values_list = [0 for i in range(window_size)]
         self.value_index = 0
@@ -66,7 +67,12 @@ class Sensor:
                 self.maxVal = new_value
             elif new_value < self.minVal:
                 self.minVal = new_value
-        self.last_value =  self.get_normalized_value(new_value)
+                
+        if self.normalize:
+            self.last_value =  self.get_normalized_value(new_value)
+        else:
+	    self.last_value = new_value
+	    
         self.last_values_list[self.value_index] = self.last_value
         self.value_index = (self.value_index + 1) % self.window_size
 
@@ -97,24 +103,27 @@ class EmoWorker:
                                         "P8", "T8", "F8", "AF4",
                                         "FC6", "F4", "X", "Y"]
 
+        adaptive = False
+        normalize = False
+
         # build list with Sensor object for each sensor
         self.sensorlist = []
-        self.sensorlist.append(Sensor("F3", -3241, 4630, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("FC5", -1287, 1718, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("AF3", -5911, 7491, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("F7", -2169, -2148, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("T7", -531, 2359, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("P7", -5026, -2850, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("O1", -3734, 3780, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("O2", -3763, 2101, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("P8", -675, 1473, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("T8", -3271, 6340, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("F8", 240, 383, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("AF4", -3551, 7129, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("FC6", -73, 273, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("F4", -140, 3, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("X", -29, 94, WINDOW_SIZE))
-        self.sensorlist.append(Sensor("Y", -11, 56, WINDOW_SIZE))
+        self.sensorlist.append(Sensor("F3", -3241, 4630, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("FC5", -1287, 1718, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("AF3", -5911, 7491, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("F7", -2169, -2148, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("T7", -531, 2359, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("P7", -5026, -2850, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("O1", -3734, 3780, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("O2", -3763, 2101, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("P8", -675, 1473, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("T8", -3271, 6340, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("F8", 240, 383, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("AF4", -3551, 7129, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("FC6", -73, 273, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("F4", -140, 3, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("X", -29, 94, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
+        self.sensorlist.append(Sensor("Y", -11, 56, WINDOW_SIZE, adaptive=adaptive, normalize=normalize))
         self.num_sensors = len(self.sensorlist)
 
 
@@ -127,14 +136,15 @@ class EmoWorker:
     def update_sensor_values(self, sensors):
         """Write new sensor value to last_values_list."""
 
-        # c(1,2,4,6,8,9)
-        new_value = sensors['F3']['value'] + sensors['FC5']['value'] + sensors['F7']['value'] + sensors['P7']['value'] + sensors['O2']['value'] + sensors['P8']['value']
-
-
+        # update all sensors
         for i, s in enumerate(self.meaningful_sensor_names):
             self.sensorlist[i].update_values_list(sensors[s]["value"])
 
-
+        # update the feature buffer, a combination of the following selected sensor values:
+        # (1,2,4,6,8,9) -> these are the 1-based indices. 
+        new_value = (sensors['F3']['value'] + sensors['FC5']['value'] + 
+                     sensors['F7']['value'] + sensors['P7']['value'] +
+                     sensors['O2']['value'] + sensors['P8']['value'])
         self.last_values_list[self.index] = new_value
         self.index = (self.index + 1) % WINDOW_SIZE
         self.step_counter += 1
@@ -153,13 +163,13 @@ class EmoWorker:
            3  ->  squint one's eyes
         """
 
+        # TODO note the difference of variance and std!
+
         # shaking of the head
-        # if self.sensorlist[0].get_sensor_std() > 0.001 and self.sensorlist[1].get_sensor_std() > 0.001:
         if self.sensorlist[0].get_sensor_variance() > 0.01 and self.sensorlist[1].get_sensor_std() > 0.005:
             return 1
 
         # nodding
-        # if self.sensorlist[15].get_sensor_std() > 0.005:
         if self.sensorlist[15].get_sensor_variance() > 0.01:
             return 2
 
