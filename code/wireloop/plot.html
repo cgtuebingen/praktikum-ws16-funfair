@@ -15,7 +15,7 @@ var DATA = [];
 var MASK = (1 << 16) - 1;
 var WIN = 100;
 
-MASK = (1 << 16) -1;
+MASK = (1 << 14) | (1 << 15);
 
 
 var X = 500;
@@ -34,7 +34,7 @@ function adaptPos(dx, dy) {
 
 var r = () => ("0" + Math.floor(Math.random() * 256).toString(16)).slice(-2);
 
-var pl = new Plot(document.getElementById('canvas'), [0, WIN], [-4000, 4000]);
+var pl = new Plot(document.getElementById('canvas'), [0, WIN], [-100, 100]);
 
 var ws = new WebSocket('ws://localhost:8080/raw');
 

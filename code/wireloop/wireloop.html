@@ -1,74 +1,315 @@
-<canvas id="canvas" width="1000" height="400"></canvas>
+
+<html>
+
+<head>
+    <title>Wireloop</title>
+    <style>
+
+      canvas {
+        z-index: 100
+      }
+
+        #overlay {
+            text-align: center;
+            color: white;
+            position: absolute;
+            width: 100%;
+            z-index: 2000;
+            font-size: 160px;
+            font-family: "Arial";
+            font-weight: bold;
+            padding-top: 200px;
+            text-shadow: 0px 4px 3px rgba(0, 0, 0, 0.4),
+            0px 8px 13px rgba(0, 0, 0, 0.1),
+            0px 18px 23px rgba(0, 0, 0, 0.1);
+        }
+
+        #indic {
+            position: absolute;
+            right: 30px;
+            top: 100px;
+        }
+    </style>
+
+</head>
+
+<body style="background:#ebe3d9;margin:0">
+
+<div id="overlay"></div>
+<div style="position: relative; width:80%; margin:auto">
+    <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
+
+    <img src="../../design/bude_fg_wireloop.svg" style="position: absolute; z-index: 3; width: 100%">
+    <div style="position: relative; z-index: 200">
+        <canvas id="canvas"></canvas>
+    </div>
+
+</div>
+
+<canvas id="indic"></canvas>
+
+<script src="../js/common.js"></script>
 <script>
 
-  // Implementation of cardinal splines
-  // https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Cardinal_spline
-  function getSpline(pts, tension, numOfSegments) {
 
-    var _pts = [];
-    var _ret = [];
+    /*#########################################################
+     ACTION HANDLING
+     ########################################################*/
 
-    _pts = pts.slice(0);
+    //then: 'mouse moving' equates to 'being relaxed'
+    var useMouseControlForDemo = false;
 
-    _pts.unshift(pts[1]);
-    _pts.unshift(pts[0]);
-    _pts.push(pts[pts.length - 2]);
-    _pts.push(pts[pts.length - 1]);
+    window.onresize = function() {
+      canvas[0].width = window.innerWidth;
+      canvas[0].height = window.innerHeight;
 
-    for (var i = 2; i < (_pts.length - 4); i += 2) {
-      for (var t = 0; t <= numOfSegments; t++) {
+      initialize();
+    };
 
-        var t1x = (_pts[i + 2] - _pts[i - 2]) * tension;
-        var t1y = (_pts[i + 3] - _pts[i - 1]) * tension;
+    var ws = new WebSocket('ws://localhost:8080/raw');
 
-        var t2x = (_pts[i + 4] - _pts[i]) * tension;
-        var t2y = (_pts[i + 5] - _pts[i + 1]) * tension;
+    ws.onopen = function() {
+      console.log("Connected!");
+    };
 
-        var st = t / numOfSegments;
+    ws.onclose = function(ev) {
+      console.log("Closed!");
+    };
 
-        var c1 = 2 * Math.pow(st, 3) - 3 * Math.pow(st, 2) + 1;
-        var c2 = -(2 * Math.pow(st, 3)) + 3 * Math.pow(st, 2);
-        var c3 = Math.pow(st, 3) - 2 * Math.pow(st, 2) + st;
-        var c4 = Math.pow(st, 3) - Math.pow(st, 2);
+    ws.onerror = function(ev) {
+      console.log("Error!", ev)
+    };
 
-        var x = c1 * _pts[i] + c2 * _pts[i + 2] + c3 * t1x + c4 * t2x;
-        var y = c1 * _pts[i + 1] + c2 * _pts[i + 3] + c3 * t1y + c4 * t2y;
+    // Set sensibility
+    $.Indicator.SENSE = 200;
 
-        _ret.push(x);
-        _ret.push(y);
+    ws.onmessage = function (ev) {
+
+      var data = ev.data.split(",");
+
+      adaptPos(parseFloat(data[14]), parseFloat(data[15]));
+    };
+
+
+    var X = 0;
+    var Y = 0;
+    function adaptPos(dx, dy) {
+
+      var alpha = 0.8;
+
+      X = X * alpha + (1-alpha)*(X+(-dx + 24) * 6);
+      Y = Y* alpha + (1-alpha)*(Y+(dy - 22) *2);
+
+      draw(X, Y);
+
+    }
+
+    if (useMouseControlForDemo) {
+      document.onmousemove = function(ev) {
+        if (gameRunning) {
+
+          var x = ev.pageX - offsetX - off.left
+          var y = ev.pageY - offsetY - off.top
+
+          draw(x, y);
+
+        }
       }
     }
-    return _ret;
-  }
 
-  var canvas = document.getElementById("canvas");
-  var ctx = canvas.getContext("2d");
+    var isLost = false;
+    var isWon = false;
 
-  var width = canvas.width;
-  var height = canvas.height;
+    function draw(x, y) {
 
-  var myPoints = [];
-  var points = width / 40;
+        // Find closest point on spline
+        var minX = Infinity;
+        var minI = -1;
+        var theta = 0;
+        var okay = false;
+        for (var i = 0; i < spline.length; i+=2) {
 
-  for (var i = 0; i < points; i++) {
-    myPoints.push(i * width / points + Math.random() * width / 50 - Math.random() * width / 50);
-    myPoints.push(Math.random() * (height - 50) + 25);
-  }
+          if (Math.abs(spline[i] - x) < minX) {
+            minX = Math.abs(spline[i] - x);
+            minI = i >> 1;
+          }
+        }
 
-  var spline = getSpline(myPoints, 1, 10);
+        if (Math.abs(spline[spline.length - 1] - y) < 70 && Math.abs(spline[spline.length - 2] - x) < 70) {
+          isWon = true;
+          okay = true;
+          $.displayText('Won!');
+          $.progress.setComplete($.progress.game.WIRELOOP);
+          $.goto('/', 1500);
+        } else if (Math.abs(spline[minI * 2 + 1] - y) < 70) {
+          theta = Math.atan(splineDX[minI]);
+          okay = true;
+        } else if (!isWon) {
+            if(!isLost)
+              window.setTimeout(initialize, 1000);
+            isLost = true;
+        }
 
-  function draw() {
-
-    ctx.strokeStyle = "red";
-    ctx.beginPath();
-
-    ctx.moveTo(spline[0], spline[1]);
-    for (var i = 2; i < spline.length; i += 2) {
-      ctx.lineTo(spline[i], spline[i + 1]);
+        ctx.clearRect(0, 0, 2000, 2000);
+        drawLoopBack(x, y, theta, okay ? 'green' : 'red');
+        drawWire();
+        drawLoop(x, y, theta, okay ? 'green' : 'red');
     }
-    ctx.stroke();
-  }
 
-  draw();
+    // Implementation of cardinal splines
+    // https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Cardinal_spline
+    function getSpline(pts, tension, numOfSegments) {
+
+      var _pts = [];
+      var _ret = [];
+
+      _pts = pts.slice(0);
+
+      _pts.unshift(pts[1]);
+      _pts.unshift(pts[0]);
+      _pts.push(pts[pts.length - 2]);
+      _pts.push(pts[pts.length - 1]);
+
+      for (var i = 2; i < (_pts.length - 4); i += 2) {
+        for (var t = 0; t <= numOfSegments; t++) {
+
+          var t1x = (_pts[i + 2] - _pts[i - 2]) * tension;
+          var t1y = (_pts[i + 3] - _pts[i - 1]) * tension;
+
+          var t2x = (_pts[i + 4] - _pts[i]) * tension;
+          var t2y = (_pts[i + 5] - _pts[i + 1]) * tension;
+
+          var st = t / numOfSegments;
+
+          var c1 = 2 * Math.pow(st, 3) - 3 * Math.pow(st, 2) + 1;
+          var c2 = -(2 * Math.pow(st, 3)) + 3 * Math.pow(st, 2);
+          var c3 = Math.pow(st, 3) - 2 * Math.pow(st, 2) + st;
+          var c4 = Math.pow(st, 3) - Math.pow(st, 2);
+
+          var x = c1 * _pts[i] + c2 * _pts[i + 2] + c3 * t1x + c4 * t2x;
+          var y = c1 * _pts[i + 1] + c2 * _pts[i + 3] + c3 * t1y + c4 * t2y;
+
+          _ret.push(x);
+          _ret.push(y);
+        }
+      }
+      return _ret;
+    }
+
+    /*#########################################################
+     INITIALIZATION
+     ########################################################*/
+
+    var canvas = $("#canvas");
+    canvas[0].width = window.innerWidth;
+    canvas[0].height = window.innerHeight;
+    var ctx = canvas.getContext("2d");
+    var off = canvas.offset(); // get the offset of the canvas once
+
+
+    var width;
+    var height;
+    var offsetX;
+    var offsetY;
+    var surroundingWidth;
+    var spline;
+    var splineDX = [];
+
+    var gameRunning = false;
+
+    initialize = function() {
+
+      isLost = false;
+
+      width = window.innerWidth / 2;
+      height = window.innerWidth / 5;
+      offsetX = window.innerWidth / 7+10;
+      offsetY = window.innerWidth / 4;
+      surroundingWidth = window.innerWidth / 185;
+      textPx = Math.trunc(window.innerWidth / 71);
+
+      var myPoints = [];
+      var points = width / 40;
+      for (var i = 0; i < points; i++) {
+        myPoints.push(i * width / points + Math.random() * width / 50 - Math.random() * width / 50);
+        myPoints.push(Math.random() * (height - 50) + 25);
+      }
+      spline = getSpline(myPoints, 1, 10);
+
+      for (var i = 0; i < spline.length - 2; i+= 2) {
+          splineDX.push((spline[i + 3] - spline[i + 1]) / (spline[i + 2] - spline[i + 0]) || 0);
+      }
+
+      X = spline[0];
+      Y = spline[1];
+
+      draw(X, Y);
+
+      var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80)) + "px";
+      document.getElementById("overlay").style.paddingTop = overlayDist;
+      $.countdown("Move your head!");
+      window.setTimeout(function() {
+        gameRunning = true;
+      }, 4000);
+    };
+
+
+
+    initialize();
+
+
+    function drawWire() {
+
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#bbb";
+      ctx.beginPath();
+
+      ctx.moveTo(spline[0] + offsetX, spline[1] + offsetY);
+      for (var i = 2; i < spline.length; i += 2) {
+        ctx.lineTo(spline[i] + offsetX, spline[i + 1] + offsetY);
+      }
+      ctx.stroke();
+    }
+
+    function drawLoopBack(x, y, theta, color) {
+
+      ctx.save();
+
+      ctx.translate(x + offsetX, y + offsetY);
+      ctx.rotate(theta);
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 10
+      ctx.beginPath();
+      ctx.ellipse(0,0, 25, 30, 0, Math.PI/2, Math.PI / 2 * 3, true);
+
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawLoop(x, y, theta, color) {
+
+      ctx.save();
+
+      ctx.translate(x + offsetX, y + offsetY);
+      ctx.rotate(theta);
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 10
+      ctx.beginPath();
+      ctx.ellipse(0,0, 25, 30, 0, Math.PI/2, Math.PI / 2 * 3, false);
+
+      ctx.stroke();
+
+      ctx.moveTo(0, 25);
+      ctx.lineTo(0, 100);
+      ctx.stroke();
+
+      ctx.restore();
+    }
 
 </script>
+
+</body>
+</html>

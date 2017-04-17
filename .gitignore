@@ -2,6 +2,9 @@ code/painter/result_imgs/
 *.swp
 *.pyc
 
+.DS_Store
+.idea
+
 
 # LaTeX .gitignore stuff taken from: https://github.com/github/gitignore/blob/master/TeX.gitignore
 ## Core latex/pdflatex auxiliary files:

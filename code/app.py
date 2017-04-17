@@ -187,7 +187,7 @@ class EmoWorker:
             return 2
 
         # grit one's teeth
-        if self.sensorlist[9].get_sensor_variance() > 200000:
+        if self.sensorlist[9].get_sensor_variance() > 100000:
             return 3
 
         return 0
