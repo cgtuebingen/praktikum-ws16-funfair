@@ -90,6 +90,7 @@
             var timeOfLastAction;
             var minSecondsBetweenTwoActions = 2.5;
             var gameRunning = false;
+            var explainModeCounter = 0; // >0? -> explain mode
 
             initialize = function() {
 
@@ -121,6 +122,7 @@
                 textPx = Math.trunc(window.innerWidth / 71);
                 wonMessageShown = false;
                 gameIsWon = false;
+                explainModeCounter = 0;
 
                 drawGame(offsetX, offsetY, width, height);
 
@@ -129,6 +131,40 @@
                 $.countdown("Start guessing!");
                 window.setTimeout(function(){gameRunning = true;}, 4000);
             }
+            
+            var buttonPos = {
+                x: 0,
+                y: 0,
+                r: 0,
+            };
+            
+            drawExplainButton = function() {
+                var radius = offsetX / 9;
+                var centerX = offsetX * Math.PI;
+                var centerY = offsetX * 1.6;
+                buttonPos.x = centerX;
+                buttonPos.y = centerY;
+                buttonPos.r = radius;
+
+                ctx.save();
+                
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+                ctx.fillStyle = "#9c2364";
+                ctx.fill();
+
+                ctx.lineWidth = width / 75;
+                ctx.strokeStyle = "#003300";
+                ctx.stroke();
+                
+                var textQuestionmark = String(parseInt(window.innerWidth / 34))+"px";
+                
+                ctx.font=textQuestionmark+" Veranda";
+                ctx.fillStyle = "#003300";
+                ctx.fillText("?", centerX - radius/3, centerY + radius/2);
+                ctx.restore();
+                
+              };
 
 
             /*#########################################################
@@ -138,6 +174,8 @@
             drawGame = function(x, y, width, height) {
 
                 ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                
+                drawExplainButton();
 
                 var radius = width / 24;
                 var offset = radius / 2;
@@ -393,7 +431,7 @@
             }
 
             ws.onerror = function (ev) {
-                console.log("Error!", ev)
+                console.log("Error!", ev);
             }
 
             ws.onmessage = function (ev) {
@@ -414,7 +452,11 @@
                             if(action == 1) {
                                 changeColumn();
                             } else if(action == 2) {
-                                changeRow();
+                                if(explainModeCounter == 0) {
+                                    changeRow();
+                                } else {
+                                    explainGame();
+                                }
                             } else if(action == 3) {
                                 changeColor();
                             }
@@ -424,14 +466,60 @@
                     }
                 }
             }
+            
+            explainGame = function() {
+            
+                var id = document.getElementById("overlay");
+                var originalFontSize = id.style.fontSize;
+                var originalColor = id.style.color;
+                id.style.fontSize = String(parseInt(window.innerWidth / 34))+"px";
+                id.style.color = "black";
+            
+                if(explainModeCounter == 0) {
+                    $.displayText("Click or nod to continue!");
+                } else if(explainModeCounter == 1) {
+                    $.displayText("change color: clench teeth or scroll mouse");
+                } else if(explainModeCounter == 2) {
+                    $.displayText("change column: nod or click mouse");
+                } else if(explainModeCounter == 3) {
+                    $.displayText("change row: shake head or click mouse middle button");
+                } else if(explainModeCounter == 4) {
+                    $.displayText("Game rules: <br><br> Try to guess the computer's color code. <br> \
+                    For every correct peg (correct color in correct position), you get a black feedback peg.<br><br> \
+                    For a peg with the correct color at a wrong position, you get a black feedback peg. \
+                    ");
+                } else if(explainModeCounter == 5) {
+                    $.displayText("Have fun!");
+                } else if(explainModeCounter == 6) {
+                    $.displayText("");
+                    explainModeCounter = -1;
+                }
+                explainModeCounter += 1;
+                //id.style.fontSize = originalFontSize;
+                //id.style.color = originalColor;
+            }
 
             if(useMouseControlForDemo) {
 
                 document.onclick = function(ev) {
 
                     if(ev.button == 0) { // left button
-                        changeRow();
-                    } else if (ev.button == 1) { // middle button
+                    
+                        if(explainModeCounter == 0) {
+                            // Check if button was clicked
+                            var x = ev.pageX - off.left;
+                            var y = ev.pageY - off.top;
+                            
+                            if (Math.hypot(x - buttonPos.x, y - buttonPos.y) <= buttonPos.r) {
+                                explainGame();
+                            } else {
+                                changeRow();
+                            }
+                        } else {
+                            explainGame();
+                        }
+                        
+                        } else if (ev.button == 1) { // middle button
                         changeColumn();
                     }
                 }
