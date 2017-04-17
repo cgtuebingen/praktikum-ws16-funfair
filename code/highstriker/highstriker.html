@@ -265,9 +265,7 @@
         $.displayText("Game won!");
         wonMessageShown = true;
 
-        console.log("old", $.progress._state);
         $.progress.setComplete($.progress.game.HIGHSTRIKER);
-        console.log("new", $.progress._state);
         $.goto('/', 1500);
       }
 

@@ -88,7 +88,7 @@
             var curr = {i:0, j:0};
             
             var timeOfLastAction;
-            var minSecondsBetweenTwoActions = 1.5;
+            var minSecondsBetweenTwoActions = 2.5;
             var gameRunning = false;
 
             initialize = function() {
@@ -339,7 +339,7 @@
 
             changeColumn = function() {
                 if(gameRunning) {
-                    if(1||currentColIsComplete()) {
+                    if(currentColIsComplete()) {
                         var feedback = getSortedResult(getCurrentGuess(), FIELD);
                         for(var i=0; i<feedback.length; i++) {
                             FEEDBACK[i][curr.j] = feedback[i];
@@ -350,6 +350,10 @@
                             gameRunning = false;
                             $.displayText("Game won!");
                             wonMessageShown = true;
+
+                            $.progress.setComplete($.progress.game.HIGHSTRIKER);
+                            $.goto('/', 1500);
+                            
                         } else {
                             if(curr.j < (numCols - 1)) {
                                 curr.j += 1;
@@ -365,7 +369,6 @@
                      ACTION HANDLING
             ########################################################*/
 
-            //then: 'mouse moving' equates to 'being relaxed'
             var useMouseControlForDemo = true;
 
             var gameIsWon = false;
@@ -412,7 +415,7 @@
                                 changeColumn();
                             } else if(action == 2) {
                                 changeRow();
-                            } else if(action == 3 /*|| std > 60*/) {
+                            } else if(action == 3) {
                                 changeColor();
                             }
 
@@ -423,11 +426,6 @@
             }
 
             if(useMouseControlForDemo) {
-                document.onmousemove = function (ev) {
-                    if(gameRunning) {
-                        //drawGame(offsetX, offsetY, width, height);
-                    }
-                }
 
                 document.onclick = function(ev) {
 
