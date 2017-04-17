@@ -166,15 +166,28 @@ class EmoWorker:
         # TODO note the difference of variance and std!
 
         # shaking of the head
-        if self.sensorlist[0].get_sensor_variance() > 0.01 and self.sensorlist[1].get_sensor_std() > 0.005:
+        #if self.sensorlist[0].get_sensor_variance() > 0.01 and self.sensorlist[1].get_sensor_std() > 0.005:
+        #    return 1
+
+        # nodding
+        #if self.sensorlist[15].get_sensor_variance() > 0.01:
+        #    return 2
+
+        # grit one's teeth
+        #if self.sensorlist[9].get_sensor_variance() > 0.01:
+        #    return 3
+
+
+        # shaking of the head
+        if self.sensorlist[0].get_sensor_variance() > (1020629-566)/2 and self.sensorlist[1].get_sensor_variance() > 50000:
             return 1
 
         # nodding
-        if self.sensorlist[15].get_sensor_variance() > 0.01:
+        if self.sensorlist[15].get_sensor_variance() > 30:
             return 2
 
         # grit one's teeth
-        if self.sensorlist[9].get_sensor_variance() > 0.01:
+        if self.sensorlist[9].get_sensor_variance() > 200000:
             return 3
 
         return 0
