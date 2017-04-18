@@ -249,14 +249,13 @@
     _state: parseInt(getCookie('progress') || 0, 10),
     setComplete: function(game) {
       this._state |= 1 << game;
-console.log(game)
       setCookie('progress', this._state);
     },
     isComplete: function(game) {
       return (this._state >>> game) & 1;
     },
     hasAll: function() {
-      return this._state == (1<<4)-1;
+      return this._state == (1<<6)-1;
     },
     game: {
       PAINTER: 0,
