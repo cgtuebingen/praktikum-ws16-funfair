@@ -3,6 +3,21 @@ Funfair is a collection of six browswer games, all centered around the setting o
 
 ![](design/index.png)
 
+## Teaser
+
+Here's how playing some of our funfair games looks like:
+
+### Balancing game:
+![balancing-demo-video](publications/06_videos/balancing.gif)
+
+### Mastermind game:
+![mastermind-demo-video](publications/06_videos/mastermind.gif)
+
+### Highstriker game:
+![highstriker-demo-video](publications/06_videos/highstriker.gif)
+
+### 
+
 ## Setup
 
 #### Tested setup:
