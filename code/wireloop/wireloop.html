@@ -214,7 +214,7 @@
           isWon = true;
           okay = true;
           $.displayText('Game won!');
-          $.progress.setComplete($.progress.game.WIRELOOP);
+          $.progress.setComplete($.progress.game.WIRE);
           $.goto('/', 1500);
         } else if (Math.abs(spline[minI * 2 + 1] - y) < 70) {
           theta = Math.atan(splineDX[minI]);

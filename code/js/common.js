@@ -255,7 +255,7 @@
       return (this._state >>> game) & 1;
     },
     hasAll: function() {
-      return this._state == (1<<4)-1;
+      return this._state == (1<<6)-1;
     },
     game: {
       PAINTER: 0,
@@ -276,9 +276,6 @@
         location.href = url;
       }, time);
   };
-
-
-
 
   window.$ = $;
 
