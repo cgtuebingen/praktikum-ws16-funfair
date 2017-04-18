@@ -249,6 +249,7 @@
     _state: parseInt(getCookie('progress') || 0, 10),
     setComplete: function(game) {
       this._state |= 1 << game;
+console.log(game)
       setCookie('progress', this._state);
     },
     isComplete: function(game) {
@@ -276,9 +277,6 @@
         location.href = url;
       }, time);
   };
-
-
-
 
   window.$ = $;
 

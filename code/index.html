@@ -71,9 +71,9 @@
     {id: document.getElementById('Lhigh'), sh: 0},
     {id: document.getElementById('Lpaint'), sh: $.progress.game.HIGHSTRIKER},
     {id: document.getElementById('Lmagic'), sh: $.progress.game.PAINTER},
-    {id: document.getElementById('Lbalance'), sh: $.progress.game.MAGIC},
-    {id: document.getElementById('Lwire'), sh: $.progress.game.WIRE},
-    {id: document.getElementById('Lmaster'), sh: $.progress.game.MASTERMIND},
+    {id: document.getElementById('Lbalance'), sh: $.progress.game.MASTERMIND},
+    {id: document.getElementById('Lwire'), sh: $.progress.game.MAGIC},
+    {id: document.getElementById('Lmaster'), sh: $.progress.game.WIRE},
   ];
 
   for (var i = 1; i < links.length; i++) {
@@ -83,7 +83,7 @@
     } else {
 
       links[i].id.onclick = function(ev) {
-        //ev.preventDefault();
+        ev.preventDefault();
       };
 
       links[i].id.style.opacity = 0.5;
