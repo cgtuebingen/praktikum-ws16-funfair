@@ -10,7 +10,7 @@ import os
 
 
 
-DEFAULT_DIR = "result_imgs"
+DEFAULT_DIR = "painter/result_imgs"
 DEFAULT_STYLE = "45"
 SNAPSHOT_ORIG_NAME = "snapshot_orig.jpg"
 SNAPSHOT_RESIZED_NAME = "snapshot_resized.jpg"
@@ -44,42 +44,17 @@ def paint_image(image_path,
             img = Image.open(output_path)
             img.close()
             print "Image painted successfully."
-            break        
+            break
 
         except:
             print "Image retrieval no. "+str(i+1)+" failed! Trying again allowing the following time: "+str(seconds+1)+"s."
-        
-
-def take_image(img_path, img_name):
-    """Take a snapshot using a computer's in-built camera."""
-
-    import pygame.camera
-    pygame.camera.init()
-    pygame.camera.list_cameras()
-
-    dirs = os.listdir("/dev/") 
-    camera_name = ""
-    for d in dirs:
-        if d.startswith("video"):
-            camera_name = d
-            break
-
-    assert(d != ""), "no camera found. This function only works for linux."
-
-    cam = pygame.camera.Camera("/dev/"+camera_name, (640, 480))
-    cam.start()
-    time.sleep(0.1)  # You might need something higher in the beginning
-    img = cam.get_image()
-
-    if not os.path.exists(img_path):
-        os.makedirs(img_path)
-
-    pygame.image.save(img, os.path.join(img_path, img_name))
-    cam.stop()
 
 
 def resize_image(img_path, res_path):
     """Resize image to correct format (512, 512)."""
+
+    # temporary hack
+    os.system("convert " + img_path + " " + img_path);
 
     img = Image.open(img_path)
 
@@ -106,13 +81,5 @@ def take_snapshot_and_paint(path=DEFAULT_DIR,
     resized_path = os.path.join(path, SNAPSHOT_RESIZED_NAME)
     painted_path = os.path.join(path, SNAPSHOT_PAINTED_NAME)
 
-    take_image(path, SNAPSHOT_ORIG_NAME)
     resize_image(orig_path, resized_path)
     paint_image(resized_path, painted_path, style)
-
-
-if __name__ == "__main__":
-
-    take_snapshot_and_paint()
-
-

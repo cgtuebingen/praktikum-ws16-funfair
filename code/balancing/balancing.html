@@ -8,356 +8,379 @@
         }
 
         #canvas {
-            z-index:2;
+            z-index: 2;
         }
 
-        #overlay{
-           text-align: center;
-           color: white;
-           position: absolute;
-           width: 100%;
-           z-index: 2000;
-           font-size: 160px;
-           font-family: "Arial";
-           font-weight: bold;
-           padding-top: 200px;
-           text-shadow: 0px 4px 3px rgba(0,0,0,0.4),
-                        0px 8px 13px rgba(0,0,0,0.1),
-                        0px 18px 23px rgba(0,0,0,0.1);
+        #overlay {
+            text-align: center;
+            color: white;
+            position: absolute;
+            width: 100%;
+            z-index: 2000;
+            font-size: 160px;
+            font-family: "Arial";
+            font-weight: bold;
+            padding-top: 200px;
+            text-shadow: 0px 4px 3px rgba(0, 0, 0, 0.4),
+            0px 8px 13px rgba(0, 0, 0, 0.1),
+            0px 18px 23px rgba(0, 0, 0, 0.1);
         }
-        </style>
-    </head>
 
-    <body style="background:#ebe3d9;margin:0">
+        #indic {
+            position: absolute;
+            right: 30px;
+            top: 100px;
+        }
+    </style>
+</head>
 
-        <div id="overlay"></div>
-        <div style="position: relative; width:80%; margin:auto"> 
-            <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
+<body style="background:#ebe3d9;margin:0">
 
-            <img src="../../design/bude_fg_balancing.svg" style="position: absolute; z-index: 3; width: 100%">
-            <div style="position: relative; z-index: 5"> <canvas id="canvas"></canvas></div>
+<div id="overlay"></div>
+<div style="position: relative; width:80%; margin:auto">
+    <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
 
-        </div>
+    <img src="../../design/bude_fg_balancing.svg" style="position: absolute; z-index: 3; width: 100%">
+    <div style="position: relative; z-index: 5">
+        <canvas id="canvas"></canvas>
+    </div>
 
-        <script src="../js/common.js"></script>
-        <script>
+</div>
 
+<canvas id="indic"></canvas>
 
-            /*#########################################################
-                     INITIALIZATION
-            ########################################################*/
-
-
-            // use emotiv XOR mouse?
-            var useEmotiv = false;
-            var useMouse = !useEmotiv;
-
-
-            var canvas = $("#canvas");
-            canvas[0].width = window.innerWidth;
-            canvas[0].height = window.innerHeight;
-            var ctx = canvas.getContext("2d");
-            var off = canvas.offset(); // get the offset of the canvas once
-            var cursorX = 42;
-            var cursorY = 42;
-
-            var col_red   = "rgb(165, 30, 55)";
-            var col_bar      = "rgb(0, 105, 170)";
-            var col_surrounding = "rgb(50, 65, 75)";
-            var col_yellow = "rgb(210, 150, 0)";
-  
-            var width;
-            var height;
-            var offsetX;
-            var offsetY;
-            var surroundingWidth;
-            var rectWidth;
-            var rectHeight;
-
-            var angleStartValue = 0.00;
-            var angle = angleStartValue;
-            var maxAngle = 0.74;
-            var sign = 1.0;
-            var counterBalance = 0.0; // <0: left, >0: right
-            var counterBalanceForce = 0.0045;
-            var gravityForce = 0.001;
-
-            var gameLost;
-            var gameWon;
-            var gameRunning;
-            var secondsNeededForWin = 30;
-            var secondsUntilRestart = 1;
-            var timeRemainingUntilGameWon;
-            var timeSinceGameLost;
-            var gameLostTime;
-            var startTime; 
-            var timeCompleted;
-            var wonMessageShown;
-
-            // the little man...
-            var man = new Image();
-            var manWidth;
-            var manHeight;
-
-            initialize = function() {
-
-                gameRunning = false;
-                width = window.innerWidth / 19;
-                height = window.innerWidth / 11;
-                offsetX = window.innerWidth / 2.5;
-                offsetY = window.innerWidth / 2.7;
-                surroundingWidth = window.innerWidth / 960;
-                rectWidth = window.innerWidth / 4;
-                rectHeight = window.innerWidth / 80;
-                manWidth = window.innerWidth / 13;
-                manHeight = manWidth / 1.3;
-                textPx = Math.trunc(window.innerWidth / 71);
-                wonMessageShown = false;
-                gameLost = false;
-                gameWon = false;
-                timeCompleted = 0;
-                timeSinceGameLost = 0;
-                timeRemainingUntilGameWon = secondsNeededForWin;
-                angle = -0.003;
-
-                var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80))+"px";
-                document.getElementById("overlay").style.paddingTop =  overlayDist; 
-                $.countdown("Start!");
-                window.setTimeout(function(){
-                    gameRunning = true;
-                    startTime = new Date().getTime() / 1000;
-                }, 4000);
-            }
-
-            /*#########################################################
-                     DRAWING THE BALANCING
-            ########################################################*/
-
-            drawBalancing = function(angle) {
-
-                // bottom triangle
-                ctx.fillStyle = col_red;
-                ctx.beginPath();
-                ctx.moveTo(offsetX, offsetY);
-                ctx.lineTo(offsetX - width, offsetY + height);
-                ctx.lineTo(offsetX + width, offsetY + height);
-                ctx.lineTo(offsetX, offsetY);
-                ctx.fill();
-                ctx.strokeStyle = "black";
-                ctx.lineWidth = surroundingWidth;
-                ctx.stroke();
-                 
-                // rectangle
-                ctx.save();
-                ctx.translate(offsetX, offsetY);
-                ctx.rotate(angle);
-                ctx.beginPath();
-                ctx.rect(-0.5*rectWidth, -0.5*rectHeight,
-                         rectWidth, rectHeight);
-                ctx.fillStyle = col_red;
-                ctx.fill();
-                ctx.lineWidth = surroundingWidth;
-                ctx.strokeStyle = "black";
-                ctx.stroke();
-                ctx.restore();
-
-                // middle circle
-                var circleRadius = window.innerWidth / 92;
-                drawEllipse(ctx, offsetX, offsetY,
-                            circleRadius, circleRadius, col_bar);
-            }
+<script src="../js/common.js"></script>
+<script>
 
 
-            drawLittleMan = function(angle) {
-                ctx.save();
-                ctx.translate(offsetX, offsetY);
-                ctx.rotate(angle);
-                ctx.drawImage(man, -0.5*manWidth, -manHeight,
-                              manWidth, manHeight);
-                ctx.restore();
-            }
+    /*#########################################################
+     INITIALIZATION
+     ########################################################*/
 
+
+    // use emotiv XOR mouse?
+    var useEmotiv = true;
+    var useMouse = !useEmotiv;
+
+
+    var canvas = $("#canvas");
+    canvas[0].width = window.innerWidth;
+    canvas[0].height = window.innerHeight;
+    var ctx = canvas.getContext("2d");
+    var off = canvas.offset(); // get the offset of the canvas once
+    var cursorX = 42;
+    var cursorY = 42;
+
+    var col_red = "rgb(165, 30, 55)";
+    var col_bar = "rgb(0, 105, 170)";
+    var col_surrounding = "rgb(50, 65, 75)";
+    var col_yellow = "rgb(210, 150, 0)";
+
+    var width;
+    var height;
+    var offsetX;
+    var offsetY;
+    var surroundingWidth;
+    var rectWidth;
+    var rectHeight;
+
+    var angleStartValue = 0.00;
+    var angle = angleStartValue;
+    var maxAngle = 0.74;
+    var sign = 1.0;
+    var counterBalance = 0.0; // <0: left, >0: right
+    var counterBalanceForce = 0.0045;
+    var gravityForce = 0.001;
+
+    var gameLost;
+    var gameWon;
+    var gameRunning;
+    var secondsNeededForWin = 30;
+    var secondsUntilRestart = 1;
+    var timeRemainingUntilGameWon;
+    var timeSinceGameLost;
+    var gameLostTime;
+    var startTime;
+    var timeCompleted;
+    var wonMessageShown;
+
+    // the little man...
+    var man = new Image();
+    var manWidth;
+    var manHeight;
+
+    initialize = function() {
+
+      gameRunning = false;
+      width = window.innerWidth / 19;
+      height = window.innerWidth / 11;
+      offsetX = window.innerWidth / 2.5;
+      offsetY = window.innerWidth / 2.7;
+      surroundingWidth = window.innerWidth / 960;
+      rectWidth = window.innerWidth / 4;
+      rectHeight = window.innerWidth / 80;
+      manWidth = window.innerWidth / 13;
+      manHeight = manWidth / 1.3;
+      textPx = Math.trunc(window.innerWidth / 71);
+      wonMessageShown = false;
+      gameLost = false;
+      gameWon = false;
+      timeCompleted = 0;
+      timeSinceGameLost = 0;
+      timeRemainingUntilGameWon = secondsNeededForWin;
+      angle = -0.003;
+
+      var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80)) + "px";
+      document.getElementById("overlay").style.paddingTop = overlayDist;
+      $.countdown("Start!");
+      window.setTimeout(function() {
+        gameRunning = true;
+        startTime = new Date().getTime() / 1000;
+      }, 4000);
+    }
+
+    /*#########################################################
+     DRAWING THE BALANCING
+     ########################################################*/
+
+    drawBalancing = function(angle) {
+
+      // bottom triangle
+      ctx.fillStyle = col_red;
+      ctx.beginPath();
+      ctx.moveTo(offsetX, offsetY);
+      ctx.lineTo(offsetX - width, offsetY + height);
+      ctx.lineTo(offsetX + width, offsetY + height);
+      ctx.lineTo(offsetX, offsetY);
+      ctx.fill();
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = surroundingWidth;
+      ctx.stroke();
+
+      // rectangle
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.rect(-0.5 * rectWidth, -0.5 * rectHeight,
+        rectWidth, rectHeight);
+      ctx.fillStyle = col_red;
+      ctx.fill();
+      ctx.lineWidth = surroundingWidth;
+      ctx.strokeStyle = "black";
+      ctx.stroke();
+      ctx.restore();
+
+      // middle circle
+      var circleRadius = window.innerWidth / 92;
+      drawEllipse(ctx, offsetX, offsetY,
+        circleRadius, circleRadius, col_bar);
+    }
+
+
+    drawLittleMan = function(angle) {
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
+      ctx.rotate(angle);
+      ctx.drawImage(man, -0.5 * manWidth, -manHeight,
+        manWidth, manHeight);
+      ctx.restore();
+    }
+
+    initialize();
+
+    /*#########################################################
+     ACTION HANDLING
+     #########################################################*/
+
+    var INDICATOR = new $.Indicator('indic');
+
+    // Set sensibility
+    $.Indicator.SENSE = 200;
+
+    var ws = new WebSocket('ws://localhost:8080/ws');
+
+    ws.onopen = function() {
+      console.log("Connected!");
+    }
+
+    ws.onclose = function(ev) {
+      console.log("Closed!");
+    }
+
+    ws.onerror = function(ev) {
+      console.log("Error!", ev)
+    }
+
+    ws.onmessage = function(ev) {
+
+      if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
+
+        var tmp = ev.data.slice("brain:activity:".length).split(";");
+        var std = +tmp[1];
+
+        INDICATOR.addValue(tmp[0]);
+        counterBalance = std - 75;
+      }
+    }
+
+    window.onresize = function() {
+      canvas[0].width = window.innerWidth;
+      canvas[0].height = window.innerHeight;
+
+      initialize();
+    }
+
+    document.onclick = function() {
+      // restart game
+      gameLost = false;
+      angle = angleStartValue;
+    }
+
+    if (useMouse) {
+      document.onmousemove = function(ev) {
+        cursorX = ev.pageX - off.left;
+        cursorY = ev.pageY - off.top;
+        counterBalance = cursorX - offsetX;
+      }
+    }
+
+
+    // image source (modified from):
+    // https://tobintouch.wordpress.com/2012/08/14/balancing-freedom-and-security-in-a-freelance-career/
+
+    man.src = "balancing.png";
+    man.onload = function() {
+
+      // endless animation
+      $.animate('test', function() {
+
+        // clear everything
+        ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
+
+        if (gameRunning) {
+          if (gameLost) {
+            timeSinceGameLost = new Date().getTime() / 1000 - gameLostTime;
+          }
+
+          if (gameLost && timeSinceGameLost > secondsUntilRestart) {
             initialize();
+          }
 
-            /*#########################################################
-                     ACTION HANDLING
-            #########################################################*/
+          if (!gameLost && Math.abs(angle) >= maxAngle) {
+            gameLost = true;
+            gameLostTime = new Date().getTime() / 1000;
+          }
 
+          if (angle == 0.0) {
+            // never reach perfect balance
+            angle = -sign * 0.003;
+          } else if (angle < 0.0) {
+            sign = -1.0;
+          } else {
+            sign = 1.0;
+          }
 
-            var ws = new WebSocket('ws://localhost:8080/ws');
+          angle = angle + (gravityForce * sign) +
+            Math.sign(counterBalance) * counterBalanceForce;
+          angle = Math.min(Math.max(-maxAngle, angle), maxAngle);
 
-            ws.onopen = function () {
-                console.log("Connected!");
-            }
+        }
+        drawBalancing(angle);
 
-            ws.onclose = function (ev) {
-                console.log("Closed!");
-            }
-
-            ws.onerror = function (ev) {
-                console.log("Error!", ev)
-            }
-
-            ws.onmessage = function (ev) {
-
-                if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
-
-                    var std = +ev.data.slice("brain:activity:".length).split(";")[1];
-
-                    counterBalance = std - 75;
-                }
-            }
-
-            window.onresize = function() {
-                canvas[0].width = window.innerWidth;
-                canvas[0].height = window.innerHeight;
-
-                initialize();
-            }
-
-            document.onclick = function() {
-                // restart game
-                gameLost = false;
-                angle = angleStartValue;
-            }
-
-            if(useMouse) {
-                document.onmousemove = function(ev) {
-                    cursorX = ev.pageX - off.left;
-                    cursorY = ev.pageY - off.top;
-                    counterBalance = cursorX - offsetX;
-                }
-            }
+        INDICATOR.draw();
 
 
-            // image source (modified from):
-            // https://tobintouch.wordpress.com/2012/08/14/balancing-freedom-and-security-in-a-freelance-career/
+        // draw help message: "Relax!" vs. "Focus!"
+        factor = -offsetX / 2.0 * Math.sign(angle);
+        var textHint = "Start!";
+        if (Math.sign(angle) == "-1") {
+          textHint = "Focus!";
+        } else if (Math.sign(angle) == "1") {
+          textHint = "Relax!";
+        }
+        hintXPos = offsetX - factor;
+        hintYPos = offsetY - offsetY / 4.0;
+        drawEllipse(ctx,
+          hintXPos, hintYPos,
+          offsetX / 9.0, offsetX / 30.0,
+          col_red, col_surrounding);
+        ctx.fillStyle = col_yellow;
+        ctx.font = String(textPx) + "px Georgia";
+        ctx.fillText(textHint,
+          hintXPos - offsetX / 20.0,
+          hintYPos + offsetY / 70.0);
 
-            man.src = "balancing.png";
-            man.onload = function() {
- 
-                // endless animation
-                $.animate('test', function () {
+        // draw time till won
+        if (gameRunning) {
+          timeCompleted = Math.round(new Date().getTime() / 1000 - startTime, 0);
+          if (!gameLost) {
+            timeRemainingUntilGameWon = secondsNeededForWin - timeCompleted;
+            timeRemainingUntilGameWon = Math.max(0, timeRemainingUntilGameWon);
+          }
+        } else {
+          if (gameWon) {
+            timeRemainingUntilGameWon = 0;
+          } else {
+            timeRemainingUntilGameWon = secondsNeededForWin;
+          }
+        }
+        ctx.fillText(timeRemainingUntilGameWon,
+          offsetX - offsetX / 70,
+          offsetY + offsetY / 6.0);
 
-                    // clear everything
-                    ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
-
-                    if(gameRunning) {
-                        if(gameLost) {
-                            timeSinceGameLost = new Date().getTime() / 1000 - gameLostTime;
-                        }
-
-                        if(gameLost & timeSinceGameLost > secondsUntilRestart) {
-                            initialize();
-                        }
-   
-                        if (! gameLost & Math.abs(angle) >= maxAngle) {
-                            gameLost = true;
-                            gameLostTime = new Date().getTime() / 1000;
-                        }
-                
-                        if (angle == 0.0) {
-                            // never reach perfect balance
-                            angle = -sign * 0.003;
-                        } else if (angle < 0.0) {
-                            sign = -1.0;
-                        } else {
-                            sign = 1.0;
-                        }
-
-                        angle = angle + (gravityForce*sign) +
-                                Math.sign(counterBalance)*counterBalanceForce;
-                        angle = Math.min(Math.max(-maxAngle, angle), maxAngle);
-
-                    }
-                    drawBalancing(angle);
+        if (!gameLost && timeRemainingUntilGameWon == 0 && !wonMessageShown) {
+          gameRunning = false;
+          gameWon = true;
+          $.displayText("Game won!");
+          wonMessageShown = true;
 
 
-                    // draw help message: "Relax!" vs. "Focus!"
-                    factor = - offsetX/2.0 * Math.sign(angle);
-                    var textHint = "Start!";
-                    if(Math.sign(angle) == "-1") {
-                        textHint = "Focus!";
-                    } else if (Math.sign(angle) == "1") {
-                        textHint = "Relax!";
-                    }
-                    hintXPos = offsetX - factor;
-                    hintYPos = offsetY - offsetY / 4.0;
-                    drawEllipse(ctx,
-                                hintXPos, hintYPos,
-                                offsetX / 9.0, offsetX / 30.0,
-                                col_red, col_surrounding);
-                    ctx.fillStyle = col_yellow;
-                    ctx.font=String(textPx)+"px Georgia";
-                    ctx.fillText(textHint,
-                                 hintXPos - offsetX / 20.0,
-                                 hintYPos + offsetY / 70.0);
+          $.progress.setComplete($.progress.game.BALANCING);
 
-                    // draw time till won
-                    if(gameRunning) {
-                        timeCompleted = Math.round(new Date().getTime() / 1000 - startTime, 0);
-                        if(! gameLost) {
-                            timeRemainingUntilGameWon = secondsNeededForWin - timeCompleted;
-                            timeRemainingUntilGameWon = Math.max(0, timeRemainingUntilGameWon);
-                        }
-                    } else {
-                        if(gameWon) {
-                            timeRemainingUntilGameWon = 0;
-                        } else {
-                            timeRemainingUntilGameWon = secondsNeededForWin;
-                        }
-                    }
-                    ctx.fillText(timeRemainingUntilGameWon,
-                                 offsetX - offsetX / 70,
-                                 offsetY + offsetY / 6.0);
+          $.goto('/', 1500);
+        }
 
-                    if (! gameLost & timeRemainingUntilGameWon == 0 & !wonMessageShown) {
-                        gameRunning = false;
-                        gameWon = true;
-                        $.displayText("Game won!");
-                        wonMessageShown = true;
-                    }
+        if (!gameLost) {
+          drawLittleMan(angle);
+        }
+      });
+    }
 
-                    if (! gameLost) {
-                        drawLittleMan(angle);
-                    }
-                });
-            }
+    /*#########################################################
+     GENERIC DRAWING FUNCTIONS
+     #########################################################*/
 
-            /*#########################################################
-                     GENERIC DRAWING FUNCTIONS
-            #########################################################*/
+    function drawCylinder(ctx, x, y,
+                          height, radiusX, radiusY,
+                          col1, col2, colStroke) {
 
-            function drawCylinder(ctx, x, y,
-                                  height, radiusX, radiusY,
-                                  col1, col2, colStroke) {
+      drawEllipse(ctx, x, y + height,
+        radiusX, radiusY, col1, colStroke);
 
-                drawEllipse(ctx, x, y+height,
-                            radiusX, radiusY, col1, colStroke);
+      drawEllipse(ctx, x, y - height,
+        radiusX, radiusY,
+        col2, colStroke);
+    }
 
-                drawEllipse(ctx, x, y-height,
-                            radiusX, radiusY,
-                            col2, colStroke);
-            }
+    function drawEllipse(ctx, x, y,
+                         radiusX, radiusY,
+                         col, colStroke) {
 
-            function drawEllipse(ctx, x, y,
-                                 radiusX, radiusY,
-                                 col, colStroke) {
+      ctx.beginPath();
+      ctx.fillStyle = col;
+      ctx.ellipse(x, y,
+        radiusX = radiusX,
+        radiusY = radiusY,
+        rotation = 0,
+        startAngle = 0,
+        endAngle = 2 * Math.PI);
+      ctx.strokeStyle = colStroke;
+      ctx.stroke();
+      ctx.fill();
+      ctx.closePath();
+    }
+</script>
 
-                ctx.beginPath();
-                ctx.fillStyle = col;
-                ctx.ellipse(x, y, 
-                            radiusX = radiusX,
-                            radiusY = radiusY,
-                            rotation = 0,
-                            startAngle = 0, 
-                            endAngle = 2 * Math.PI);
-                ctx.strokeStyle = colStroke;
-                ctx.stroke();
-                ctx.fill();
-                ctx.closePath();
-            }
-        </script>
-
-    </body>
+</body>
 </html>

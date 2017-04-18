@@ -1,0 +1,85 @@
+
+
+
+<canvas id="canvas" width="1000" height="800"></canvas>
+
+<div style="position:absolute;left:500px;top:500px;width:10px;height:10px;background:red" id="point"></div>
+
+<script src="../js/plot.js"></script>
+<script>
+
+var point = document.getElementById("point");
+
+var KF = [];
+var DATA = [];
+var MASK = (1 << 16) - 1;
+var WIN = 100;
+
+MASK = (1 << 14) | (1 << 15);
+
+
+var X = 500;
+var Y = 500;
+function adaptPos(dx, dy) {
+
+  var alpah = 0.8;
+
+  X = X * alpha + (1-alpha)*(X+(-dx + 24) * 2);
+  Y = Y* alpha + (1-alpha)*(Y+(dy - 22) *2);
+
+  point.style.left = X+"px";
+  point.style.top = Y+"px";
+
+}
+
+var r = () => ("0" + Math.floor(Math.random() * 256).toString(16)).slice(-2);
+
+var pl = new Plot(document.getElementById('canvas'), [0, WIN], [-100, 100]);
+
+var ws = new WebSocket('ws://localhost:8080/raw');
+
+var alpha = 0.8;
+for (var i = MASK; i > 0; i>>= 1) {
+  DATA.push(['timeseries', new Array(WIN), ['#', r(), r(), r()].join("")]);
+  KF.push({add: function(v) {this.val = this.val * alpha + (1-alpha)*v}, val: 0});
+}
+
+pl._data = DATA;
+
+ws.onopen = function () {
+    console.log("Connected!");
+}
+
+ws.onclose = function (ev) {
+    console.log("Closed!");
+}
+
+ws.onerror = function (ev) {
+    console.log("Error!", ev)
+}
+
+ws.onmessage = function (ev) {
+
+  var data = ev.data.split(",");
+
+  adaptPos(parseFloat(data[14]), parseFloat(data[15]));
+
+  for (var i = 0; i < data.length; i++) {
+
+    if (0 == (MASK >> i & 1))
+      continue;
+
+    var val = parseFloat(data[i]);
+    var cur = DATA[i][1];
+
+    for (var j = 1; j < WIN; j++) {
+      cur[j - 1] = cur[j];
+    }
+    cur[j - 1] = val;
+
+    KF[i].add(val);
+  }
+  pl.draw();
+};
+
+</script>

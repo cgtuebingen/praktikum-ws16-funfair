@@ -1,234 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Funfair</title>
     <meta charset="UTF-8">
+    <title>Funfair</title>
 
     <style>
 
         body {
-            overflow: hidden;
+            background: #e7d7b6;
             margin: 0;
         }
 
-        section {
-            display: block;
-            overflow: scroll;
-            overflow-x: hidden;
+        #horizon {
+            background: #b6cde7;
+            height: 150px;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
         }
 
-        #canvas {
-            position: fixed;
-            right: 80px;
-            top: 100px;
+        #land {
+            position: relative;
         }
 
     </style>
-
 </head>
 <body>
 
-<canvas id="canvas" height="400" width="40"></canvas>
 
-<section>
-    <iframe style="width:100%;height:1000px;" src="../design/carusell.html"></iframe>
-</section>
+<div id="horizon">
 
-<section>
-    <iframe style="width:100%;height:1000px;" src="../code/painter/painter.html"></iframe>
-</section>
+    <img src="../design/cloud.png" style="position:absolute;left: 400px; top: 50px">
+    <img src="../design/cloud.png" style="position:absolute;width:110px;left: 800px; top: 20px">
 
-<section>
-    <span style="display: block;height:1000px;width:2000px;background:#050"></span>
-</section>
+    <img src="../design/baloon.svg" style="position:absolute;width:100px;left:450px;">
+    <img src="../design/baloon2.svg" style="position:absolute;width:150px;left:580px;">
+</div>
 
-<section>
-    <span style="display: block;height:1000px;width:2000px;background:#228822"></span>
-</section>
-
-<section>
-    <span style="display: block;height:1000px;width:2000px;background:#624144"></span>
-</section>
-
-<section>
-    <span style="display: block;height:1000px;width:2000px;background:#ff00FF"></span>
-</section>
-
-<section>
-    <span style="display: block;height:1000px;width:2000px;background:#c00"></span>
-</section>
-
-<section>
-    <span style="display: block;height:1000px;width:2000px;background:yellow"></span>
-</section>
+<div id="land">
 
 
+    <img src="../design/tent.svg" style="width:400px;position:absolute;right: 150px;">
+
+    <img src="../design/path.png" style="position:absolute;left:200px;top:250px;">
+    <iframe src="../design/carusell.html"
+            style="border:0px; position:absolute;width:600px;height:600px;left:0px;top:-100px;"></iframe>
+
+
+    <a id="Lhigh" href="highstriker/highstriker.html"
+       style="position:absolute;left: 570px;top: 321px;"><img src="../design/but3.png" width="65"></a>
+    <a id="Lpaint" href="painter/painter.html"
+       style="position:absolute;left: 505px;top: 297px;"><img src="../design/but2.png" width="60"></a>
+    <a id="Lmagic" href="magic/magic.html"
+       style="position:absolute;left: 440px;top: 280px;"><img src="../design/but1.png" width="55"></a>
+    <a id="Lwire" href="wireloop/wireloop.html"
+       style="position:absolute;left: 370px;top: 276px;"><img src="../design/but4.png" width="50"></a>
+    <a id="Lmaster" href="mastermind/mastermind.html"
+       style="position:absolute;left: 301px;top: 274px;"><img src="../design/but5.png" width="45"></a>
+    <a id="Lbalance" href="balancing/balancing.html"
+       style="position:absolute;left: 238px;top: 268px;"><img src="../design/but6.png" width="40"></a>
+
+
+</div>
+
+
+<script src="js/common.js"></script>
 <script>
 
-    (function (window) {
+  var links = [
+    {id: document.getElementById('Lhigh'), sh: 0},
+    {id: document.getElementById('Lpaint'), sh: $.progress.game.HIGHSTRIKER},
+    {id: document.getElementById('Lmagic'), sh: $.progress.game.PAINTER},
+    {id: document.getElementById('Lbalance'), sh: $.progress.game.MAGIC},
+    {id: document.getElementById('Lwire'), sh: $.progress.game.WIRE},
+    {id: document.getElementById('Lmaster'), sh: $.progress.game.MASTERMIND},
+  ];
 
-        var document = window.document;
+  for (var i = 1; i < links.length; i++) {
 
-        var body = document.body;
+    if ($.progress.isComplete(links[i].sh)) {
 
-        var sections = document.getElementsByClassName("section");
+    } else {
 
-        var clientHeight;
-        var currentStep = 0;
-        var questionsAnswered = 0;
+      links[i].id.onclick = function(ev) {
+        //ev.preventDefault();
+      };
 
-        document.onclick = function () {
-
-            var start = NOW;
-
-            if (questionsAnswered === sections.length - 1)
-                return;
-
-            currentStep++;
-            questionsAnswered++;
-
-            $anim['scroll'] = function (now) {
-
-                var state = (now - start) / 750;
-
-                if (state >= 1) {
-                    state = 1;
-                    delete $anim['scroll'];
-                    drawProgress();
-                }
-
-                state = --state * state * state + 1;
-
-                body.scrollTop = (state + currentStep - 1) * clientHeight;
-            };
-        };
-
-        window.onbeforeunload = function() {
-            body.scrollTop = 0;
-        }
-
-        var resizeTime = null;
-        window.onresize = function () {
-
-            if (resizeTime !== null)
-                window.clearTimeout(resizeTime);
-
-            resizeTime = window.setTimeout(function () {
-
-                resizeSections();
-
-                body.scrollTop = currentStep * clientHeight;
-            }, 50);
-        };
+      links[i].id.style.opacity = 0.5;
+    }
 
 
-
-        function resizeSections() {
-
-            clientHeight = window.innerHeight;
-
-            var elm = sections;
-            for (var i = elm.length; i--;) {
-                elm[i].style.height = clientHeight + "px";
-            }
-        }
-
-        var drawProgress = function () {
-
-            var width = 40;
-            var center = width / 2;
-            var height = 400 - 2 * center;
-
-            ctx.clearRect(0, 0, 40, 400);
-
-            // Gets a matrix of from-to steps on the progressbar for 3 segments (2x green, 1x white)
-            var segmentMatrix = [0, currentStep, currentStep, questionsAnswered, questionsAnswered, sections.length - 1];
-
-            function segment(part) {
-
-                var off = 0;
-
-                var partner = (part % 2 === 0 ? part + 1 : part - 1);
-
-                if (segmentMatrix[part] === segmentMatrix[partner]) {
-                    return 0;
-                }
-
-                if (part === 1) // first green end
-                    off = -9;
-
-                if (part === 2) // second green start
-                    off = 9;
-
-                if (part === 4 && currentStep === questionsAnswered) // white start
-                    off = 9;
-
-                // Get the current height by segment
-                return center + segmentMatrix[part] * height / (sections.length - 1) + off;
-            }
-
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = "#4c7938";
-            ctx.beginPath();
-            ctx.moveTo(center, segment(0));
-            ctx.lineTo(center, segment(1));
-            ctx.moveTo(center, segment(2));
-            ctx.lineTo(center, segment(3));
-            ctx.stroke();
-
-            ctx.strokeStyle = "#fff";
-            ctx.beginPath();
-            ctx.moveTo(center, segment(4));
-            ctx.lineTo(center, segment(5));
-            ctx.stroke();
-
-            for (var i = 0; i < sections.length; i++) {
-
-                var x = center;
-                var y = center + i * height / (sections.length - 1);
-
-                if (i === currentStep) {
-                    ctx.lineWidth = 11;
-                    ctx.strokeStyle = "#4c7938";
-                    ctx.beginPath();
-                    ctx.arc(x, y, 14, 0, Math.PI * 2, false);
-                    ctx.stroke();
-                } else if (i <= questionsAnswered) {
-                    ctx.fillStyle = "#4c7938";
-                    ctx.beginPath();
-                    ctx.arc(x, y, 8, 0, Math.PI * 2, false);
-                    ctx.fill();
-                } else {
-                    ctx.fillStyle = "#fff";
-                    ctx.beginPath();
-                    ctx.arc(x, y, 8, 0, Math.PI * 2, false);
-                    ctx.fill();
-                }
-            }
-        };
-
-        var canvas = document.getElementById('canvas');
-        var ctx = canvas.getContext("2d");
-
-        var NOW;
-        var $anim = {};
-        var loop = function (now) {
-            NOW = now;
-            for (var i in $anim) {
-                $anim[i](now);
-            }
-            window.requestAnimationFrame(loop);
-        };
-
-        resizeSections();
-        drawProgress();
-
-        window.requestAnimationFrame(loop);
-
-    })(this);
+  }
 
 
 </script>
+
 
 </body>
 </html>

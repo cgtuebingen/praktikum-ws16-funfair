@@ -8,283 +8,307 @@
         }
 
         #canvas {
-            z-index:2;
+            z-index: 2;
         }
 
-        #overlay{
-           text-align: center;
-           color: white;
-           position: absolute;
-           width: 100%;
-           z-index: 2000;
-           font-size: 160px;
-           font-family: "Arial";
-           font-weight: bold;
-           padding-top: 200px;
-           text-shadow: 0px 4px 3px rgba(0,0,0,0.4),
-                        0px 8px 13px rgba(0,0,0,0.1),
-                        0px 18px 23px rgba(0,0,0,0.1);
+        #overlay {
+            text-align: center;
+            color: white;
+            position: absolute;
+            width: 100%;
+            z-index: 2000;
+            font-size: 160px;
+            font-family: "Arial";
+            font-weight: bold;
+            padding-top: 200px;
+            text-shadow: 0px 4px 3px rgba(0, 0, 0, 0.4),
+            0px 8px 13px rgba(0, 0, 0, 0.1),
+            0px 18px 23px rgba(0, 0, 0, 0.1);
+        }
+
+        #indic {
+            position: absolute;
+            right: 30px;
+            top: 100px;
         }
     </style>
 
-    </head>
+</head>
 
-    <body style="background:#ebe3d9;margin:0">
+<body style="background:#ebe3d9;margin:0">
 
-        <div id="overlay"></div>
-        <div style="position: relative; width:80%; margin:auto"> 
-            <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
+<div id="overlay"></div>
+<div style="position: relative; width:80%; margin:auto">
+    <img src="../../design/bude_bg.svg" style="position: absolute; z-index: 1; width: 100%">
 
-            <img src="../../design/bude_fg_highstriker.svg" style="position: absolute; z-index: 3; width: 100%">
-            <div style="position: relative; z-index: 2"> <canvas id="canvas"></canvas></div>
-
-        </div>
-
-        <script src="../js/common.js"></script>
-        <script>
+    <img src="../../design/bude_fg_highstriker.svg" style="position: absolute; z-index: 3; width: 100%">
+    <div style="position: relative; z-index: 2">
+        <canvas id="canvas"></canvas>
+    </div>
 
 
-            /*#########################################################
-                     ACTION HANDLING
-            ########################################################*/
+</div>
 
-            //then: 'mouse moving' equates to 'being relaxed'
-            var useMouseControlForDemo = true;
+<canvas id="indic"></canvas>
 
-            var gameIsWon = false;
-            var wonMessageShown = false;
-
-            window.onresize = function() {
-                canvas[0].width = window.innerWidth;
-                canvas[0].height = window.innerHeight;
-                
-                initialize();
-            }
+<script src="../js/common.js"></script>
+<script>
 
 
-            var ws = new WebSocket('ws://localhost:8080/ws');
+    /*#########################################################
+     ACTION HANDLING
+     ########################################################*/
 
-            ws.onopen = function () {
-                console.log("Connected!");
-            }
+    //then: 'mouse moving' equates to 'being relaxed'
+    var useMouseControlForDemo = false;
 
-            ws.onclose = function (ev) {
-                console.log("Closed!");
-            }
+    var gameIsWon = false;
+    var wonMessageShown = false;
 
-            ws.onerror = function (ev) {
-                console.log("Error!", ev)
-            }
+    window.onresize = function() {
+      canvas[0].width = window.innerWidth;
+      canvas[0].height = window.innerHeight;
 
-            ws.onmessage = function (ev) {
-
-                if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
-
-                    if(gameRunning) {
-                        var val = -ev.data.slice("brain:activity:".length).split(";")[0];
-                        bar += val * 3e-4;
-                        bar = Math.min(1, Math.max(0, bar));
-                        drawHighstriker(bar);
-                    }
-                }
-            }
-
-            if(useMouseControlForDemo) {
-                document.onmousemove = function (ev) {
-                    if(gameRunning) {
-                        bar += 0.001;
-                        drawHighstriker(bar);
-                    }
-                }
-            }
+      initialize();
+    };
 
 
-            /*#########################################################
-                     INITIALIZATION
-            ########################################################*/
+    var ws = new WebSocket('ws://localhost:8080/ws');
 
-            var canvas = $("#canvas");
-            canvas[0].width = window.innerWidth;
-            canvas[0].height = window.innerHeight;
-            var ctx = canvas.getContext("2d");
-            var off = canvas.offset(); // get the offset of the canvas once
+    var INDICATOR = new $.Indicator('indic');
 
-            var col_red   = "rgb(165, 30, 55)";
-            var col_bar      = "rgb(0, 105, 170)";
-            var col_surrounding = "rgb(50, 65, 75)";
-            var col_yellow = "rgb(210, 150, 0)";
-  
-            var levels = ["Burnout candidate", 
-                          "Amateur Yogi", 
-                          "Meditation junkie",
-                          "Yoga expert", 
-                          "Master of Yoga"];
-            var numLevels = levels.length;
+    ws.onopen = function() {
+      console.log("Connected!");
+    };
 
-            var width;
-            var height;
-            var offsetX;
-            var offsetY;
-            var surroundingWidth;
-            var textPx;
+    ws.onclose = function(ev) {
+      console.log("Closed!");
+    };
 
-            var barStartValue = 0.05;
-            var bar = barStartValue;
-            
-            var gameRunning = false;
+    ws.onerror = function(ev) {
+      console.log("Error!", ev)
+    };
 
-            initialize = function() {
+    // Set sensibility
+    $.Indicator.SENSE = 200;
 
-                width = window.innerWidth / 13;
-                height = window.innerWidth / 5;
-                offsetX = window.innerWidth / 2.3;
-                offsetY = window.innerWidth / 4;
-                surroundingWidth = window.innerWidth / 185;
-                textPx = Math.trunc(window.innerWidth / 71);
-                bar = barStartValue; 
-                drawHighstriker(bar);
-                wonMessageShown = false;
-                gameIsWon = false;
+    ws.onmessage = function(ev) {
 
-                var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80))+"px";
-                document.getElementById("overlay").style.paddingTop =  overlayDist;
-                $.countdown("Relax!");
-                window.setTimeout(function(){gameRunning = true;}, 4000);
-            }
+      if (typeof ev.data === "string" && ev.data.indexOf("brain:activity:") === 0) {
+
+        if (gameRunning) {
+          var val = -ev.data.slice("brain:activity:".length).split(";")[0];
+          bar += val * 3e-4;
+          INDICATOR.addValue(val);
+          bar = Math.min(1, Math.max(0, bar));
+          drawHighstriker(bar);
+        }
+      }
+    };
+
+    if (useMouseControlForDemo) {
+      document.onmousemove = function(ev) {
+        if (gameRunning) {
+          bar += 0.001;
+          drawHighstriker(bar);
+        }
+      }
+    }
 
 
-            /*#########################################################
-                     DRAWING THE HIGHSTRIKER
-            ########################################################*/
+    /*#########################################################
+     INITIALIZATION
+     ########################################################*/
 
-            drawHighstriker = function(barHeightProportion) {
-            /* barHeightProportion: \in [0, 1], denoting height of bar.
-               The higher this is, the better for the striker.*/
+    var canvas = $("#canvas");
+    canvas[0].width = window.innerWidth;
+    canvas[0].height = window.innerHeight;
+    var ctx = canvas.getContext("2d");
+    var off = canvas.offset(); // get the offset of the canvas once
 
-                barHeightProportion = Math.min(1, Math.max(0, barHeightProportion));
+    var col_red = "rgb(165, 30, 55)";
+    var col_bar = "rgb(0, 105, 170)";
+    var col_surrounding = "rgb(50, 65, 75)";
+    var col_yellow = "rgb(210, 150, 0)";
 
-                // big middle rectangle
-                ctx.fillStyle = col_red;
-                ctx.fillRect(offsetX, offsetY, width, height);
+    var levels = ["Burnout candidate",
+      "Amateur Yogi",
+      "Meditation junkie",
+      "Yoga expert",
+      "Master of Yoga"];
+    var numLevels = levels.length;
 
-                // surrounding
-                ctx.strokeStyle = col_surrounding;
-                ctx.lineWidth=surroundingWidth;
-                ctx.strokeRect(offsetX, offsetY, width, height);
+    var width;
+    var height;
+    var offsetX;
+    var offsetY;
+    var surroundingWidth;
+    var textPx;
+
+    var barStartValue = 0.05;
+    var bar = barStartValue;
+
+    var gameRunning = false;
+
+    initialize = function() {
+
+      width = window.innerWidth / 13;
+      height = window.innerWidth / 5;
+      offsetX = window.innerWidth / 2.3;
+      offsetY = window.innerWidth / 4;
+      surroundingWidth = window.innerWidth / 185;
+      textPx = Math.trunc(window.innerWidth / 71);
+      bar = barStartValue;
+      drawHighstriker(bar);
+      wonMessageShown = false;
+      gameIsWon = false;
+
+      var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80)) + "px";
+      document.getElementById("overlay").style.paddingTop = overlayDist;
+      $.countdown("Relax!");
+      window.setTimeout(function() {
+        gameRunning = true;
+      }, 4000);
+    };
 
 
-                // bar background
-                ctx.fillStyle = col_yellow;
-                var barBackgroundWidth  = (1/3) * (width-2*surroundingWidth);
-                ctx.fillRect(offsetX + 0.5*width - 0.5*barBackgroundWidth,
-                             offsetY,
-                             barBackgroundWidth, height);
+    /*#########################################################
+     DRAWING THE HIGHSTRIKER
+     ########################################################*/
 
-                // bar
-                ctx.fillStyle = col_bar;
-                var barWidth  = (1/6) * (width-2*surroundingWidth);
-                var barHeight = barHeightProportion * height;
-                ctx.fillRect(offsetX + 0.5*width - 0.5*barWidth,
-                             offsetY+height-barHeight,
-                             barWidth,
-                             barHeight);
-                // middle lines
-                ctx.strokeStyle = col_surrounding;
-                for(var i=0; i<=numLevels; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(offsetX, offsetY+i*(height / numLevels));
-                    ctx.lineWidth = surroundingWidth;
-                    ctx.lineTo(offsetX + width, offsetY+i*(height / numLevels));
-                    ctx.stroke();
-                }
+    drawHighstriker = function(barHeightProportion) {
+        /* barHeightProportion: \in [0, 1], denoting height of bar.
+         The higher this is, the better for the striker.*/
 
-                // YOGA levels
-                ctx.font=String(textPx)+"px Georgia";
-                ctx.clearRect(0, 0, window.innerWidth/2.5, window.innerWidth/2);
-                var ellipseCenterX = offsetX-window.innerWidth/7.2;
-                var ellipseWidth = window.innerWidth / 11;
-                var ellipseHeight = window.innerWidth / 74;
+      barHeightProportion = Math.min(1, Math.max(0, barHeightProportion));
 
-               
-                // strings for the level indicators
-                ctx.beginPath();
-                ctx.moveTo(ellipseCenterX-0.45*ellipseWidth, offsetY / 2);
-                ctx.lineWidth = surroundingWidth*2;
-                ctx.lineTo(ellipseCenterX-0.45*ellipseWidth, offsetY * 1.7);
-                ctx.stroke();
+      // big middle rectangle
+      ctx.fillStyle = col_red;
+      ctx.fillRect(offsetX, offsetY, width, height);
 
-                ctx.beginPath();
-                ctx.moveTo(ellipseCenterX+0.45*ellipseWidth, offsetY / 2);
-                ctx.lineWidth = surroundingWidth*2;
-                ctx.lineTo(ellipseCenterX+0.45*ellipseWidth, offsetY * 1.7);
-                ctx.stroke();
+      // surrounding
+      ctx.strokeStyle = col_surrounding;
+      ctx.lineWidth = surroundingWidth;
+      ctx.strokeRect(offsetX, offsetY, width, height);
 
-                for(var i=0; i<numLevels; i++) {
 
-                    if(barHeightProportion*numLevels >= (numLevels-i-1)) {
-                        var y = offsetY+i*(height / numLevels) +0.5*(height/numLevels);
-                        var ellipseCenterY = y - window.innerWidth / 185;
-                        // elliptic level indicator
-                        drawEllipse(ctx, ellipseCenterX, ellipseCenterY,
-                                    ellipseWidth, ellipseHeight,
-                                    col_red, col_surrounding);
-                                     
-                        // level text: "Master of Yoga" etc
-                        ctx.fillStyle = col_yellow;
-                        ctx.fillText(levels[numLevels-i-1], 
-                                     offsetX-window.innerWidth/5,
-                                     y);
-                    }
-                }
-                
-                if((1.0 - barHeightProportion) < 0.001) {
-                    gameIsWon = true;
-                }
+      // bar background
+      ctx.fillStyle = col_yellow;
+      var barBackgroundWidth = (1 / 3) * (width - 2 * surroundingWidth);
+      ctx.fillRect(offsetX + 0.5 * width - 0.5 * barBackgroundWidth,
+        offsetY,
+        barBackgroundWidth, height);
 
-                if(gameIsWon & !wonMessageShown) {
-                    gameRunning = false;
-                    $.displayText("Game won!");
-                    wonMessageShown = true;
-                }
-            }
+      // bar
+      ctx.fillStyle = col_bar;
+      var barWidth = (1 / 6) * (width - 2 * surroundingWidth);
+      var barHeight = barHeightProportion * height;
+      ctx.fillRect(offsetX + 0.5 * width - 0.5 * barWidth,
+        offsetY + height - barHeight,
+        barWidth,
+        barHeight);
+      // middle lines
+      ctx.strokeStyle = col_surrounding;
+      for (var i = 0; i <= numLevels; i++) {
+        ctx.beginPath();
+        ctx.moveTo(offsetX, offsetY + i * (height / numLevels));
+        ctx.lineWidth = surroundingWidth;
+        ctx.lineTo(offsetX + width, offsetY + i * (height / numLevels));
+        ctx.stroke();
+      }
 
-            initialize();
+      // YOGA levels
+      ctx.font = String(textPx) + "px Georgia";
+      ctx.clearRect(0, 0, window.innerWidth / 2.5, window.innerWidth / 2);
+      var ellipseCenterX = offsetX - window.innerWidth / 7.2;
+      var ellipseWidth = window.innerWidth / 11;
+      var ellipseHeight = window.innerWidth / 74;
 
-            /*#########################################################
-                     GENERIC DRAWING FUNCTIONS
-            #########################################################*/
 
-            function drawCylinder(ctx, x, y,
-                                  height, radiusX, radiusY,
-                                  col1, col2, colStroke) {
+      // strings for the level indicators
+      ctx.beginPath();
+      ctx.moveTo(ellipseCenterX - 0.45 * ellipseWidth, offsetY / 2);
+      ctx.lineWidth = surroundingWidth * 2;
+      ctx.lineTo(ellipseCenterX - 0.45 * ellipseWidth, offsetY * 1.7);
+      ctx.stroke();
 
-                drawEllipse(ctx, x, y+height,
-                            radiusX, radiusY, col1, colStroke);
+      ctx.beginPath();
+      ctx.moveTo(ellipseCenterX + 0.45 * ellipseWidth, offsetY / 2);
+      ctx.lineWidth = surroundingWidth * 2;
+      ctx.lineTo(ellipseCenterX + 0.45 * ellipseWidth, offsetY * 1.7);
+      ctx.stroke();
 
-                drawEllipse(ctx, x, y-height,
-                            radiusX, radiusY,
-                            col2, colStroke);
-            }
+      for (var i = 0; i < numLevels; i++) {
 
-            function drawEllipse(ctx, x, y,
-                                 radiusX, radiusY,
-                                 col, colStroke) {
+        if (barHeightProportion * numLevels >= (numLevels - i - 1)) {
+          var y = offsetY + i * (height / numLevels) + 0.5 * (height / numLevels);
+          var ellipseCenterY = y - window.innerWidth / 185;
+          // elliptic level indicator
+          drawEllipse(ctx, ellipseCenterX, ellipseCenterY,
+            ellipseWidth, ellipseHeight,
+            col_red, col_surrounding);
 
-                ctx.beginPath();
-                ctx.fillStyle = col;
-                ctx.ellipse(x, y, 
-                            radiusX = radiusX,
-                            radiusY = radiusY,
-                            rotation = 0,
-                            startAngle = 0, 
-                            endAngle = 2 * Math.PI);
-                ctx.strokeStyle = colStroke;
-                ctx.stroke();
-                ctx.fill();
-                ctx.closePath();
-            }
+          // level text: "Master of Yoga" etc
+          ctx.fillStyle = col_yellow;
+          ctx.fillText(levels[numLevels - i - 1],
+            offsetX - window.innerWidth / 5,
+            y);
+        }
+      }
 
-        </script>
+      if ((1.0 - barHeightProportion) < 0.001) {
+        gameIsWon = true;
+      }
 
-    </body>
+      if (gameIsWon & !wonMessageShown) {
+        gameRunning = false;
+        $.displayText("Game won!");
+        wonMessageShown = true;
+
+        $.progress.setComplete($.progress.game.HIGHSTRIKER);
+        $.goto('/', 1500);
+      }
+
+      INDICATOR.draw();
+    };
+
+    initialize();
+
+    /*#########################################################
+     GENERIC DRAWING FUNCTIONS
+     #########################################################*/
+
+    function drawCylinder(ctx, x, y,
+                          height, radiusX, radiusY,
+                          col1, col2, colStroke) {
+
+      drawEllipse(ctx, x, y + height,
+        radiusX, radiusY, col1, colStroke);
+
+      drawEllipse(ctx, x, y - height,
+        radiusX, radiusY,
+        col2, colStroke);
+    }
+
+    function drawEllipse(ctx, x, y,
+                         radiusX, radiusY,
+                         col, colStroke) {
+
+      ctx.beginPath();
+      ctx.fillStyle = col;
+      ctx.ellipse(x, y,
+        radiusX = radiusX,
+        radiusY = radiusY,
+        rotation = 0,
+        startAngle = 0,
+        endAngle = 2 * Math.PI);
+      ctx.strokeStyle = colStroke;
+      ctx.stroke();
+      ctx.fill();
+      ctx.closePath();
+    }
+
+</script>
+
+</body>
 </html>
