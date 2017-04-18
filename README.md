@@ -3,10 +3,6 @@ Funfair is a collection of six browswer games, all centered around the setting o
 
 ![](design/index.png)
 
-
-![painter-demo-video](documentation/videos/painter.gif)
-
-
 ## Setup
 
 #### Tested setup:
@@ -42,8 +38,12 @@ python app.py
 After that, the browser can be opened: http://localhost:8080 and you should be seeing a little funfair with baloons, a tent and the first game (highstriker) enabled. Make sure the Emotiv Insight device is switched on and paired, otherwise you'll find yourself having a hard time winning the game! As soon as one game is won, the next one is unlocked, until you make your way to the Ferris wheel (which is awaiting you with a little surprise if you win all games).
 
 
-#### JavaScript Framework
-If you'd like to create a similar game on your own, here's some brief information on how to do this: Animations can be created by including `js/common.js`. The `example_animation.html` file gives a little overview of the functionality. In detail:
+## Do-it-yourself: How to create a new game
+If you'd like to create a similar game on your own, here's some brief information on how to do this: 
+
+Our software consists of a Python application which forks a Tornado web-application server. This setup streams the sensor data from Emokit directly to the browser via websockets. On the browser side, the data are received asynchronously. The games themselves are organized in separate HTML files, which share one common JavaScript file. This JavaScript file handles the game progress and implements a central animation loop which can be used by every individual game.
+
+Animations can be created by including `js/common.js`. The `example_animation.html` file gives a little overview of the functionality. In detail:
 
 ```
 animate(name, callback[, time]);
@@ -60,7 +60,7 @@ The example file draws a circle within each callback. The screen is cleared ever
 The process of creating new paintings from a photograph according to a certain style is based on:
 
 * [Image Style Transfer Using Convolutional Neural Networks](http://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/Gatys_Image_Style_Transfer_CVPR_2016_paper.pdf)
-by Leon A. Gatys, Alexander S. Ecker, Matthias Bethge
+by Leon A. Gatys, Alexander S. Ecker, and Matthias Bethge
 * The [Deepart API](https://github.com/deepart-io/deepart-api)
 * The [Turbo-Deepart website](http://turbo.deepart.io/)
 
