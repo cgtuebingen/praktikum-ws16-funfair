@@ -60,8 +60,14 @@ As most actions lasted for a very brief period of time, roughly 1-2 seconds, we 
 
 \subsection{Gyro data analysis}
 
-It turned out that Emokit was the perfect fit for our needs, as it gives raw measurements at a pretty high rate. Unfortunately, there is no documentation of what channel actually delivers what information. When the headset is moved around, a lot of channels dramatically change their values, which must be kept in mind for normal sensor analysis. 
-%TODO low-pass filter (Robert E)
+The Emokit delivers measurements at a very high rate, making it a perfect fit for our needs. For gyro data, our goal was to obtain a stable signal to make head movements usable for game control. Since most EEG channels also spike when head movements appear, an idea was to use this information to filter and improve the gyro data.
+
+Experiments showed that the gyroscope signal is already quite stable and contains only minor noise. As such, we decided to filter the data only for our games, but not fuse it with other information, since the rotational signal became worse with the boundless EEG channel data.
+
+In order to filter the gyroscope information, we implemented two linear Kalman Filter for the x- and y-axis, since the co-ordinates can be seen as independent from each other. Since the head-movement in our games is quite slow, the covariance can be seen as constant. With a constant covariance, the Kalman-gain becomes constant as well, which simplifies the code even further. Since the decision making Kalman-gain is constant, the actual filter is a low-pass filter or an exponential smoother. In praxis, this showed to be very stable for solid game-play. 
+
+Since all of our games are played after instructions for the player and since there are no overlaps between head movement and concentrating exercises, we removed the chance of overlapping signals by design. If future games are planned to become more dynamic in terms of concentration while moving the head, the gyro signal could be used to improve the EEG data.
+
 
 \subsection{Highstriker}
 A highstriker is a classic game that can be found on most funfairs. We took the basic idea of striking with a hammer to achieve a score on a vertical bar and made a few adaptions to it. Rather than a using a virtual hammer, we mapped the current mental state to a score: the more relaxed one is, the better the score (and the friendlier the status indicator, ranging from \texttt{Burnout candidate} to \texttt{Master of Yoga}). As this game is, in our experience, both quite fun and very easy to play, we selected it to be the first game, enabling the user to get to know how he can control his mental activity to achieve a good score. This then prepares for more complex games such as the balancing game. So-called \textit{brain self-regulation} based on visual feedback has been successfully used in clinical settings, e.g. to teach psychopaths to control their aggression \cite{Konicar2015}. It would be interesting to see whether some of our games (the ones that can only be won when one learns how to calm down and relax quickly) could be used to train children suffering from ADHD (attention deficit hyperactivity disorder) in a fun way.
@@ -125,7 +131,9 @@ In some relaxation techniques such as \textit{Progressive Relaxation} \cite{Jaco
 
 \section{Possible Extensions}
 
-Beyond the possible game-specific extensions and applications mentioned beforehand (highstriker: ADHD treatment through learning how to calm down, wireloop / gyroscope: flappy bird adaption with moving wire or aircraft simulation game, balancing: teach relaxation techniques), we could think of a couple of ways to enhance our funfair. It would be possible to add additional games without much effort, as the whole funfair is designed in a modular way. Beyond that, one could improve the visual experience of all our games by making them look more realistic, such as by using more sophisticated game engine or a 3D framework.
+Beyond the possible game-specific extensions and applications mentioned beforehand (highstriker: ADHD treatment through learning how to calm down, wireloop / gyroscope: flappy bird adaption with moving wire or aircraft simulation game, balancing: teach relaxation techniques), we could think of a couple of ways to enhance our funfair. It would be possible to add additional games without much effort, as the whole funfair is designed in a modular way. Beyond that, one could improve the visual experience of all our games by making them look more realistic, such as by using a more sophisticated game engine or a 3D framework.
+
+A technical extension is the improvement of the EEG channel data, by filtering out the gyro data. This could improve the signal in more dynamic scenarios when concentration data as well as emotional information must be obtained while the player can move or jump around. This is even more interesting when a player is situated in an augmented reality environment.
 
 We anticipate our main contribution, however, to lie in an extensive exploration of different mouse- and keyboard-free game control mechanisms and the demonstration which forms of game control work well from a technical and data-driven perspective as well as from a user-centered point of view. Our work could be a starting point for future game designers implementing their own, unique ideas while being informed by our experiments on what forms of control serve a new, interesting gaming experience.
 
