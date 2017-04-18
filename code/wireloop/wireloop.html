@@ -120,6 +120,81 @@
     var isLost = false;
     var isWon = false;
 
+
+
+    /*#########################################################
+     INITIALIZATION
+     ########################################################*/
+
+    var canvas = $("#canvas");
+    canvas[0].width = window.innerWidth;
+    canvas[0].height = window.innerHeight;
+    var ctx = canvas.getContext("2d");
+    var off = canvas.offset(); // get the offset of the canvas once
+
+    var col_bar = "#D2691E";
+    var width;
+    var height;
+    var offsetX;
+    var offsetY;
+    var surroundingWidth;
+    var spline;
+    var splineDX = [];
+
+    var gameRunning = false;
+    var outOfWire = false;
+    var gameCounter = 1;
+
+    initialize = function() {
+
+      isLost = false;
+      outOfWire = false;
+
+      width = window.innerWidth / 2;
+      height = window.innerWidth / 5;
+      offsetX = window.innerWidth / 7;
+      offsetY = window.innerWidth / 4;
+      surroundingWidth = window.innerWidth / 185;
+      textPx = Math.trunc(window.innerWidth / 71);
+
+      var myPoints = [];
+      var points = 12;
+      for (var i = 0; i < points; i++) {
+        myPoints.push(i * width / points + Math.random() * width / 50 - Math.random() * width / 50);
+        myPoints.push(Math.random() * (height - 50) + 25);
+      }
+      spline = getSpline(myPoints, 1, 10);
+
+      for (var i = 0; i < spline.length - 2; i+= 2) {
+          splineDX.push((spline[i + 3] - spline[i + 1]) / (spline[i + 2] - spline[i + 0]) || 0);
+      }
+
+      X = spline[0];
+      Y = spline[1];
+
+      draw(X, Y);
+
+      var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80)) + "px";
+      document.getElementById("overlay").style.paddingTop = overlayDist;
+      if(gameCounter == 1) {
+          $.countdown("Move your head!");
+      }
+      gameCounter += 1;
+      window.setTimeout(function() {
+        gameRunning = true;
+      }, 4000);
+    };
+
+
+
+    initialize();
+
+
+    /*#########################################################
+     DRAWING FUNCTIONALITY
+     ########################################################*/
+
+
     function draw(x, y) {
 
         // Find closest point on spline
@@ -138,7 +213,7 @@
         if (!isLost && Math.abs(spline[spline.length - 1] - y) < 70 && Math.abs(spline[spline.length - 2] - x) < 70) {
           isWon = true;
           okay = true;
-          $.displayText('Won!');
+          $.displayText('Game won!');
           $.progress.setComplete($.progress.game.WIRELOOP);
           $.goto('/', 1500);
         } else if (Math.abs(spline[minI * 2 + 1] - y) < 70) {
@@ -150,11 +225,30 @@
             isLost = true;
         }
 
-        ctx.clearRect(0, 0, 2000, 2000);
-        drawLoopBack(x, y, theta, okay ? 'green' : 'red');
+        ctx.clearRect(0, 0, offsetX*3000, offsetX*3000);
+        drawLoopBack(x, y, theta, (okay && !outOfWire)? 'green' : 'red');
         drawWire();
-        drawLoop(x, y, theta, okay ? 'green' : 'red');
+
+        ctx.fillStyle = col_bar;
+        ctx.strokeStyle = "black";
+        ctx.lineWidth=offsetX / 107.0;
+        ctx.fillRect(0.90*offsetX, offsetX*1.75, offsetX/5, offsetX*1.4);
+        ctx.strokeRect(0.90*offsetX, offsetX*1.75, offsetX/5, offsetX*1.4);
+        ctx.fillRect(4.1*offsetX, offsetX*1.75, offsetX/5, offsetX*1.4);
+        ctx.strokeRect(4.1*offsetX, offsetX*1.75, offsetX/5, offsetX*1.4);
+
+        if(!okay) {
+            outOfWire = true;
+        }
+
+        drawLoop(x, y, theta, (okay && !outOfWire)? 'green' : 'red');
+        if(x < 0.165*offsetX) {
+            drawLoopBack(x, y, theta, (okay && !outOfWire)? 'green' : 'red');
+        }
+
+
     }
+
 
     // Implementation of cardinal splines
     // https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Cardinal_spline
@@ -196,71 +290,11 @@
       return _ret;
     }
 
-    /*#########################################################
-     INITIALIZATION
-     ########################################################*/
-
-    var canvas = $("#canvas");
-    canvas[0].width = window.innerWidth;
-    canvas[0].height = window.innerHeight;
-    var ctx = canvas.getContext("2d");
-    var off = canvas.offset(); // get the offset of the canvas once
-
-
-    var width;
-    var height;
-    var offsetX;
-    var offsetY;
-    var surroundingWidth;
-    var spline;
-    var splineDX = [];
-
-    var gameRunning = false;
-
-    initialize = function() {
-
-      isLost = false;
-
-      width = window.innerWidth / 2;
-      height = window.innerWidth / 5;
-      offsetX = window.innerWidth / 7+10;
-      offsetY = window.innerWidth / 4;
-      surroundingWidth = window.innerWidth / 185;
-      textPx = Math.trunc(window.innerWidth / 71);
-
-      var myPoints = [];
-      var points = width / 40;
-      for (var i = 0; i < points; i++) {
-        myPoints.push(i * width / points + Math.random() * width / 50 - Math.random() * width / 50);
-        myPoints.push(Math.random() * (height - 50) + 25);
-      }
-      spline = getSpline(myPoints, 1, 10);
-
-      for (var i = 0; i < spline.length - 2; i+= 2) {
-          splineDX.push((spline[i + 3] - spline[i + 1]) / (spline[i + 2] - spline[i + 0]) || 0);
-      }
-
-      X = spline[0];
-      Y = spline[1];
-
-      draw(X, Y);
-
-      var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80)) + "px";
-      document.getElementById("overlay").style.paddingTop = overlayDist;
-      $.countdown("Move your head!");
-      window.setTimeout(function() {
-        gameRunning = true;
-      }, 4000);
-    };
-
-
-
-    initialize();
 
 
     function drawWire() {
 
-      ctx.lineWidth = 3;
+      ctx.lineWidth = offsetX / 65;
       ctx.strokeStyle = "#bbb";
       ctx.beginPath();
 
