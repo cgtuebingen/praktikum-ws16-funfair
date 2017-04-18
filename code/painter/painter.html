@@ -88,12 +88,7 @@
 
     ws.onmessage = function(ev) {
 
-      if (ev.data == "painter:finished") {
-        // Draw image =)
-        window.setTimeout(function() {
-          img_frame.onload();
-        }, 1000);
-      }
+
       console.log("event data: ", ev.data)
     }
 
@@ -289,14 +284,16 @@
         $.countdown("Smile!");
         window.setTimeout(function() {
 
-          changeVideoVisibility("hidden");
-          ctx.drawImage(video, offsetX + marginX, offsetY + marginY, paintingWidth, paintingWidth);
-
-          // Bring video image to a temporary canvas, we can finally upload
           var tmpCanvas = document.createElement("canvas");
           tmpCanvas.width = video.height;
           tmpCanvas.height = video.height;
-          tmpCanvas.getContext("2d").drawImage(video, 0, 0, video.height, video.height);
+          tmpCanvas.getContext("2d").drawImage(video, 0, 0, video.height * 4 / 3, video.height);
+
+          changeVideoVisibility("hidden");
+          ctx.drawImage(tmpCanvas, offsetX + marginX, offsetY + marginY, paintingWidth, paintingWidth);
+
+          // Bring video image to a temporary canvas, we can finally upload
+
 
           tmpCanvas.toBlob(
             function(blob) {
@@ -320,6 +317,9 @@
           $.countdown("Paint!");
           window.setTimeout(function() {
             gameRunning = true;
+
+            // Draw image
+            img_frame.onload();
           }, 4000);
 
 
@@ -421,7 +421,7 @@
     img_frame.src = "input/frame_b2.png";
     // use nested loading to make sure both imgs have been loaded.
     img_frame.onload = function() {
-console.log("frame onload")
+
       img_name = getImageNameForPainting();
       img.src = img_name + "?cache" + Math.random();
 
