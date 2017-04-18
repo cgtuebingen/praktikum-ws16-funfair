@@ -7,6 +7,7 @@
         #container {
             position: absolute;
             z-index: 3;
+            overflow:hidden;
         }
 
         #videoElement {
@@ -43,8 +44,7 @@
 <body style="background:#ebe3d9;margin:0">
 
 <div id="container">
-    <video autoplay="true" id="videoElement">
-    </video>
+    <video autoplay="true" id="videoElement"></video>
 </div>
 
 <div id="overlay"></div>
@@ -155,8 +155,7 @@
       contstyle.left = offsetX + off.left + marginX + "px";
       contstyle.top = offsetY + off.top + marginY + "px";
 
-      var videostyle = document.getElementById("videoElement").style;
-      video.width = paintingWidth;
+      var videostyle = video.style;
       video.height = paintingWidth;
 
       var overlayDist = String(parseInt(window.innerHeight / 2.0 - 80)) + "px";
@@ -285,24 +284,25 @@
       // Check if button was clicked
       if (Math.hypot(x - buttonPos.x, y - buttonPos.y) <= buttonPos.r) {
 
+        changeVideoVisibility("visible");
+
         $.countdown("Smile!");
         window.setTimeout(function() {
 
-          //TODO take correctly sized image and send to backend
           changeVideoVisibility("hidden");
           ctx.drawImage(video, offsetX + marginX, offsetY + marginY, paintingWidth, paintingWidth);
 
           // Bring video image to a temporary canvas, we can finally upload
           var tmpCanvas = document.createElement("canvas");
-          tmpCanvas.width = video.width;
+          tmpCanvas.width = video.height;
           tmpCanvas.height = video.height;
-          tmpCanvas.getContext("2d").drawImage(video, 0, 0, video.width, video.height);
+          tmpCanvas.getContext("2d").drawImage(video, 0, 0, video.height, video.height);
 
           tmpCanvas.toBlob(
             function(blob) {
 
               var fd = new FormData();
-              fd.append("myFile", blob, "thumb.jpg");
+              fd.append("myFile", blob);
 
               var xhr = new XMLHttpRequest();
               xhr.open('POST', '/upload');
@@ -314,14 +314,16 @@
               xhr.send(fd);
             },
             'image/jpeg',
-            0.8
+            1
           );
 
           $.countdown("Paint!");
           window.setTimeout(function() {
             gameRunning = true;
           }, 4000);
-        }, 8000);
+
+
+        }, 4000);
 
       }
     };
@@ -419,11 +421,12 @@
     img_frame.src = "input/frame_b2.png";
     // use nested loading to make sure both imgs have been loaded.
     img_frame.onload = function() {
-
+console.log("frame onload")
       img_name = getImageNameForPainting();
       img.src = img_name + "?cache" + Math.random();
 
       img.onload = function() {
+        console.log("painting onload")
         drawImage();
       }
     };
